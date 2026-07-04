@@ -97,16 +97,20 @@ function ClientesPage() {
 
   const upsert = useMutation({
     mutationFn: async (payload: z.infer<typeof schema> & { id?: string }) => {
-      const clean = Object.fromEntries(
+      const clean: Record<string, unknown> = Object.fromEntries(
         Object.entries(payload).map(([k, v]) => [k, v === "" ? null : v]),
       );
+      delete clean.id;
       if (payload.id) {
-        const { error } = await supabase.from("clientes").update(clean).eq("id", payload.id);
+        const { error } = await supabase
+          .from("clientes")
+          .update(clean as never)
+          .eq("id", payload.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("clientes")
-          .insert({ ...clean, created_by: user!.id });
+          .insert({ ...clean, created_by: user!.id } as never);
         if (error) throw error;
       }
     },
