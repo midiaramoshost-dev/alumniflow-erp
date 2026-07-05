@@ -122,6 +122,141 @@ export type Database = {
         }
         Relationships: []
       }
+      orcamento_itens: {
+        Row: {
+          altura_mm: number | null
+          created_at: string
+          descricao: string
+          id: string
+          largura_mm: number | null
+          observacoes: string | null
+          orcamento_id: string
+          ordem: number
+          perfil_id: string | null
+          preco_unitario: number
+          quantidade: number
+          subtotal: number
+          tipo: string | null
+          updated_at: string
+          vidro_id: string | null
+        }
+        Insert: {
+          altura_mm?: number | null
+          created_at?: string
+          descricao: string
+          id?: string
+          largura_mm?: number | null
+          observacoes?: string | null
+          orcamento_id: string
+          ordem?: number
+          perfil_id?: string | null
+          preco_unitario?: number
+          quantidade?: number
+          subtotal?: number
+          tipo?: string | null
+          updated_at?: string
+          vidro_id?: string | null
+        }
+        Update: {
+          altura_mm?: number | null
+          created_at?: string
+          descricao?: string
+          id?: string
+          largura_mm?: number | null
+          observacoes?: string | null
+          orcamento_id?: string
+          ordem?: number
+          perfil_id?: string | null
+          preco_unitario?: number
+          quantidade?: number
+          subtotal?: number
+          tipo?: string | null
+          updated_at?: string
+          vidro_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orcamento_itens_orcamento_id_fkey"
+            columns: ["orcamento_id"]
+            isOneToOne: false
+            referencedRelation: "orcamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orcamento_itens_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfis_aluminio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orcamento_itens_vidro_id_fkey"
+            columns: ["vidro_id"]
+            isOneToOne: false
+            referencedRelation: "vidros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orcamentos: {
+        Row: {
+          cliente_id: string | null
+          cliente_nome: string | null
+          created_at: string
+          created_by: string | null
+          data_orcamento: string
+          desconto: number
+          id: string
+          numero: number
+          observacoes: string | null
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string
+          validade_dias: number
+        }
+        Insert: {
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_orcamento?: string
+          desconto?: number
+          id?: string
+          numero?: number
+          observacoes?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          validade_dias?: number
+        }
+        Update: {
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_orcamento?: string
+          desconto?: number
+          id?: string
+          numero?: number
+          observacoes?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          validade_dias?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orcamentos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfis_aluminio: {
         Row: {
           acabamento: string | null
