@@ -44,7 +44,7 @@ const nav = [
     label: "Operação",
     items: [
       { title: "Vendas", url: "/vendas", icon: ShoppingCart },
-      { title: "Produção", url: "/producao", icon: Factory, soon: true },
+      { title: "Produção", url: "/producao", icon: Factory },
       { title: "Obras", url: "/obras", icon: Building, soon: true },
       { title: "Financeiro", url: "/financeiro", icon: Wallet, soon: true },
     ],

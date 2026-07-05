@@ -257,6 +257,128 @@ export type Database = {
           },
         ]
       }
+      ordem_producao_etapas: {
+        Row: {
+          concluida_em: string | null
+          created_at: string
+          etapa: string
+          id: string
+          iniciada_em: string
+          observacoes: string | null
+          ordem_id: string
+          responsavel_id: string | null
+        }
+        Insert: {
+          concluida_em?: string | null
+          created_at?: string
+          etapa: string
+          id?: string
+          iniciada_em?: string
+          observacoes?: string | null
+          ordem_id: string
+          responsavel_id?: string | null
+        }
+        Update: {
+          concluida_em?: string | null
+          created_at?: string
+          etapa?: string
+          id?: string
+          iniciada_em?: string
+          observacoes?: string | null
+          ordem_id?: string
+          responsavel_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordem_producao_etapas_ordem_id_fkey"
+            columns: ["ordem_id"]
+            isOneToOne: false
+            referencedRelation: "ordens_producao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ordens_producao: {
+        Row: {
+          cliente_id: string | null
+          cliente_nome: string | null
+          created_at: string
+          created_by: string | null
+          data_entrega: string | null
+          data_inicio: string | null
+          data_previsao: string | null
+          descricao: string | null
+          etapa: string
+          id: string
+          numero: number
+          observacoes: string | null
+          orcamento_id: string | null
+          orcamento_numero: number | null
+          prioridade: string
+          progresso: number
+          responsavel_id: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_entrega?: string | null
+          data_inicio?: string | null
+          data_previsao?: string | null
+          descricao?: string | null
+          etapa?: string
+          id?: string
+          numero?: number
+          observacoes?: string | null
+          orcamento_id?: string | null
+          orcamento_numero?: number | null
+          prioridade?: string
+          progresso?: number
+          responsavel_id?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_entrega?: string | null
+          data_inicio?: string | null
+          data_previsao?: string | null
+          descricao?: string | null
+          etapa?: string
+          id?: string
+          numero?: number
+          observacoes?: string | null
+          orcamento_id?: string | null
+          orcamento_numero?: number | null
+          prioridade?: string
+          progresso?: number
+          responsavel_id?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordens_producao_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordens_producao_orcamento_id_fkey"
+            columns: ["orcamento_id"]
+            isOneToOne: false
+            referencedRelation: "orcamentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfis_aluminio: {
         Row: {
           acabamento: string | null

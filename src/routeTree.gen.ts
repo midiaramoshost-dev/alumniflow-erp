@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedVidrosRouteImport } from './routes/_authenticated/vidros'
 import { Route as AuthenticatedVendasRouteImport } from './routes/_authenticated/vendas'
+import { Route as AuthenticatedProducaoRouteImport } from './routes/_authenticated/producao'
 import { Route as AuthenticatedPerfisRouteImport } from './routes/_authenticated/perfis'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
@@ -41,6 +42,11 @@ const AuthenticatedVidrosRoute = AuthenticatedVidrosRouteImport.update({
 const AuthenticatedVendasRoute = AuthenticatedVendasRouteImport.update({
   id: '/vendas',
   path: '/vendas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProducaoRoute = AuthenticatedProducaoRouteImport.update({
+  id: '/producao',
+  path: '/producao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPerfisRoute = AuthenticatedPerfisRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/clientes': typeof AuthenticatedClientesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfis': typeof AuthenticatedPerfisRoute
+  '/producao': typeof AuthenticatedProducaoRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/vidros': typeof AuthenticatedVidrosRoute
 }
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/clientes': typeof AuthenticatedClientesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfis': typeof AuthenticatedPerfisRoute
+  '/producao': typeof AuthenticatedProducaoRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/vidros': typeof AuthenticatedVidrosRoute
 }
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/perfis': typeof AuthenticatedPerfisRoute
+  '/_authenticated/producao': typeof AuthenticatedProducaoRoute
   '/_authenticated/vendas': typeof AuthenticatedVendasRoute
   '/_authenticated/vidros': typeof AuthenticatedVidrosRoute
 }
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/dashboard'
     | '/perfis'
+    | '/producao'
     | '/vendas'
     | '/vidros'
   fileRoutesByTo: FileRoutesByTo
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/dashboard'
     | '/perfis'
+    | '/producao'
     | '/vendas'
     | '/vidros'
   id:
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/_authenticated/clientes'
     | '/_authenticated/dashboard'
     | '/_authenticated/perfis'
+    | '/_authenticated/producao'
     | '/_authenticated/vendas'
     | '/_authenticated/vidros'
   fileRoutesById: FileRoutesById
@@ -173,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVendasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/producao': {
+      id: '/_authenticated/producao'
+      path: '/producao'
+      fullPath: '/producao'
+      preLoaderRoute: typeof AuthenticatedProducaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/perfis': {
       id: '/_authenticated/perfis'
       path: '/perfis'
@@ -209,6 +228,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPerfisRoute: typeof AuthenticatedPerfisRoute
+  AuthenticatedProducaoRoute: typeof AuthenticatedProducaoRoute
   AuthenticatedVendasRoute: typeof AuthenticatedVendasRoute
   AuthenticatedVidrosRoute: typeof AuthenticatedVidrosRoute
 }
@@ -218,6 +238,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPerfisRoute: AuthenticatedPerfisRoute,
+  AuthenticatedProducaoRoute: AuthenticatedProducaoRoute,
   AuthenticatedVendasRoute: AuthenticatedVendasRoute,
   AuthenticatedVidrosRoute: AuthenticatedVidrosRoute,
 }
