@@ -122,6 +122,265 @@ export type Database = {
         }
         Relationships: []
       }
+      obra_cronograma: {
+        Row: {
+          created_at: string
+          data_conclusao: string | null
+          data_prevista: string | null
+          descricao: string | null
+          id: string
+          obra_id: string
+          ordem: number
+          status: Database["public"]["Enums"]["obra_cronograma_status"]
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_conclusao?: string | null
+          data_prevista?: string | null
+          descricao?: string | null
+          id?: string
+          obra_id: string
+          ordem?: number
+          status?: Database["public"]["Enums"]["obra_cronograma_status"]
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_conclusao?: string | null
+          data_prevista?: string | null
+          descricao?: string | null
+          id?: string
+          obra_id?: string
+          ordem?: number
+          status?: Database["public"]["Enums"]["obra_cronograma_status"]
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obra_cronograma_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      obra_materiais: {
+        Row: {
+          created_at: string
+          descricao: string
+          id: string
+          obra_id: string
+          observacoes: string | null
+          quantidade_prevista: number
+          quantidade_utilizada: number
+          unidade: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao: string
+          id?: string
+          obra_id: string
+          observacoes?: string | null
+          quantidade_prevista?: number
+          quantidade_utilizada?: number
+          unidade?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string
+          id?: string
+          obra_id?: string
+          observacoes?: string | null
+          quantidade_prevista?: number
+          quantidade_utilizada?: number
+          unidade?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obra_materiais_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      obra_medicoes: {
+        Row: {
+          altura_mm: number | null
+          ambiente: string
+          created_at: string
+          data_medicao: string
+          id: string
+          largura_mm: number | null
+          obra_id: string
+          observacoes: string | null
+          quantidade: number
+          responsavel_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          altura_mm?: number | null
+          ambiente: string
+          created_at?: string
+          data_medicao?: string
+          id?: string
+          largura_mm?: number | null
+          obra_id: string
+          observacoes?: string | null
+          quantidade?: number
+          responsavel_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          altura_mm?: number | null
+          ambiente?: string
+          created_at?: string
+          data_medicao?: string
+          id?: string
+          largura_mm?: number | null
+          obra_id?: string
+          observacoes?: string | null
+          quantidade?: number
+          responsavel_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obra_medicoes_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      obras: {
+        Row: {
+          bairro: string | null
+          cep: string | null
+          cidade: string | null
+          cliente_id: string | null
+          cliente_nome: string | null
+          complemento: string | null
+          created_at: string
+          created_by: string | null
+          data_entrega_prevista: string | null
+          data_entrega_real: string | null
+          data_inicio_prevista: string | null
+          descricao: string | null
+          estado: string | null
+          id: string
+          logradouro: string | null
+          numero: number
+          numero_endereco: string | null
+          observacoes: string | null
+          orcamento_id: string | null
+          orcamento_numero: number | null
+          ordem_producao_id: string | null
+          ordem_producao_numero: number | null
+          progresso: number
+          responsavel_id: string | null
+          responsavel_nome: string | null
+          status: Database["public"]["Enums"]["obra_status"]
+          titulo: string
+          updated_at: string
+          valor: number | null
+        }
+        Insert: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          complemento?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_entrega_prevista?: string | null
+          data_entrega_real?: string | null
+          data_inicio_prevista?: string | null
+          descricao?: string | null
+          estado?: string | null
+          id?: string
+          logradouro?: string | null
+          numero?: number
+          numero_endereco?: string | null
+          observacoes?: string | null
+          orcamento_id?: string | null
+          orcamento_numero?: number | null
+          ordem_producao_id?: string | null
+          ordem_producao_numero?: number | null
+          progresso?: number
+          responsavel_id?: string | null
+          responsavel_nome?: string | null
+          status?: Database["public"]["Enums"]["obra_status"]
+          titulo: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Update: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          complemento?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_entrega_prevista?: string | null
+          data_entrega_real?: string | null
+          data_inicio_prevista?: string | null
+          descricao?: string | null
+          estado?: string | null
+          id?: string
+          logradouro?: string | null
+          numero?: number
+          numero_endereco?: string | null
+          observacoes?: string | null
+          orcamento_id?: string | null
+          orcamento_numero?: number | null
+          ordem_producao_id?: string | null
+          ordem_producao_numero?: number | null
+          progresso?: number
+          responsavel_id?: string | null
+          responsavel_nome?: string | null
+          status?: Database["public"]["Enums"]["obra_status"]
+          titulo?: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obras_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "obras_orcamento_id_fkey"
+            columns: ["orcamento_id"]
+            isOneToOne: false
+            referencedRelation: "orcamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "obras_ordem_producao_id_fkey"
+            columns: ["ordem_producao_id"]
+            isOneToOne: false
+            referencedRelation: "ordens_producao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orcamento_itens: {
         Row: {
           altura_mm: number | null
@@ -550,6 +809,18 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "vendedor" | "producao" | "financeiro_obra"
+      obra_cronograma_status:
+        | "pendente"
+        | "em_andamento"
+        | "concluida"
+        | "atrasada"
+      obra_status:
+        | "planejamento"
+        | "aguardando_material"
+        | "em_medicao"
+        | "em_instalacao"
+        | "concluida"
+        | "cancelada"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -678,6 +949,20 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "vendedor", "producao", "financeiro_obra"],
+      obra_cronograma_status: [
+        "pendente",
+        "em_andamento",
+        "concluida",
+        "atrasada",
+      ],
+      obra_status: [
+        "planejamento",
+        "aguardando_material",
+        "em_medicao",
+        "em_instalacao",
+        "concluida",
+        "cancelada",
+      ],
     },
   },
 } as const
