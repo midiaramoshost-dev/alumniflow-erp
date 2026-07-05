@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Users,
   Layers,
@@ -11,12 +13,18 @@ import {
   ShoppingCart,
   Factory,
   Building,
+  Wifi,
+  ArrowUpRight,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
 });
+
+const brl = (n: number) =>
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n ?? 0);
 
 function StatCard({
   title,
@@ -35,13 +43,13 @@ function StatCard({
     <Card className="shadow-card overflow-hidden">
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
+            <p className="mt-2 text-3xl font-bold tracking-tight truncate">{value}</p>
             {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
           </div>
           <div
-            className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
               accent ?? "bg-primary/10 text-primary"
             }`}
           >
@@ -66,37 +74,117 @@ function useCount(table: "clientes" | "perfis_aluminio" | "vidros" | "acessorios
   });
 }
 
+type OrcRow = { id: string; numero: number; cliente_nome: string | null; status: string; total: number; data_orcamento: string };
+
 function Dashboard() {
   const { user } = useAuth();
+  const qc = useQueryClient();
   const clientes = useCount("clientes");
   const perfis = useCount("perfis_aluminio");
   const vidros = useCount("vidros");
   const acessorios = useCount("acessorios");
+
+  const orcamentos = useQuery({
+    queryKey: ["orcamentos", "dashboard"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("orcamentos" as never)
+        .select("id, numero, cliente_nome, status, total, data_orcamento")
+        .order("numero", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data as unknown as OrcRow[];
+    },
+  });
+
+  // Realtime: refetch on any change across core tables
+  useEffect(() => {
+    const channel = supabase
+      .channel("dashboard-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orcamentos" }, () => {
+        qc.invalidateQueries({ queryKey: ["orcamentos", "dashboard"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "clientes" }, () => {
+        qc.invalidateQueries({ queryKey: ["count", "clientes"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "perfis_aluminio" }, () => {
+        qc.invalidateQueries({ queryKey: ["count", "perfis_aluminio"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "vidros" }, () => {
+        qc.invalidateQueries({ queryKey: ["count", "vidros"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "acessorios" }, () => {
+        qc.invalidateQueries({ queryKey: ["count", "acessorios"] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
   const name = (user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? "";
+  const orcs = orcamentos.data ?? [];
+  const pipelineValor = orcs
+    .filter((o) => o.status === "rascunho" || o.status === "enviado")
+    .reduce((s, o) => s + Number(o.total), 0);
+  const fechadosValor = orcs
+    .filter((o) => o.status === "aprovado" || o.status === "convertido")
+    .reduce((s, o) => s + Number(o.total), 0);
+  const orcamentosAtivos = orcs.filter((o) => o.status !== "rejeitado").length;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          Olá{name ? `, ${name.split(" ")[0]}` : ""} 👋
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Visão geral do seu ERP de esquadrias em tempo real.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            Olá{name ? `, ${name.split(" ")[0]}` : ""} 👋
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Visão geral do seu ERP de esquadrias em tempo real.
+          </p>
+        </div>
+        <Badge variant="secondary" className="gap-1.5 bg-chart-2/15 text-chart-2 border-0">
+          <Wifi className="h-3 w-3" />
+          Atualizando ao vivo
+        </Badge>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Clientes cadastrados"
+          title="Orçamentos ativos"
+          value={orcamentosAtivos}
+          icon={ShoppingCart}
+          hint="Últimos 50 registros"
+        />
+        <StatCard
+          title="Pipeline"
+          value={brl(pipelineValor)}
+          icon={TrendingUp}
+          hint="Rascunho + enviados"
+          accent="bg-chart-3/10 text-chart-3"
+        />
+        <StatCard
+          title="Fechados"
+          value={brl(fechadosValor)}
+          icon={Building}
+          hint="Aprovados + convertidos"
+          accent="bg-chart-2/10 text-chart-2"
+        />
+        <StatCard
+          title="Clientes"
           value={clientes.data ?? "—"}
           icon={Users}
           hint="Total na base"
+          accent="bg-primary/10 text-primary"
         />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Perfis de alumínio"
           value={perfis.data ?? "—"}
           icon={Layers}
-          hint="Itens ativos"
+          hint="Itens cadastrados"
           accent="bg-chart-2/10 text-chart-2"
         />
         <StatCard
@@ -113,54 +201,53 @@ function Dashboard() {
           hint="SKUs no estoque"
           accent="bg-chart-4/10 text-chart-4"
         />
+        <StatCard
+          title="Módulos"
+          value="4 ativos"
+          icon={Factory}
+          hint="Cadastros + Vendas"
+          accent="bg-muted text-foreground"
+        />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="shadow-card lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              Operação
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {[
-                { icon: ShoppingCart, label: "Vendas", value: "Em breve" },
-                { icon: Factory, label: "Produção", value: "Em breve" },
-                { icon: Building, label: "Obras", value: "Em breve" },
-              ].map((m) => (
-                <div
-                  key={m.label}
-                  className="rounded-lg border border-dashed border-border p-4 text-center"
-                >
-                  <m.icon className="h-6 w-6 mx-auto text-muted-foreground" />
-                  <p className="mt-2 text-sm font-medium">{m.label}</p>
-                  <p className="text-xs text-muted-foreground">{m.value}</p>
+      <Card className="shadow-card">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ShoppingCart className="h-4 w-4 text-primary" />
+            Últimos orçamentos
+          </CardTitle>
+          <Link
+            to="/vendas"
+            className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+          >
+            Ver todos <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </CardHeader>
+        <CardContent className="p-0">
+          {orcamentos.isLoading ? (
+            <div className="p-6 text-sm text-muted-foreground">Carregando…</div>
+          ) : orcs.length === 0 ? (
+            <div className="p-6 text-sm text-muted-foreground text-center">
+              Nenhum orçamento ainda. <Link to="/vendas" className="text-primary hover:underline">Crie o primeiro</Link>.
+            </div>
+          ) : (
+            <div className="divide-y">
+              {orcs.slice(0, 6).map((o) => (
+                <div key={o.id} className="flex items-center justify-between px-6 py-3 hover:bg-muted/30 transition-colors">
+                  <div className="min-w-0 flex items-center gap-3">
+                    <span className="font-mono text-sm font-semibold text-muted-foreground">#{o.numero}</span>
+                    <span className="truncate font-medium">{o.cliente_nome ?? "Sem cliente"}</span>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <Badge variant="secondary" className="capitalize">{o.status}</Badge>
+                    <span className="font-semibold w-28 text-right">{brl(Number(o.total))}</span>
+                  </div>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle>Bem-vindo ao AluManager</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground space-y-2">
-            <p>
-              A fundação do seu ERP está pronta com autenticação, permissões e módulo de
-              cadastros.
-            </p>
-            <p>
-              Comece cadastrando <strong className="text-foreground">Clientes</strong>,{" "}
-              <strong className="text-foreground">Perfis</strong>,{" "}
-              <strong className="text-foreground">Vidros</strong> e{" "}
-              <strong className="text-foreground">Acessórios</strong> pela barra lateral.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
