@@ -29,6 +29,7 @@ import { Route as AuthenticatedComercialRouteImport } from './routes/_authentica
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAcessoriosRouteImport } from './routes/_authenticated/acessorios'
+import { Route as AuthenticatedPedidosPedidoIdRouteImport } from './routes/_authenticated/pedidos.$pedidoId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -131,6 +132,12 @@ const AuthenticatedAcessoriosRoute = AuthenticatedAcessoriosRouteImport.update({
   path: '/acessorios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPedidosPedidoIdRoute =
+  AuthenticatedPedidosPedidoIdRouteImport.update({
+    id: '/$pedidoId',
+    path: '/$pedidoId',
+    getParentRoute: () => AuthenticatedPedidosRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -145,13 +152,14 @@ export interface FileRoutesByFullPath {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/materiais': typeof AuthenticatedMateriaisRoute
   '/obras': typeof AuthenticatedObrasRoute
-  '/pedidos': typeof AuthenticatedPedidosRoute
+  '/pedidos': typeof AuthenticatedPedidosRouteWithChildren
   '/perfis': typeof AuthenticatedPerfisRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/producao': typeof AuthenticatedProducaoRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/vidros': typeof AuthenticatedVidrosRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/pedidos/$pedidoId': typeof AuthenticatedPedidosPedidoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -166,13 +174,14 @@ export interface FileRoutesByTo {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/materiais': typeof AuthenticatedMateriaisRoute
   '/obras': typeof AuthenticatedObrasRoute
-  '/pedidos': typeof AuthenticatedPedidosRoute
+  '/pedidos': typeof AuthenticatedPedidosRouteWithChildren
   '/perfis': typeof AuthenticatedPerfisRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/producao': typeof AuthenticatedProducaoRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/vidros': typeof AuthenticatedVidrosRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/pedidos/$pedidoId': typeof AuthenticatedPedidosPedidoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -189,13 +198,14 @@ export interface FileRoutesById {
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/materiais': typeof AuthenticatedMateriaisRoute
   '/_authenticated/obras': typeof AuthenticatedObrasRoute
-  '/_authenticated/pedidos': typeof AuthenticatedPedidosRoute
+  '/_authenticated/pedidos': typeof AuthenticatedPedidosRouteWithChildren
   '/_authenticated/perfis': typeof AuthenticatedPerfisRoute
   '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
   '/_authenticated/producao': typeof AuthenticatedProducaoRoute
   '/_authenticated/vendas': typeof AuthenticatedVendasRoute
   '/_authenticated/vidros': typeof AuthenticatedVidrosRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/_authenticated/pedidos/$pedidoId': typeof AuthenticatedPedidosPedidoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/vendas'
     | '/vidros'
     | '/invite/$token'
+    | '/pedidos/$pedidoId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/vendas'
     | '/vidros'
     | '/invite/$token'
+    | '/pedidos/$pedidoId'
   id:
     | '__root__'
     | '/'
@@ -262,6 +274,7 @@ export interface FileRouteTypes {
     | '/_authenticated/vendas'
     | '/_authenticated/vidros'
     | '/invite/$token'
+    | '/_authenticated/pedidos/$pedidoId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -413,8 +426,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAcessoriosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pedidos/$pedidoId': {
+      id: '/_authenticated/pedidos/$pedidoId'
+      path: '/$pedidoId'
+      fullPath: '/pedidos/$pedidoId'
+      preLoaderRoute: typeof AuthenticatedPedidosPedidoIdRouteImport
+      parentRoute: typeof AuthenticatedPedidosRoute
+    }
   }
 }
+
+interface AuthenticatedPedidosRouteChildren {
+  AuthenticatedPedidosPedidoIdRoute: typeof AuthenticatedPedidosPedidoIdRoute
+}
+
+const AuthenticatedPedidosRouteChildren: AuthenticatedPedidosRouteChildren = {
+  AuthenticatedPedidosPedidoIdRoute: AuthenticatedPedidosPedidoIdRoute,
+}
+
+const AuthenticatedPedidosRouteWithChildren =
+  AuthenticatedPedidosRoute._addFileChildren(AuthenticatedPedidosRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAcessoriosRoute: typeof AuthenticatedAcessoriosRoute
@@ -427,7 +458,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
   AuthenticatedMateriaisRoute: typeof AuthenticatedMateriaisRoute
   AuthenticatedObrasRoute: typeof AuthenticatedObrasRoute
-  AuthenticatedPedidosRoute: typeof AuthenticatedPedidosRoute
+  AuthenticatedPedidosRoute: typeof AuthenticatedPedidosRouteWithChildren
   AuthenticatedPerfisRoute: typeof AuthenticatedPerfisRoute
   AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
   AuthenticatedProducaoRoute: typeof AuthenticatedProducaoRoute
@@ -446,7 +477,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
   AuthenticatedMateriaisRoute: AuthenticatedMateriaisRoute,
   AuthenticatedObrasRoute: AuthenticatedObrasRoute,
-  AuthenticatedPedidosRoute: AuthenticatedPedidosRoute,
+  AuthenticatedPedidosRoute: AuthenticatedPedidosRouteWithChildren,
   AuthenticatedPerfisRoute: AuthenticatedPerfisRoute,
   AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
   AuthenticatedProducaoRoute: AuthenticatedProducaoRoute,
