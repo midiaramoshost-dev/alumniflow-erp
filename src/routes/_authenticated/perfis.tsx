@@ -215,7 +215,7 @@ function PerfisPage() {
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                <Button variant="ghost" size="icon" onClick={() => { setEditing(p); setAtivo(p.ativo); setOpen(true); }}>
+                <Button variant="ghost" size="icon" onClick={() => openFor(p)}>
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" onClick={() => confirm(`Excluir "${p.codigo}"?`) && remove.mutate(p.id)}>
