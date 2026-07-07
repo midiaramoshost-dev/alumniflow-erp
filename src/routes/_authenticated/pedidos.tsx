@@ -162,36 +162,39 @@ function PedidosPage() {
                       </p>
                     )}
                     {items.map((p) => (
-                      <Card
+                      <Link
                         key={p.id}
-                        className="cursor-pointer hover:shadow-md transition"
-                        onClick={() => setSelectedId(p.id)}
+                        to="/pedidos/$pedidoId"
+                        params={{ pedidoId: p.id }}
+                        className="block"
                       >
-                        <CardContent className="p-3 space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] text-muted-foreground">
-                              #{p.numero}
-                            </span>
-                            <Badge variant="outline" className="text-[9px]">
-                              {p.prioridade}
-                            </Badge>
-                          </div>
-                          <p className="text-sm font-medium line-clamp-2">{p.titulo}</p>
-                          {p.cliente_nome && (
-                            <p className="text-xs text-muted-foreground line-clamp-1">
-                              {p.cliente_nome}
-                            </p>
-                          )}
-                          {p.valor_estimado != null && (
-                            <p className="text-xs font-semibold">
-                              {new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
-                              }).format(Number(p.valor_estimado))}
-                            </p>
-                          )}
-                        </CardContent>
-                      </Card>
+                        <Card className="cursor-pointer hover:shadow-md transition">
+                          <CardContent className="p-3 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] text-muted-foreground">
+                                #{p.numero}
+                              </span>
+                              <Badge variant="outline" className="text-[9px]">
+                                {p.prioridade}
+                              </Badge>
+                            </div>
+                            <p className="text-sm font-medium line-clamp-2">{p.titulo}</p>
+                            {p.cliente_nome && (
+                              <p className="text-xs text-muted-foreground line-clamp-1">
+                                {p.cliente_nome}
+                              </p>
+                            )}
+                            {p.valor_estimado != null && (
+                              <p className="text-xs font-semibold">
+                                {new Intl.NumberFormat("pt-BR", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                }).format(Number(p.valor_estimado))}
+                              </p>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </Link>
                     ))}
                   </div>
                 </div>
