@@ -66,6 +66,7 @@ const nav = [
     label: "Sistema",
     items: [
       { title: "Admin Master", url: "/admin", icon: ShieldCheck },
+      { title: "Exportar dados", url: "/exportar", icon: FileSpreadsheet },
       { title: "Configurações", url: "/configuracoes", icon: Settings },
     ],
   },
