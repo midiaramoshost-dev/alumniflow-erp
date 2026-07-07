@@ -340,7 +340,7 @@ function AdminPage() {
 
   const { data: counts } = useQuery({
     queryKey: ["admin", "counts"],
-    enabled: isAdmin && unlocked,
+    enabled: isAdmin,
     queryFn: async () => {
       const tables = ENTITIES.map((e) => e.table);
       const entries = await Promise.all(
