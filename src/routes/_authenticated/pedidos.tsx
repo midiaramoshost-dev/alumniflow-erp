@@ -204,10 +204,6 @@ function PedidosPage() {
         )}
       </div>
 
-      <PedidoDetailDialog
-        pedidoId={selectedId}
-        onClose={() => setSelectedId(null)}
-      />
     </PageShell>
   );
 }
