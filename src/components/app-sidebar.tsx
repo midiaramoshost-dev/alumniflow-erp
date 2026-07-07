@@ -64,7 +64,7 @@ const nav = [
     label: "Sistema",
     items: [
       { title: "Admin Master", url: "/admin", icon: ShieldCheck },
-      { title: "Configurações", url: "/configuracoes", icon: Settings, soon: true },
+      { title: "Configurações", url: "/configuracoes", icon: Settings },
     ],
   },
 ];
