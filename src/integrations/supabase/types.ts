@@ -837,6 +837,60 @@ export type Database = {
         }
         Relationships: []
       }
+      vendedores: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          created_by: string | null
+          documento: string | null
+          email: string | null
+          id: string
+          meta_mensal: number | null
+          nome: string
+          observacoes: string | null
+          percentual_comissao: number
+          percentual_comissao_meta: number | null
+          telefone: string | null
+          tipo_comissao: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          documento?: string | null
+          email?: string | null
+          id?: string
+          meta_mensal?: number | null
+          nome: string
+          observacoes?: string | null
+          percentual_comissao?: number
+          percentual_comissao_meta?: number | null
+          telefone?: string | null
+          tipo_comissao?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          documento?: string | null
+          email?: string | null
+          id?: string
+          meta_mensal?: number | null
+          nome?: string
+          observacoes?: string | null
+          percentual_comissao?: number
+          percentual_comissao_meta?: number | null
+          telefone?: string | null
+          tipo_comissao?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       vidros: {
         Row: {
           ativo: boolean
