@@ -1,4 +1,31 @@
 import { useEffect, useState } from "react";
+import { z } from "zod";
+
+const nameSchema = z
+  .string()
+  .trim()
+  .min(3, "Informe seu nome completo (mín. 3 caracteres)")
+  .max(100, "Máximo 100 caracteres")
+  .regex(/^[\p{L}][\p{L}\s'.-]*$/u, "Use apenas letras, espaços, apóstrofos, pontos ou hífens")
+  .refine((v) => v.trim().split(/\s+/).length >= 2, "Informe nome e sobrenome");
+
+function formatPhoneBR(raw: string) {
+  const d = raw.replace(/\D/g, "").slice(0, 11);
+  if (d.length === 0) return "";
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+const phoneSchema = z
+  .string()
+  .trim()
+  .refine((v) => {
+    if (!v) return true;
+    const d = v.replace(/\D/g, "");
+    return d.length === 10 || d.length === 11;
+  }, "Telefone deve ter 10 ou 11 dígitos (DDD + número)");
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
