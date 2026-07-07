@@ -15,6 +15,7 @@ import {
   Boxes,
   Briefcase,
   Cog,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -61,7 +62,10 @@ const nav = [
   },
   {
     label: "Sistema",
-    items: [{ title: "Configurações", url: "/configuracoes", icon: Settings, soon: true }],
+    items: [
+      { title: "Admin Master", url: "/admin", icon: ShieldCheck },
+      { title: "Configurações", url: "/configuracoes", icon: Settings, soon: true },
+    ],
   },
 ];
 
