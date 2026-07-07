@@ -47,7 +47,7 @@ function AuthLayout() {
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/dashboard">AluManager</Link>
+                    <Link to="/dashboard">CRM CRISTIANO</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />

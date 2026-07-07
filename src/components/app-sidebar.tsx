@@ -83,7 +83,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-bold text-sidebar-foreground">AluManager</span>
+              <span className="text-sm font-bold text-sidebar-foreground">CRM CRISTIANO</span>
               <span className="text-[10px] uppercase tracking-wider text-sidebar-foreground/60">
                 ERP Esquadrias
               </span>

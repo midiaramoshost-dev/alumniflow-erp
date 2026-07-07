@@ -79,18 +79,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AluManager — ERP para Fábricas de Esquadrias de Alumínio" },
+      { title: "CRM CRISTIANO — ERP para Fábricas de Esquadrias de Alumínio" },
       {
         name: "description",
         content:
           "Sistema completo de gestão para fábricas de esquadrias de alumínio: vendas, produção, obras, estoque e financeiro em um só lugar.",
       },
-      { name: "author", content: "AluManager" },
-      { property: "og:title", content: "AluManager — ERP para Fábricas de Esquadrias de Alumínio" },
+      { name: "author", content: "CRM CRISTIANO" },
+      { property: "og:title", content: "CRM CRISTIANO — ERP para Fábricas de Esquadrias de Alumínio" },
       { property: "og:description", content: "Sistema completo de gestão para fábricas de esquadrias de alumínio: vendas, produção, obras, estoque e financeiro em um só lugar." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "AluManager — ERP para Fábricas de Esquadrias de Alumínio" },
+      { name: "twitter:title", content: "CRM CRISTIANO — ERP para Fábricas de Esquadrias de Alumínio" },
       { name: "description", content: "Sistema completo de gestão para fábricas de esquadrias de alumínio: vendas, produção, obras, estoque e financeiro em um só lugar." },
       { name: "twitter:description", content: "Sistema completo de gestão para fábricas de esquadrias de alumínio: vendas, produção, obras, estoque e financeiro em um só lugar." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/84f361fc-2e71-4b36-b0d3-6e831eaac155/id-preview-e7f9b211--5992925b-2362-44cf-8914-ad993fd6134a.lovable.app-1783123467498.png" },
