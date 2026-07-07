@@ -169,11 +169,7 @@ function PerfisPage() {
       title="Perfis de Alumínio"
       description="Cadastro técnico de perfis com preço e estoque"
       newLabel="Novo perfil"
-      onNew={() => {
-        setEditing(null);
-        setAtivo(true);
-        setOpen(true);
-      }}
+      onNew={() => openFor(null)}
       actions={
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
