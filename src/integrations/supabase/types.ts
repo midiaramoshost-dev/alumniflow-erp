@@ -385,12 +385,14 @@ export type Database = {
           cliente_id: string | null
           cliente_nome: string | null
           complemento: string | null
+          conferido_por: string | null
           cortador_nome: string | null
           created_at: string
           created_by: string | null
           data_compra_acessorios: string | null
           data_compra_perfis: string | null
           data_compra_vidros: string | null
+          data_conferencia: string | null
           data_corte: string | null
           data_entrega_prevista: string | null
           data_entrega_real: string | null
@@ -427,12 +429,14 @@ export type Database = {
           cliente_id?: string | null
           cliente_nome?: string | null
           complemento?: string | null
+          conferido_por?: string | null
           cortador_nome?: string | null
           created_at?: string
           created_by?: string | null
           data_compra_acessorios?: string | null
           data_compra_perfis?: string | null
           data_compra_vidros?: string | null
+          data_conferencia?: string | null
           data_corte?: string | null
           data_entrega_prevista?: string | null
           data_entrega_real?: string | null
@@ -469,12 +473,14 @@ export type Database = {
           cliente_id?: string | null
           cliente_nome?: string | null
           complemento?: string | null
+          conferido_por?: string | null
           cortador_nome?: string | null
           created_at?: string
           created_by?: string | null
           data_compra_acessorios?: string | null
           data_compra_perfis?: string | null
           data_compra_vidros?: string | null
+          data_conferencia?: string | null
           data_corte?: string | null
           data_entrega_prevista?: string | null
           data_entrega_real?: string | null

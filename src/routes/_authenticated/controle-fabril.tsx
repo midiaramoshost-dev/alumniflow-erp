@@ -33,6 +33,7 @@ import {
   Cog,
   Wrench,
   CheckCircle2,
+  ClipboardCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -57,6 +58,8 @@ type Obra = {
   usinador_nome: string | null;
   data_montagem: string | null;
   montador_nome: string | null;
+  data_conferencia: string | null;
+  conferido_por: string | null;
 };
 
 const STAGES: {
@@ -74,6 +77,7 @@ const STAGES: {
   { key: "data_corte", label: "Corte", icon: Scissors, nameKey: "cortador_nome", nameLabel: "Cortador" },
   { key: "data_usinagem", label: "Usinagem", icon: Cog, nameKey: "usinador_nome", nameLabel: "Usinador" },
   { key: "data_montagem", label: "Montagem", icon: Wrench, nameKey: "montador_nome", nameLabel: "Montador" },
+  { key: "data_conferencia", label: "Conferência", icon: ClipboardCheck, nameKey: "conferido_por", nameLabel: "Conferido por" },
 ];
 
 function ControleFabrilPage() {
@@ -87,7 +91,7 @@ function ControleFabrilPage() {
       const { data, error } = await (supabase as unknown as { from: (t: string) => any })
         .from("obras")
         .select(
-          "id, numero, titulo, cliente_nome, status, data_medicao, data_envio_tecnico, data_compra_vidros, data_compra_acessorios, data_compra_perfis, data_corte, cortador_nome, data_usinagem, usinador_nome, data_montagem, montador_nome",
+          "id, numero, titulo, cliente_nome, status, data_medicao, data_envio_tecnico, data_compra_vidros, data_compra_acessorios, data_compra_perfis, data_corte, cortador_nome, data_usinagem, usinador_nome, data_montagem, montador_nome, data_conferencia, conferido_por",
         )
         .order("numero", { ascending: false });
       if (error) throw error;
