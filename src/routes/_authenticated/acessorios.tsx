@@ -180,7 +180,7 @@ function AcessoriosPage() {
                 </TableCell>
                 <TableCell><Badge variant={v.ativo ? "default" : "secondary"}>{v.ativo ? "Ativo" : "Inativo"}</Badge></TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => { setEditing(v); setAtivo(v.ativo); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => { setEditing(v); setAtivo(v.ativo); setCategoria(v.categoria ?? ""); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => confirm(`Excluir "${v.codigo}"?`) && remove.mutate(v.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 </TableCell>
               </TableRow>
