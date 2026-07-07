@@ -26,6 +26,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ShieldAlert,
   ShieldCheck,
@@ -42,6 +50,10 @@ import {
   Square,
   Briefcase,
   Cog,
+  Trash2,
+  Pencil,
+  Database,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -61,6 +73,197 @@ const ROLES: { key: AppRole; label: string; description: string }[] = [
 type Profile = { id: string; full_name: string | null; email: string | null };
 type UserRoleRow = { user_id: string; role: AppRole };
 
+/** Column descriptor for the generic data manager. */
+type Col = {
+  key: string;
+  label: string;
+  editable?: boolean;
+  type?: "text" | "number" | "date" | "textarea";
+  className?: string;
+};
+
+type EntityDef = {
+  key: string;
+  label: string;
+  table: string;
+  select: string;
+  orderBy: string;
+  ascending?: boolean;
+  searchCols: string[];
+  columns: Col[];
+  labelCol: string; // for delete confirmation
+};
+
+const ENTITIES: EntityDef[] = [
+  {
+    key: "clientes",
+    label: "Clientes",
+    table: "clientes",
+    select: "id, nome, email, telefone, cidade, numero_proposta, valor_total_obra, vendedor_nome, forma_pagamento, data_venda",
+    orderBy: "nome",
+    ascending: true,
+    searchCols: ["nome", "email", "telefone", "cidade", "numero_proposta", "vendedor_nome"],
+    labelCol: "nome",
+    columns: [
+      { key: "nome", label: "Nome", editable: true },
+      { key: "email", label: "E-mail", editable: true },
+      { key: "telefone", label: "Telefone", editable: true },
+      { key: "cidade", label: "Cidade", editable: true },
+      { key: "numero_proposta", label: "Nº Proposta", editable: true },
+      { key: "valor_total_obra", label: "Valor obra", type: "number", editable: true },
+      { key: "vendedor_nome", label: "Vendedor", editable: true },
+      { key: "forma_pagamento", label: "Pagamento", editable: true },
+      { key: "data_venda", label: "Data venda", type: "date", editable: true },
+    ],
+  },
+  {
+    key: "orcamentos",
+    label: "Orçamentos",
+    table: "orcamentos",
+    select: "id, numero, cliente_nome, status, total, validade_dias, created_at",
+    orderBy: "created_at",
+    ascending: false,
+    searchCols: ["cliente_nome", "status"],
+    labelCol: "numero",
+    columns: [
+      { key: "numero", label: "Nº" },
+      { key: "cliente_nome", label: "Cliente", editable: true },
+      { key: "status", label: "Status", editable: true },
+      { key: "total", label: "Total", type: "number", editable: true },
+      { key: "validade_dias", label: "Validade (dias)", type: "number", editable: true },
+      { key: "created_at", label: "Criado" },
+    ],
+  },
+  {
+    key: "ordens_producao",
+    label: "Ordens de Produção",
+    table: "ordens_producao",
+    select: "id, numero, titulo, cliente_nome, etapa, prioridade, data_entrega, created_at",
+    orderBy: "created_at",
+    ascending: false,
+    searchCols: ["titulo", "cliente_nome", "etapa"],
+    labelCol: "titulo",
+    columns: [
+      { key: "numero", label: "Nº" },
+      { key: "titulo", label: "Título", editable: true },
+      { key: "cliente_nome", label: "Cliente", editable: true },
+      { key: "etapa", label: "Etapa", editable: true },
+      { key: "prioridade", label: "Prioridade", editable: true },
+      { key: "data_entrega", label: "Entrega", type: "date", editable: true },
+    ],
+  },
+  {
+    key: "obras",
+    label: "Obras",
+    table: "obras",
+    select: "id, titulo, cliente_nome, status, progresso, valor, data_entrega_prevista, data_entrega_real",
+    orderBy: "created_at",
+    ascending: false,
+    searchCols: ["titulo", "cliente_nome", "status"],
+    labelCol: "titulo",
+    columns: [
+      { key: "titulo", label: "Título", editable: true },
+      { key: "cliente_nome", label: "Cliente", editable: true },
+      { key: "status", label: "Status", editable: true },
+      { key: "progresso", label: "%", type: "number", editable: true },
+      { key: "valor", label: "Valor", type: "number", editable: true },
+      { key: "data_entrega_prevista", label: "Prev.", type: "date", editable: true },
+      { key: "data_entrega_real", label: "Real", type: "date", editable: true },
+    ],
+  },
+  {
+    key: "financeiro_lancamentos",
+    label: "Financeiro",
+    table: "financeiro_lancamentos",
+    select: "id, tipo, descricao, categoria, valor, status, data_vencimento, data_pagamento, cliente_nome",
+    orderBy: "data_vencimento",
+    ascending: false,
+    searchCols: ["descricao", "categoria", "cliente_nome", "status", "tipo"],
+    labelCol: "descricao",
+    columns: [
+      { key: "tipo", label: "Tipo", editable: true },
+      { key: "descricao", label: "Descrição", editable: true },
+      { key: "categoria", label: "Categoria", editable: true },
+      { key: "valor", label: "Valor", type: "number", editable: true },
+      { key: "status", label: "Status", editable: true },
+      { key: "data_vencimento", label: "Vencimento", type: "date", editable: true },
+      { key: "data_pagamento", label: "Pagamento", type: "date", editable: true },
+      { key: "cliente_nome", label: "Cliente" },
+    ],
+  },
+  {
+    key: "vendedores",
+    label: "Vendedores",
+    table: "vendedores",
+    select: "id, nome, email, telefone, percentual_comissao, ativo, meta_mensal",
+    orderBy: "nome",
+    ascending: true,
+    searchCols: ["nome", "email", "telefone"],
+    labelCol: "nome",
+    columns: [
+      { key: "nome", label: "Nome", editable: true },
+      { key: "email", label: "E-mail", editable: true },
+      { key: "telefone", label: "Telefone", editable: true },
+      { key: "percentual_comissao", label: "% Comissão", type: "number", editable: true },
+      { key: "meta_mensal", label: "Meta mensal", type: "number", editable: true },
+      { key: "ativo", label: "Ativo" },
+    ],
+  },
+  {
+    key: "perfis_aluminio",
+    label: "Perfis Alumínio",
+    table: "perfis_aluminio",
+    select: "id, codigo, descricao, cor, peso_kg_m, preco_kg, estoque_metros",
+    orderBy: "codigo",
+    ascending: true,
+    searchCols: ["codigo", "descricao", "cor"],
+    labelCol: "codigo",
+    columns: [
+      { key: "codigo", label: "Código", editable: true },
+      { key: "descricao", label: "Descrição", editable: true },
+      { key: "cor", label: "Cor", editable: true },
+      { key: "peso_kg_m", label: "Kg/m", type: "number", editable: true },
+      { key: "preco_kg", label: "R$/kg", type: "number", editable: true },
+      { key: "estoque_metros", label: "Estoque (m)", type: "number", editable: true },
+    ],
+  },
+  {
+    key: "vidros",
+    label: "Vidros",
+    table: "vidros",
+    select: "id, codigo, descricao, espessura_mm, tipo, preco_m2, estoque_m2",
+    orderBy: "codigo",
+    ascending: true,
+    searchCols: ["codigo", "descricao", "tipo"],
+    labelCol: "codigo",
+    columns: [
+      { key: "codigo", label: "Código", editable: true },
+      { key: "descricao", label: "Descrição", editable: true },
+      { key: "tipo", label: "Tipo", editable: true },
+      { key: "espessura_mm", label: "Esp. (mm)", type: "number", editable: true },
+      { key: "preco_m2", label: "R$/m²", type: "number", editable: true },
+      { key: "estoque_m2", label: "Estoque m²", type: "number", editable: true },
+    ],
+  },
+  {
+    key: "acessorios",
+    label: "Acessórios",
+    table: "acessorios",
+    select: "id, codigo, descricao, unidade, preco_unitario, estoque_quantidade",
+    orderBy: "codigo",
+    ascending: true,
+    searchCols: ["codigo", "descricao"],
+    labelCol: "codigo",
+    columns: [
+      { key: "codigo", label: "Código", editable: true },
+      { key: "descricao", label: "Descrição", editable: true },
+      { key: "unidade", label: "Unidade", editable: true },
+      { key: "preco_unitario", label: "R$ un.", type: "number", editable: true },
+      { key: "estoque_quantidade", label: "Estoque", type: "number", editable: true },
+    ],
+  },
+];
+
 function AdminPage() {
   const { user, hasRole, loading } = useAuth();
   const navigate = useNavigate();
@@ -71,12 +274,6 @@ function AdminPage() {
   const [editing, setEditing] = useState<Profile | null>(null);
 
   const isAdmin = hasRole("admin");
-
-  // Simple in-session lock: admin must re-confirm identity to enter panel
-  const requireUnlock = () => {
-    if (unlocked) return true;
-    return false;
-  };
 
   const verify = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -136,7 +333,6 @@ function AdminPage() {
   const setRoles = useMutation({
     mutationFn: async (payload: { userId: string; roles: AppRole[] }) => {
       const { userId, roles } = payload;
-      // Delete all current, then insert desired
       const { error: delErr } = await supabase
         .from("user_roles")
         .delete()
@@ -156,19 +352,11 @@ function AdminPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Overview counts
   const { data: counts } = useQuery({
     queryKey: ["admin", "counts"],
     enabled: isAdmin && unlocked,
     queryFn: async () => {
-      const tables = [
-        "clientes",
-        "orcamentos",
-        "ordens_producao",
-        "obras",
-        "financeiro_lancamentos",
-        "vendedores",
-      ] as const;
+      const tables = ENTITIES.map((e) => e.table);
       const entries = await Promise.all(
         tables.map(async (t) => {
           const { count } = await (supabase as unknown as { from: (t: string) => any })
@@ -177,7 +365,7 @@ function AdminPage() {
           return [t, count ?? 0] as const;
         }),
       );
-      return Object.fromEntries(entries) as Record<(typeof tables)[number], number>;
+      return Object.fromEntries(entries) as Record<string, number>;
     },
   });
 
@@ -209,7 +397,7 @@ function AdminPage() {
     );
   }
 
-  if (!requireUnlock()) {
+  if (!unlocked) {
     return (
       <PageShell title="Admin Master" description="Confirme sua senha para acessar">
         <div className="max-w-md mx-auto py-16">
@@ -251,7 +439,7 @@ function AdminPage() {
   return (
     <PageShell
       title="Admin Master"
-      description="Gestão completa do sistema e permissões de usuários"
+      description="Gestão completa do sistema, dados e permissões"
       actions={
         <Badge variant="default" className="gap-1">
           <ShieldCheck className="h-3.5 w-3.5" />
@@ -260,7 +448,7 @@ function AdminPage() {
       }
     >
       {/* Overview */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mb-8">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mb-6">
         <ModuleCard to="/clientes" icon={Users} label="Clientes" count={counts?.clientes} />
         <ModuleCard to="/vendas" icon={ShoppingCart} label="Orçamentos" count={counts?.orcamentos} />
         <ModuleCard to="/producao" icon={Factory} label="Prod. OPs" count={counts?.ordens_producao} />
@@ -274,97 +462,115 @@ function AdminPage() {
         <ModuleCard to="/comercial" icon={Briefcase} label="Vendedores" count={counts?.vendedores} />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <ModuleShortcut to="/perfis" icon={Layers} label="Perfis de alumínio" />
         <ModuleShortcut to="/vidros" icon={Square} label="Vidros" />
         <ModuleShortcut to="/acessorios" icon={Package} label="Acessórios" />
         <ModuleShortcut to="/controle-fabril" icon={Cog} label="Controle Fabril" />
       </div>
 
-      {/* Users & Roles */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" /> Usuários e níveis de acesso
-            </CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">
-              Atribua funções para controlar o que cada usuário pode fazer.
-            </p>
-          </div>
-          <div className="relative w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              className="pl-8"
-              placeholder="Buscar por nome ou e-mail…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>E-mail</TableHead>
-                <TableHead>Funções</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loadingProfiles && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10">
-                    <Loader2 className="h-4 w-4 animate-spin inline mr-2" />
-                    Carregando…
-                  </TableCell>
-                </TableRow>
-              )}
-              {!loadingProfiles && filtered.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10 text-muted-foreground text-sm">
-                    Nenhum usuário encontrado.
-                  </TableCell>
-                </TableRow>
-              )}
-              {filtered.map((p) => {
-                const userRoles = rolesByUser.get(p.id) ?? [];
-                return (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-medium">
-                      {p.full_name ?? "—"}
-                      {p.id === user?.id && (
-                        <Badge variant="secondary" className="ml-2 text-[10px]">
-                          você
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{p.email ?? "—"}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {userRoles.length === 0 && (
-                          <span className="text-xs text-muted-foreground">sem funções</span>
-                        )}
-                        {userRoles.map((r) => (
-                          <Badge key={r} variant={r === "admin" ? "default" : "secondary"}>
-                            {ROLES.find((x) => x.key === r)?.label ?? r}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button size="sm" variant="outline" onClick={() => setEditing(p)}>
-                        Editar funções
-                      </Button>
-                    </TableCell>
+      <Tabs defaultValue="users" className="mt-6">
+        <TabsList className="flex flex-wrap h-auto gap-1">
+          <TabsTrigger value="users" className="gap-1">
+            <Users className="h-3.5 w-3.5" /> Usuários
+          </TabsTrigger>
+          <TabsTrigger value="data" className="gap-1">
+            <Database className="h-3.5 w-3.5" /> Gestão de dados
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Users & Roles */}
+        <TabsContent value="users" className="mt-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" /> Usuários e níveis de acesso
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Atribua funções para controlar o que cada usuário pode fazer.
+                </p>
+              </div>
+              <div className="relative w-64">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="pl-8"
+                  placeholder="Buscar por nome ou e-mail…"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>E-mail</TableHead>
+                    <TableHead>Funções</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {loadingProfiles && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-10">
+                        <Loader2 className="h-4 w-4 animate-spin inline mr-2" />
+                        Carregando…
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {!loadingProfiles && filtered.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-10 text-muted-foreground text-sm">
+                        Nenhum usuário encontrado.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {filtered.map((p) => {
+                    const userRoles = rolesByUser.get(p.id) ?? [];
+                    return (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-medium">
+                          {p.full_name ?? "—"}
+                          {p.id === user?.id && (
+                            <Badge variant="secondary" className="ml-2 text-[10px]">
+                              você
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{p.email ?? "—"}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {userRoles.length === 0 && (
+                              <span className="text-xs text-muted-foreground">sem funções</span>
+                            )}
+                            {userRoles.map((r) => (
+                              <Badge key={r} variant={r === "admin" ? "default" : "secondary"}>
+                                {ROLES.find((x) => x.key === r)?.label ?? r}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button size="sm" variant="outline" onClick={() => setEditing(p)}>
+                            Editar funções
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Data management */}
+        <TabsContent value="data" className="mt-4">
+          <DataManager />
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
         <DialogContent className="max-w-lg">
@@ -388,6 +594,295 @@ function AdminPage() {
     </PageShell>
   );
 }
+
+/* ---------------- Data Manager ---------------- */
+
+function DataManager() {
+  const [entityKey, setEntityKey] = useState<string>(ENTITIES[0].key);
+  const entity = ENTITIES.find((e) => e.key === entityKey)!;
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
+        <div>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" /> Gestão de dados
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Edite ou remova registros de qualquer tabela do sistema.
+          </p>
+        </div>
+        <Select value={entityKey} onValueChange={setEntityKey}>
+          <SelectTrigger className="w-64">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {ENTITIES.map((e) => (
+              <SelectItem key={e.key} value={e.key}>
+                {e.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </CardHeader>
+      <CardContent>
+        <EntityTable entity={entity} key={entity.key} />
+      </CardContent>
+    </Card>
+  );
+}
+
+type Row = { id: string } & Record<string, unknown>;
+
+function EntityTable({ entity }: { entity: EntityDef }) {
+  const qc = useQueryClient();
+  const [q, setQ] = useState("");
+  const [editRow, setEditRow] = useState<Row | null>(null);
+
+  const key = ["admin", "entity", entity.key];
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: key,
+    queryFn: async () => {
+      const { data, error } = await (supabase as unknown as { from: (t: string) => any })
+        .from(entity.table)
+        .select(entity.select)
+        .order(entity.orderBy, { ascending: entity.ascending ?? false })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as Row[];
+    },
+  });
+
+  const del = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase as unknown as { from: (t: string) => any })
+        .from(entity.table)
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: key });
+      qc.invalidateQueries({ queryKey: ["admin", "counts"] });
+      toast.success("Registro excluído");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const update = useMutation({
+    mutationFn: async (payload: { id: string; values: Record<string, unknown> }) => {
+      const { error } = await (supabase as unknown as { from: (t: string) => any })
+        .from(entity.table)
+        .update(payload.values)
+        .eq("id", payload.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: key });
+      toast.success("Registro atualizado");
+      setEditRow(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const filtered = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    const base = data ?? [];
+    if (!s) return base;
+    return base.filter((r) =>
+      entity.searchCols.some((c) => String(r[c] ?? "").toLowerCase().includes(s)),
+    );
+  }, [data, q, entity.searchCols]);
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="pl-8"
+            placeholder="Buscar…"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+        </div>
+        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+          <RefreshCw className={`h-4 w-4 mr-1 ${isFetching ? "animate-spin" : ""}`} />
+          Atualizar
+        </Button>
+        <div className="text-xs text-muted-foreground ml-auto">
+          {filtered.length} registro{filtered.length === 1 ? "" : "s"}
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {entity.columns.map((c) => (
+                <TableHead key={c.key} className={c.className}>
+                  {c.label}
+                </TableHead>
+              ))}
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={entity.columns.length + 1} className="text-center py-10">
+                  <Loader2 className="h-4 w-4 animate-spin inline mr-2" />
+                  Carregando…
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading && filtered.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={entity.columns.length + 1}
+                  className="text-center py-10 text-muted-foreground text-sm"
+                >
+                  Nenhum registro encontrado.
+                </TableCell>
+              </TableRow>
+            )}
+            {filtered.map((r) => (
+              <TableRow key={r.id}>
+                {entity.columns.map((c) => (
+                  <TableCell key={c.key} className="text-sm">
+                    {formatCell(r[c.key], c.type)}
+                  </TableCell>
+                ))}
+                <TableCell className="text-right whitespace-nowrap">
+                  <Button size="sm" variant="ghost" onClick={() => setEditRow(r)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => {
+                      const label = String(r[entity.labelCol] ?? r.id);
+                      if (confirm(`Excluir "${label}"? Esta ação não pode ser desfeita.`)) {
+                        del.mutate(r.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Dialog open={!!editRow} onOpenChange={(v) => !v && setEditRow(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Editar registro</DialogTitle>
+            <DialogDescription>
+              {entity.label} — {editRow ? String(editRow[entity.labelCol] ?? editRow.id) : ""}
+            </DialogDescription>
+          </DialogHeader>
+          {editRow && (
+            <RowEditor
+              row={editRow}
+              columns={entity.columns.filter((c) => c.editable)}
+              onCancel={() => setEditRow(null)}
+              onSave={(values) => update.mutate({ id: editRow.id, values })}
+              saving={update.isPending}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function RowEditor({
+  row,
+  columns,
+  onCancel,
+  onSave,
+  saving,
+}: {
+  row: Row;
+  columns: Col[];
+  onCancel: () => void;
+  onSave: (values: Record<string, unknown>) => void;
+  saving: boolean;
+}) {
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    const v: Record<string, string> = {};
+    columns.forEach((c) => {
+      const raw = row[c.key];
+      if (raw == null) v[c.key] = "";
+      else if (c.type === "date" && typeof raw === "string") v[c.key] = raw.slice(0, 10);
+      else v[c.key] = String(raw);
+    });
+    return v;
+  });
+
+  const submit = () => {
+    const payload: Record<string, unknown> = {};
+    columns.forEach((c) => {
+      const s = values[c.key];
+      if (s === "" || s == null) {
+        payload[c.key] = null;
+      } else if (c.type === "number") {
+        const n = Number(s);
+        payload[c.key] = Number.isNaN(n) ? null : n;
+      } else {
+        payload[c.key] = s;
+      }
+    });
+    onSave(payload);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        {columns.map((c) => (
+          <div key={c.key} className="space-y-1">
+            <Label htmlFor={c.key} className="text-xs">
+              {c.label}
+            </Label>
+            <Input
+              id={c.key}
+              type={c.type === "number" ? "number" : c.type === "date" ? "date" : "text"}
+              value={values[c.key] ?? ""}
+              onChange={(e) => setValues((v) => ({ ...v, [c.key]: e.target.value }))}
+              step={c.type === "number" ? "any" : undefined}
+            />
+          </div>
+        ))}
+      </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button onClick={submit} disabled={saving}>
+          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Salvar alterações
+        </Button>
+      </DialogFooter>
+    </div>
+  );
+}
+
+function formatCell(v: unknown, type?: Col["type"]) {
+  if (v == null || v === "") return <span className="text-muted-foreground">—</span>;
+  if (typeof v === "boolean") return v ? "Sim" : "Não";
+  if (type === "number" && typeof v === "number") {
+    return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  if (type === "date" && typeof v === "string") return v.slice(0, 10);
+  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T/.test(v)) {
+    return new Date(v).toLocaleString("pt-BR");
+  }
+  return String(v);
+}
+
+/* ---------------- Role editor ---------------- */
 
 function RoleEditor({
   initial,
@@ -447,6 +942,8 @@ function RoleEditor({
     </div>
   );
 }
+
+/* ---------------- Cards ---------------- */
 
 function ModuleCard({
   to,
