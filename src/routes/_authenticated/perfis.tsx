@@ -228,7 +228,7 @@ function PerfisPage() {
       </Table>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{editing ? "Editar perfil" : "Novo perfil"}</DialogTitle></DialogHeader>
           <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
             <div><Label htmlFor="codigo">Código *</Label><Input id="codigo" name="codigo" required defaultValue={editing?.codigo ?? ""} /></div>
@@ -237,15 +237,69 @@ function PerfisPage() {
             <div><Label htmlFor="cor">Cor</Label><Input id="cor" name="cor" defaultValue={editing?.cor ?? ""} placeholder="Branco, Preto, Bronze…" /></div>
             <div><Label htmlFor="acabamento">Acabamento</Label><Input id="acabamento" name="acabamento" defaultValue={editing?.acabamento ?? ""} placeholder="Anodizado, Pintado" /></div>
             <div><Label htmlFor="comprimento_barra_mm">Barra (mm)</Label><Input id="comprimento_barra_mm" name="comprimento_barra_mm" type="number" defaultValue={editing?.comprimento_barra_mm ?? 6000} /></div>
-            <div><Label htmlFor="peso_kg_m">Peso (kg/m)</Label><Input id="peso_kg_m" name="peso_kg_m" type="number" step="0.001" defaultValue={editing?.peso_kg_m ?? ""} /></div>
-            <div><Label htmlFor="preco_kg">Preço / kg (R$)</Label><Input id="preco_kg" name="preco_kg" type="number" step="0.01" defaultValue={editing?.preco_kg ?? ""} /></div>
-            <div><Label htmlFor="preco_metro">Preço / m (R$)</Label><Input id="preco_metro" name="preco_metro" type="number" step="0.01" defaultValue={editing?.preco_metro ?? ""} /></div>
+            <div><Label htmlFor="peso_kg_m">Peso (kg/m)</Label><Input id="peso_kg_m" name="peso_kg_m" type="number" step="0.001" value={simPesoKgM} onChange={(e) => setSimPesoKgM(e.target.value)} /></div>
+            <div><Label htmlFor="preco_kg">Preço / kg (R$)</Label><Input id="preco_kg" name="preco_kg" type="number" step="0.01" value={simPrecoKg} onChange={(e) => setSimPrecoKg(e.target.value)} /></div>
+            <div><Label htmlFor="preco_metro">Preço / m (R$)</Label><Input id="preco_metro" name="preco_metro" type="number" step="0.01" value={simPrecoMetro} onChange={(e) => setSimPrecoMetro(e.target.value)} /></div>
             <div><Label htmlFor="estoque_atual">Estoque atual</Label><Input id="estoque_atual" name="estoque_atual" type="number" step="0.01" defaultValue={editing?.estoque_atual ?? 0} /></div>
             <div><Label htmlFor="estoque_minimo">Estoque mínimo</Label><Input id="estoque_minimo" name="estoque_minimo" type="number" step="0.01" defaultValue={editing?.estoque_minimo ?? 0} /></div>
             <div className="flex items-center gap-2 sm:col-span-2">
               <Switch id="ativo" checked={ativo} onCheckedChange={setAtivo} />
               <Label htmlFor="ativo">Ativo</Label>
             </div>
+
+            {/* Simulador de orçamento */}
+            <div className="sm:col-span-2 rounded-lg border bg-muted/30 p-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <Calculator className="h-4 w-4 text-primary" />
+                Simulador de orçamento
+              </div>
+              <p className="text-xs text-muted-foreground -mt-2">
+                Informe as medidas da esquadria para calcular o consumo e o valor deste perfil.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div>
+                  <Label htmlFor="sim_altura">Altura (mm)</Label>
+                  <Input id="sim_altura" type="number" min="0" value={simAltura} onChange={(e) => setSimAltura(e.target.value)} placeholder="Ex: 1200" />
+                </div>
+                <div>
+                  <Label htmlFor="sim_largura">Largura (mm)</Label>
+                  <Input id="sim_largura" type="number" min="0" value={simLargura} onChange={(e) => setSimLargura(e.target.value)} placeholder="Ex: 1500" />
+                </div>
+                <div>
+                  <Label htmlFor="sim_qtd">Quantidade</Label>
+                  <Input id="sim_qtd" type="number" min="1" value={simQtd} onChange={(e) => setSimQtd(e.target.value)} />
+                </div>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2 text-sm pt-1">
+                <div className="flex justify-between rounded-md bg-background px-3 py-2 border">
+                  <span className="text-muted-foreground">Perímetro total</span>
+                  <span className="font-semibold tabular-nums">{sim.perimetroM.toFixed(2)} m</span>
+                </div>
+                <div className="flex justify-between rounded-md bg-background px-3 py-2 border">
+                  <span className="text-muted-foreground">Peso estimado</span>
+                  <span className="font-semibold tabular-nums">{sim.pesoTotalKg.toFixed(2)} kg</span>
+                </div>
+                <div className="flex justify-between rounded-md bg-background px-3 py-2 border">
+                  <span className="text-muted-foreground">Total por metro</span>
+                  <span className="font-semibold tabular-nums">
+                    R$ {sim.totalPorMetro.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between rounded-md bg-background px-3 py-2 border">
+                  <span className="text-muted-foreground">Total por peso</span>
+                  <span className="font-semibold tabular-nums">
+                    R$ {sim.totalPorPeso.toFixed(2)}
+                  </span>
+                </div>
+                <div className="sm:col-span-2 flex justify-between rounded-md bg-primary/10 text-primary px-3 py-2 border border-primary/20">
+                  <span className="font-semibold">Valor sugerido do orçamento</span>
+                  <span className="font-bold text-lg tabular-nums">
+                    R$ {sim.total.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <DialogFooter className="sm:col-span-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
               <Button type="submit" disabled={save.isPending}>
