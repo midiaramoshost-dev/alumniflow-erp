@@ -383,44 +383,6 @@ function AdminPage() {
     );
   }
 
-  if (!unlocked) {
-    return (
-      <PageShell title="Admin Master" description="Confirme sua senha para acessar">
-        <div className="max-w-md mx-auto py-16">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-primary" />
-                Desbloquear painel administrativo
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={verify} className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Usuário</Label>
-                  <Input id="email" value={user?.email ?? ""} disabled />
-                </div>
-                <div>
-                  <Label htmlFor="pwd">Senha</Label>
-                  <Input
-                    id="pwd"
-                    type="password"
-                    value={pwd}
-                    onChange={(e) => setPwd(e.target.value)}
-                    autoFocus
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full">
-                  Entrar no painel
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </PageShell>
-    );
-  }
 
   return (
     <PageShell
