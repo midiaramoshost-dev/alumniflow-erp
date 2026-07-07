@@ -268,25 +268,11 @@ function AdminPage() {
   const { user, hasRole, loading } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [unlocked, setUnlocked] = useState(false);
-  const [pwd, setPwd] = useState("");
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Profile | null>(null);
 
   const isAdmin = hasRole("admin");
 
-  const verify = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!user?.email) return toast.error("Sessão inválida");
-    const { error } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: pwd,
-    });
-    if (error) return toast.error("Senha incorreta");
-    setUnlocked(true);
-    setPwd("");
-    toast.success("Painel desbloqueado");
-  };
 
   const { data: profiles, isLoading: loadingProfiles } = useQuery({
     queryKey: ["admin", "profiles"],
