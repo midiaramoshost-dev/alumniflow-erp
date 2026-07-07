@@ -253,7 +253,11 @@ function PipelinePage() {
                       <Building className="h-3 w-3" /> Obra
                     </div>
                     {r.obra_id ? (
-                      <Link to="/obras" className="block group">
+                      <Link
+                        to="/obras"
+                        search={{ open: r.obra_id }}
+                        className="block group cursor-pointer"
+                      >
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="font-mono text-sm font-semibold">
                             #{r.obra_numero}
