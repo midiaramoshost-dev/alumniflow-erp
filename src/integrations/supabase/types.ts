@@ -827,6 +827,183 @@ export type Database = {
           },
         ]
       }
+      pedido_anexos: {
+        Row: {
+          created_at: string
+          etapa: Database["public"]["Enums"]["pedido_etapa"]
+          filename: string
+          id: string
+          mime_type: string | null
+          pedido_id: string
+          size_bytes: number | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          etapa: Database["public"]["Enums"]["pedido_etapa"]
+          filename: string
+          id?: string
+          mime_type?: string | null
+          pedido_id: string
+          size_bytes?: number | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          etapa?: Database["public"]["Enums"]["pedido_etapa"]
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          pedido_id?: string
+          size_bytes?: number | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedido_anexos_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pedido_historico: {
+        Row: {
+          acao: Database["public"]["Enums"]["pedido_acao"]
+          created_at: string
+          de_user_id: string | null
+          etapa_de: Database["public"]["Enums"]["pedido_etapa"] | null
+          etapa_para: Database["public"]["Enums"]["pedido_etapa"] | null
+          id: string
+          motivo: string | null
+          observacao: string | null
+          para_user_id: string | null
+          pedido_id: string
+        }
+        Insert: {
+          acao: Database["public"]["Enums"]["pedido_acao"]
+          created_at?: string
+          de_user_id?: string | null
+          etapa_de?: Database["public"]["Enums"]["pedido_etapa"] | null
+          etapa_para?: Database["public"]["Enums"]["pedido_etapa"] | null
+          id?: string
+          motivo?: string | null
+          observacao?: string | null
+          para_user_id?: string | null
+          pedido_id: string
+        }
+        Update: {
+          acao?: Database["public"]["Enums"]["pedido_acao"]
+          created_at?: string
+          de_user_id?: string | null
+          etapa_de?: Database["public"]["Enums"]["pedido_etapa"] | null
+          etapa_para?: Database["public"]["Enums"]["pedido_etapa"] | null
+          id?: string
+          motivo?: string | null
+          observacao?: string | null
+          para_user_id?: string | null
+          pedido_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedido_historico_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pedidos: {
+        Row: {
+          cliente_id: string | null
+          cliente_nome: string | null
+          created_at: string
+          created_by: string | null
+          descricao: string | null
+          etapa: Database["public"]["Enums"]["pedido_etapa"]
+          id: string
+          numero: number
+          obra_id: string | null
+          orcamento_id: string | null
+          ordem_producao_id: string | null
+          prioridade: string
+          responsavel_atual_id: string | null
+          titulo: string
+          updated_at: string
+          valor_estimado: number | null
+        }
+        Insert: {
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          etapa?: Database["public"]["Enums"]["pedido_etapa"]
+          id?: string
+          numero?: number
+          obra_id?: string | null
+          orcamento_id?: string | null
+          ordem_producao_id?: string | null
+          prioridade?: string
+          responsavel_atual_id?: string | null
+          titulo: string
+          updated_at?: string
+          valor_estimado?: number | null
+        }
+        Update: {
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          etapa?: Database["public"]["Enums"]["pedido_etapa"]
+          id?: string
+          numero?: number
+          obra_id?: string | null
+          orcamento_id?: string | null
+          ordem_producao_id?: string | null
+          prioridade?: string
+          responsavel_atual_id?: string | null
+          titulo?: string
+          updated_at?: string
+          valor_estimado?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedidos_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedidos_orcamento_id_fkey"
+            columns: ["orcamento_id"]
+            isOneToOne: false
+            referencedRelation: "orcamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedidos_ordem_producao_id_fkey"
+            columns: ["ordem_producao_id"]
+            isOneToOne: false
+            referencedRelation: "ordens_producao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfis_aluminio: {
         Row: {
           acabamento: string | null
@@ -1050,6 +1227,134 @@ export type Database = {
         }
         Returns: boolean
       }
+      pedido_aceitar: {
+        Args: { _pedido_id: string }
+        Returns: {
+          cliente_id: string | null
+          cliente_nome: string | null
+          created_at: string
+          created_by: string | null
+          descricao: string | null
+          etapa: Database["public"]["Enums"]["pedido_etapa"]
+          id: string
+          numero: number
+          obra_id: string | null
+          orcamento_id: string | null
+          ordem_producao_id: string | null
+          prioridade: string
+          responsavel_atual_id: string | null
+          titulo: string
+          updated_at: string
+          valor_estimado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedidos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pedido_avancar: {
+        Args: { _observacao?: string; _pedido_id: string }
+        Returns: {
+          cliente_id: string | null
+          cliente_nome: string | null
+          created_at: string
+          created_by: string | null
+          descricao: string | null
+          etapa: Database["public"]["Enums"]["pedido_etapa"]
+          id: string
+          numero: number
+          obra_id: string | null
+          orcamento_id: string | null
+          ordem_producao_id: string | null
+          prioridade: string
+          responsavel_atual_id: string | null
+          titulo: string
+          updated_at: string
+          valor_estimado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedidos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pedido_cancelar: {
+        Args: { _motivo: string; _pedido_id: string }
+        Returns: {
+          cliente_id: string | null
+          cliente_nome: string | null
+          created_at: string
+          created_by: string | null
+          descricao: string | null
+          etapa: Database["public"]["Enums"]["pedido_etapa"]
+          id: string
+          numero: number
+          obra_id: string | null
+          orcamento_id: string | null
+          ordem_producao_id: string | null
+          prioridade: string
+          responsavel_atual_id: string | null
+          titulo: string
+          updated_at: string
+          valor_estimado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedidos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pedido_comentar: {
+        Args: { _observacao: string; _pedido_id: string }
+        Returns: undefined
+      }
+      pedido_devolver: {
+        Args: { _motivo: string; _pedido_id: string }
+        Returns: {
+          cliente_id: string | null
+          cliente_nome: string | null
+          created_at: string
+          created_by: string | null
+          descricao: string | null
+          etapa: Database["public"]["Enums"]["pedido_etapa"]
+          id: string
+          numero: number
+          obra_id: string | null
+          orcamento_id: string | null
+          ordem_producao_id: string | null
+          prioridade: string
+          responsavel_atual_id: string | null
+          titulo: string
+          updated_at: string
+          valor_estimado: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedidos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pedido_etapa_anterior: {
+        Args: { _etapa: Database["public"]["Enums"]["pedido_etapa"] }
+        Returns: Database["public"]["Enums"]["pedido_etapa"]
+      }
+      pedido_etapa_papel: {
+        Args: { _etapa: Database["public"]["Enums"]["pedido_etapa"] }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      pedido_etapa_proxima: {
+        Args: { _etapa: Database["public"]["Enums"]["pedido_etapa"] }
+        Returns: Database["public"]["Enums"]["pedido_etapa"]
+      }
+      pode_agir_no_pedido: {
+        Args: { _pedido_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "vendedor" | "producao" | "financeiro_obra"
@@ -1067,6 +1372,27 @@ export type Database = {
         | "em_instalacao"
         | "concluida"
         | "cancelada"
+      pedido_acao:
+        | "criar"
+        | "aceitar"
+        | "concluir"
+        | "devolver"
+        | "comentar"
+        | "anexar"
+        | "cancelar"
+        | "reabrir"
+      pedido_etapa:
+        | "venda"
+        | "avaliacao_tecnica"
+        | "orcamento"
+        | "corte"
+        | "usinagem"
+        | "montagem"
+        | "vidracaria"
+        | "acabamento"
+        | "entrega"
+        | "concluido"
+        | "cancelado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1210,6 +1536,29 @@ export const Constants = {
         "em_instalacao",
         "concluida",
         "cancelada",
+      ],
+      pedido_acao: [
+        "criar",
+        "aceitar",
+        "concluir",
+        "devolver",
+        "comentar",
+        "anexar",
+        "cancelar",
+        "reabrir",
+      ],
+      pedido_etapa: [
+        "venda",
+        "avaliacao_tecnica",
+        "orcamento",
+        "corte",
+        "usinagem",
+        "montagem",
+        "vidracaria",
+        "acabamento",
+        "entrega",
+        "concluido",
+        "cancelado",
       ],
     },
   },
