@@ -289,7 +289,7 @@ function AdminPage() {
 
   const { data: roleRows } = useQuery({
     queryKey: ["admin", "user_roles"],
-    enabled: isAdmin && unlocked,
+    enabled: isAdmin,
     queryFn: async () => {
       const { data, error } = await supabase.from("user_roles").select("user_id, role");
       if (error) throw error;
