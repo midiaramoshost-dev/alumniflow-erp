@@ -33,6 +33,7 @@ import {
   Cog,
   Wrench,
   CheckCircle2,
+  ClipboardCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
