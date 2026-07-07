@@ -91,7 +91,7 @@ function ControleFabrilPage() {
       const { data, error } = await (supabase as unknown as { from: (t: string) => any })
         .from("obras")
         .select(
-          "id, numero, titulo, cliente_nome, status, data_medicao, data_envio_tecnico, data_compra_vidros, data_compra_acessorios, data_compra_perfis, data_corte, cortador_nome, data_usinagem, usinador_nome, data_montagem, montador_nome",
+          "id, numero, titulo, cliente_nome, status, data_medicao, data_envio_tecnico, data_compra_vidros, data_compra_acessorios, data_compra_perfis, data_corte, cortador_nome, data_usinagem, usinador_nome, data_montagem, montador_nome, data_conferencia, conferido_por",
         )
         .order("numero", { ascending: false });
       if (error) throw error;
