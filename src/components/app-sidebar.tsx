@@ -52,6 +52,7 @@ const nav = [
       { title: "Vendas", url: "/vendas", icon: ShoppingCart },
       { title: "Comercial", url: "/comercial", icon: Briefcase },
       { title: "Produção", url: "/producao", icon: Factory },
+      { title: "Controle Fabril", url: "/controle-fabril", icon: Cog },
       { title: "Obras", url: "/obras", icon: Building },
       { title: "Materiais", url: "/materiais", icon: Boxes },
       { title: "Financeiro", url: "/financeiro", icon: Wallet },
