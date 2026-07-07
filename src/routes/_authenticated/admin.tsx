@@ -521,10 +521,16 @@ function AdminPage() {
           </Card>
         </TabsContent>
 
+        {/* Invites */}
+        <TabsContent value="invites" className="mt-4">
+          <InvitesManager />
+        </TabsContent>
+
         {/* Data management */}
         <TabsContent value="data" className="mt-4">
           <DataManager />
         </TabsContent>
+
       </Tabs>
 
       <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
