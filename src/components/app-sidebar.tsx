@@ -14,6 +14,7 @@ import {
   Building2,
   Boxes,
   Briefcase,
+  Cog,
 } from "lucide-react";
 
 import {
