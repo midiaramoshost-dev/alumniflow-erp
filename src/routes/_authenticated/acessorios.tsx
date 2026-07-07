@@ -194,7 +194,15 @@ function AcessoriosPage() {
           <DialogHeader><DialogTitle>{editing ? "Editar acessório" : "Novo acessório"}</DialogTitle></DialogHeader>
           <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
             <div><Label htmlFor="codigo">Código *</Label><Input id="codigo" name="codigo" required defaultValue={editing?.codigo ?? ""} /></div>
-            <div><Label htmlFor="categoria">Categoria</Label><Input id="categoria" name="categoria" defaultValue={editing?.categoria ?? ""} placeholder="Ferragem, Vedação…" /></div>
+            <div><Label htmlFor="categoria">Categoria</Label>
+              <Select value={categoria || "none"} onValueChange={(v) => setCategoria(v === "none" ? "" : v)}>
+                <SelectTrigger id="categoria"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Sem categoria —</SelectItem>
+                  {CATEGORIAS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="sm:col-span-2"><Label htmlFor="descricao">Descrição *</Label><Input id="descricao" name="descricao" required defaultValue={editing?.descricao ?? ""} /></div>
             <div><Label htmlFor="unidade">Unidade</Label><Input id="unidade" name="unidade" defaultValue={editing?.unidade ?? "UN"} placeholder="UN, MT, KG…" /></div>
             <div><Label htmlFor="preco_unitario">Preço unitário (R$)</Label><Input id="preco_unitario" name="preco_unitario" type="number" step="0.01" defaultValue={editing?.preco_unitario ?? ""} /></div>
