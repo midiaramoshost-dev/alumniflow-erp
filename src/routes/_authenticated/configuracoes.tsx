@@ -149,10 +149,20 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
     }
   }, [profile]);
 
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+
   const save = useMutation({
     mutationFn: async () => {
-      const name = fullName.trim();
-      const tel = phone.trim();
+      const nameParsed = nameSchema.safeParse(fullName);
+      const phoneParsed = phoneSchema.safeParse(phone);
+      setNameError(nameParsed.success ? null : nameParsed.error.issues[0].message);
+      setPhoneError(phoneParsed.success ? null : phoneParsed.error.issues[0].message);
+      if (!nameParsed.success || !phoneParsed.success) {
+        throw new Error("Corrija os campos destacados");
+      }
+      const name = nameParsed.data;
+      const tel = phoneParsed.data;
       const { error } = await (supabase as unknown as { from: (t: string) => any })
         .from("profiles")
         .update({ full_name: name || null, phone: tel || null })
@@ -189,6 +199,7 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
               e.preventDefault();
               save.mutate();
             }}
+            noValidate
           >
             <div>
               <Label htmlFor="email">E-mail</Label>
@@ -202,18 +213,39 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
               <Input
                 id="name"
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(e) => {
+                  setFullName(e.target.value);
+                  if (nameError) setNameError(null);
+                }}
+                onBlur={() => {
+                  const r = nameSchema.safeParse(fullName);
+                  setNameError(r.success ? null : r.error.issues[0].message);
+                }}
                 placeholder="Seu nome"
+                maxLength={100}
+                aria-invalid={!!nameError}
               />
+              {nameError && <p className="text-xs text-destructive mt-1">{nameError}</p>}
             </div>
             <div>
               <Label htmlFor="phone">Telefone</Label>
               <Input
                 id="phone"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  setPhone(formatPhoneBR(e.target.value));
+                  if (phoneError) setPhoneError(null);
+                }}
+                onBlur={() => {
+                  const r = phoneSchema.safeParse(phone);
+                  setPhoneError(r.success ? null : r.error.issues[0].message);
+                }}
                 placeholder="(00) 00000-0000"
+                inputMode="tel"
+                maxLength={16}
+                aria-invalid={!!phoneError}
               />
+              {phoneError && <p className="text-xs text-destructive mt-1">{phoneError}</p>}
             </div>
             <div className="flex justify-end">
               <Button type="submit" disabled={save.isPending}>
