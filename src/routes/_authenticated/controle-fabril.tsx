@@ -58,6 +58,8 @@ type Obra = {
   usinador_nome: string | null;
   data_montagem: string | null;
   montador_nome: string | null;
+  data_conferencia: string | null;
+  conferido_por: string | null;
 };
 
 const STAGES: {
