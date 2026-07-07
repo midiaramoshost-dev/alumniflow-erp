@@ -140,8 +140,8 @@ function VidrosPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading && <TableRow><TableCell colSpan={8} className="text-center py-10"><Loader2 className="h-4 w-4 animate-spin inline mr-2" />Carregando…</TableCell></TableRow>}
-          {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground text-sm">Nenhum vidro cadastrado.</TableCell></TableRow>}
+          {isLoading && <TableRow><TableCell colSpan={9} className="text-center py-10"><Loader2 className="h-4 w-4 animate-spin inline mr-2" />Carregando…</TableCell></TableRow>}
+          {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={9} className="text-center py-10 text-muted-foreground text-sm">Nenhum vidro cadastrado.</TableCell></TableRow>}
           {filtered.map((v) => (
             <TableRow key={v.id}>
               <TableCell className="font-mono text-xs">{v.codigo}</TableCell>
