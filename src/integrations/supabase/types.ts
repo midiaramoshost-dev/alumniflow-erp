@@ -122,6 +122,94 @@ export type Database = {
         }
         Relationships: []
       }
+      financeiro_lancamentos: {
+        Row: {
+          categoria: string | null
+          cliente_id: string | null
+          cliente_nome: string | null
+          created_at: string
+          created_by: string | null
+          data_pagamento: string | null
+          data_vencimento: string
+          descricao: string
+          forma_pagamento: string | null
+          id: string
+          obra_id: string | null
+          obra_numero: number | null
+          observacoes: string | null
+          orcamento_id: string | null
+          orcamento_numero: number | null
+          status: Database["public"]["Enums"]["financeiro_status"]
+          tipo: Database["public"]["Enums"]["financeiro_tipo"]
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          categoria?: string | null
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_pagamento?: string | null
+          data_vencimento: string
+          descricao: string
+          forma_pagamento?: string | null
+          id?: string
+          obra_id?: string | null
+          obra_numero?: number | null
+          observacoes?: string | null
+          orcamento_id?: string | null
+          orcamento_numero?: number | null
+          status?: Database["public"]["Enums"]["financeiro_status"]
+          tipo: Database["public"]["Enums"]["financeiro_tipo"]
+          updated_at?: string
+          valor?: number
+        }
+        Update: {
+          categoria?: string | null
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_pagamento?: string | null
+          data_vencimento?: string
+          descricao?: string
+          forma_pagamento?: string | null
+          id?: string
+          obra_id?: string | null
+          obra_numero?: number | null
+          observacoes?: string | null
+          orcamento_id?: string | null
+          orcamento_numero?: number | null
+          status?: Database["public"]["Enums"]["financeiro_status"]
+          tipo?: Database["public"]["Enums"]["financeiro_tipo"]
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financeiro_lancamentos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financeiro_lancamentos_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financeiro_lancamentos_orcamento_id_fkey"
+            columns: ["orcamento_id"]
+            isOneToOne: false
+            referencedRelation: "orcamentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       obra_cronograma: {
         Row: {
           created_at: string
@@ -809,6 +897,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "vendedor" | "producao" | "financeiro_obra"
+      financeiro_status: "pendente" | "pago" | "atrasado" | "cancelado"
+      financeiro_tipo: "receita" | "despesa"
       obra_cronograma_status:
         | "pendente"
         | "em_andamento"
@@ -949,6 +1039,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "vendedor", "producao", "financeiro_obra"],
+      financeiro_status: ["pendente", "pago", "atrasado", "cancelado"],
+      financeiro_tipo: ["receita", "despesa"],
       obra_cronograma_status: [
         "pendente",
         "em_andamento",
