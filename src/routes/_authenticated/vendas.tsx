@@ -477,6 +477,27 @@ function OrcamentoDialog({
     setItens((prev) => {
       const next = [...prev];
       const merged = { ...next[idx], ...patch };
+
+      // Auto-calculate preço unitário from Perfil simulator when perfil + dimensions are set
+      const perfilChanged = "perfil_id" in patch;
+      const dimChanged = "largura_mm" in patch || "altura_mm" in patch;
+      const precoTouched = "preco_unitario" in patch;
+      if ((perfilChanged || dimChanged) && !precoTouched && merged.perfil_id) {
+        const p = perfis?.find((x) => x.id === merged.perfil_id);
+        const h = Number(merged.altura_mm ?? 0);
+        const w = Number(merged.largura_mm ?? 0);
+        if (p && h > 0 && w > 0) {
+          const perimetroM = ((h + w) * 2) / 1000; // por unidade
+          const precoMetro = Number(p.preco_metro ?? 0);
+          const precoKg = Number(p.preco_kg ?? 0);
+          const pesoKgM = Number(p.peso_kg_m ?? 0);
+          const porMetro = perimetroM * precoMetro;
+          const porPeso = perimetroM * pesoKgM * precoKg;
+          const calc = porMetro > 0 ? porMetro : porPeso;
+          if (calc > 0) merged.preco_unitario = Number(calc.toFixed(2));
+        }
+      }
+
       const qtd = Number(merged.quantidade ?? 0);
       const preco = Number(merged.preco_unitario ?? 0);
       merged.subtotal = qtd * preco;
