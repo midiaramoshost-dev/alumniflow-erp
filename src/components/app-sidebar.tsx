@@ -36,6 +36,7 @@ const nav = [
     label: "Principal",
     items: [
       { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Pedidos", url: "/pedidos", icon: Workflow },
       { title: "Pipeline", url: "/pipeline", icon: Workflow },
     ],
   },
