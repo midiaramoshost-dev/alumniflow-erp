@@ -54,6 +54,9 @@ import {
   Pencil,
   Database,
   RefreshCw,
+  Mail,
+  Copy,
+  Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
