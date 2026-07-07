@@ -124,12 +124,17 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
 
   const save = useMutation({
     mutationFn: async () => {
+      const name = fullName.trim();
+      const tel = phone.trim();
       const { error } = await (supabase as unknown as { from: (t: string) => any })
         .from("profiles")
-        .update({ full_name: fullName.trim() || null, phone: phone.trim() || null })
+        .update({ full_name: name || null, phone: tel || null })
         .eq("id", userId);
       if (error) throw error;
-      await supabase.auth.updateUser({ data: { full_name: fullName.trim() } });
+      const { error: authErr } = await supabase.auth.updateUser({
+        data: { full_name: name, phone: tel },
+      });
+      if (authErr) throw authErr;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["settings", "profile", userId] });
