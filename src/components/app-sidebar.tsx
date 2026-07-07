@@ -8,6 +8,7 @@ import {
   ShoppingCart,
   Factory,
   Building,
+  Workflow,
   Wallet,
   Settings,
   Building2,
