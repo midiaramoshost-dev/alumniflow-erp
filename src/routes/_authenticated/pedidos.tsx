@@ -97,7 +97,6 @@ const db = supabase as unknown as { from: (t: string) => any; rpc: (fn: string, 
 function PedidosPage() {
   const { hasRole } = useAuth();
   const [openNew, setOpenNew] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { data: pedidos = [], isLoading } = useQuery({
     queryKey: ["pedidos"],
