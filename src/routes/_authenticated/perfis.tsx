@@ -48,6 +48,42 @@ function PerfisPage() {
   const [editing, setEditing] = useState<Perfil | null>(null);
   const [ativo, setAtivo] = useState(true);
 
+  // Simulador de orçamento
+  const [simAltura, setSimAltura] = useState("");
+  const [simLargura, setSimLargura] = useState("");
+  const [simQtd, setSimQtd] = useState("1");
+  const [simPesoKgM, setSimPesoKgM] = useState("");
+  const [simPrecoKg, setSimPrecoKg] = useState("");
+  const [simPrecoMetro, setSimPrecoMetro] = useState("");
+
+  const openFor = (p: Perfil | null) => {
+    setEditing(p);
+    setAtivo(p?.ativo ?? true);
+    setSimAltura("");
+    setSimLargura("");
+    setSimQtd("1");
+    setSimPesoKgM(p?.peso_kg_m != null ? String(p.peso_kg_m) : "");
+    setSimPrecoKg(p?.preco_kg != null ? String(p.preco_kg) : "");
+    setSimPrecoMetro(p?.preco_metro != null ? String(p.preco_metro) : "");
+    setOpen(true);
+  };
+
+  const sim = useMemo(() => {
+    const h = Number(String(simAltura).replace(",", ".")) || 0;
+    const w = Number(String(simLargura).replace(",", ".")) || 0;
+    const qtd = Number(String(simQtd).replace(",", ".")) || 0;
+    const pesoKgM = Number(String(simPesoKgM).replace(",", ".")) || 0;
+    const precoKg = Number(String(simPrecoKg).replace(",", ".")) || 0;
+    const precoMetro = Number(String(simPrecoMetro).replace(",", ".")) || 0;
+    const perimetroM = ((h * 2 + w * 2) / 1000) * qtd;
+    const pesoTotalKg = perimetroM * pesoKgM;
+    const totalPorMetro = perimetroM * precoMetro;
+    const totalPorPeso = pesoTotalKg * precoKg;
+    const total = totalPorMetro > 0 ? totalPorMetro : totalPorPeso;
+    return { perimetroM, pesoTotalKg, totalPorMetro, totalPorPeso, total };
+  }, [simAltura, simLargura, simQtd, simPesoKgM, simPrecoKg, simPrecoMetro]);
+
+
   const { data, isLoading } = useQuery({
     queryKey: ["perfis"],
     queryFn: async () => {
