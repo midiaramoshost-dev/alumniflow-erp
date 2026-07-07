@@ -88,10 +88,18 @@ const brl = (n: number) =>
 function VendasPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const search = Route.useSearch();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<Status | "todos">("todos");
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (search.open) {
+      setEditingId(search.open);
+      setOpen(true);
+    }
+  }, [search.open]);
 
   // Realtime
   useEffect(() => {
