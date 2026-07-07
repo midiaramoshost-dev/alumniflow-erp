@@ -145,7 +145,7 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name ?? "");
-      setPhone(profile.phone ?? "");
+      setPhone(formatPhoneBR(profile.phone ?? ""));
     }
   }, [profile]);
 
