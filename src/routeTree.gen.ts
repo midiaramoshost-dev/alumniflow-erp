@@ -18,6 +18,7 @@ import { Route as AuthenticatedProducaoRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
 import { Route as AuthenticatedPerfisRouteImport } from './routes/_authenticated/perfis'
 import { Route as AuthenticatedObrasRouteImport } from './routes/_authenticated/obras'
+import { Route as AuthenticatedMateriaisRouteImport } from './routes/_authenticated/materiais'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedAcessoriosRouteImport } from './routes/_authenticated/acessorios'
@@ -66,6 +67,11 @@ const AuthenticatedObrasRoute = AuthenticatedObrasRouteImport.update({
   path: '/obras',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMateriaisRoute = AuthenticatedMateriaisRouteImport.update({
+  id: '/materiais',
+  path: '/materiais',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/acessorios': typeof AuthenticatedAcessoriosRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/materiais': typeof AuthenticatedMateriaisRoute
   '/obras': typeof AuthenticatedObrasRoute
   '/perfis': typeof AuthenticatedPerfisRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/acessorios': typeof AuthenticatedAcessoriosRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/materiais': typeof AuthenticatedMateriaisRoute
   '/obras': typeof AuthenticatedObrasRoute
   '/perfis': typeof AuthenticatedPerfisRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/_authenticated/acessorios': typeof AuthenticatedAcessoriosRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/materiais': typeof AuthenticatedMateriaisRoute
   '/_authenticated/obras': typeof AuthenticatedObrasRoute
   '/_authenticated/perfis': typeof AuthenticatedPerfisRoute
   '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/acessorios'
     | '/clientes'
     | '/dashboard'
+    | '/materiais'
     | '/obras'
     | '/perfis'
     | '/pipeline'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/acessorios'
     | '/clientes'
     | '/dashboard'
+    | '/materiais'
     | '/obras'
     | '/perfis'
     | '/pipeline'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/_authenticated/acessorios'
     | '/_authenticated/clientes'
     | '/_authenticated/dashboard'
+    | '/_authenticated/materiais'
     | '/_authenticated/obras'
     | '/_authenticated/perfis'
     | '/_authenticated/pipeline'
@@ -237,6 +249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedObrasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/materiais': {
+      id: '/_authenticated/materiais'
+      path: '/materiais'
+      fullPath: '/materiais'
+      preLoaderRoute: typeof AuthenticatedMateriaisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -265,6 +284,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAcessoriosRoute: typeof AuthenticatedAcessoriosRoute
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMateriaisRoute: typeof AuthenticatedMateriaisRoute
   AuthenticatedObrasRoute: typeof AuthenticatedObrasRoute
   AuthenticatedPerfisRoute: typeof AuthenticatedPerfisRoute
   AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
@@ -277,6 +297,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAcessoriosRoute: AuthenticatedAcessoriosRoute,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMateriaisRoute: AuthenticatedMateriaisRoute,
   AuthenticatedObrasRoute: AuthenticatedObrasRoute,
   AuthenticatedPerfisRoute: AuthenticatedPerfisRoute,
   AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,

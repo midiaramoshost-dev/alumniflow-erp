@@ -12,6 +12,8 @@ import {
   Wallet,
   Settings,
   Building2,
+  Boxes,
+  Building2,
 } from "lucide-react";
 
 import {
