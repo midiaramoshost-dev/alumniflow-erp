@@ -36,6 +36,9 @@ import { Pencil, Trash2, Search, Loader2, Plus, X, Wifi } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/vendas")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    open: typeof s.open === "string" ? s.open : undefined,
+  }),
   component: VendasPage,
 });
 
