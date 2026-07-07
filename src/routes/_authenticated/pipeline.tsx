@@ -193,7 +193,11 @@ function PipelinePage() {
                   className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] gap-3 md:gap-2 items-center px-4 md:px-6 py-4 hover:bg-muted/30 transition-colors"
                 >
                   {/* Orçamento */}
-                  <Link to="/vendas" className="min-w-0 group">
+                  <Link
+                    to="/vendas"
+                    search={{ open: r.orc_id }}
+                    className="min-w-0 group cursor-pointer"
+                  >
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <ShoppingCart className="h-3 w-3" /> Orçamento
                     </div>
