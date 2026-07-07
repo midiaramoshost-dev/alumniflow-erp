@@ -121,15 +121,19 @@ function PipelinePage() {
   ).length;
 
   return (
-    <PageShell
-      title="Pipeline de Entrega"
-      description="Visão unificada de Vendas → Produção → Obras em tempo real"
-      actions={
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Pipeline de Entrega</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Visão unificada de Vendas → Produção → Obras em tempo real
+          </p>
+        </div>
         <Badge variant="secondary" className="gap-1.5 bg-chart-2/15 text-chart-2 border-0">
           <Wifi className="h-3 w-3" /> Ao vivo
         </Badge>
-      }
-    >
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-3 mb-6">
         <Card className="shadow-card">
           <CardContent className="p-5 flex items-center gap-4">
