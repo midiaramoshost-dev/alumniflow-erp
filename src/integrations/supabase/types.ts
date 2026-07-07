@@ -65,62 +65,88 @@ export type Database = {
           celular: string | null
           cep: string | null
           cidade: string | null
+          comissao_percentual: number | null
           complemento: string | null
           created_at: string
           created_by: string | null
+          data_venda: string | null
           documento: string | null
           email: string | null
           endereco: string | null
           estado: string | null
+          forma_pagamento: string | null
           id: string
           nome: string
           numero: string | null
+          numero_proposta: string | null
           observacoes: string | null
           telefone: string | null
           tipo: string
           updated_at: string
+          valor_total: number | null
+          vendedor_id: string | null
         }
         Insert: {
           bairro?: string | null
           celular?: string | null
           cep?: string | null
           cidade?: string | null
+          comissao_percentual?: number | null
           complemento?: string | null
           created_at?: string
           created_by?: string | null
+          data_venda?: string | null
           documento?: string | null
           email?: string | null
           endereco?: string | null
           estado?: string | null
+          forma_pagamento?: string | null
           id?: string
           nome: string
           numero?: string | null
+          numero_proposta?: string | null
           observacoes?: string | null
           telefone?: string | null
           tipo?: string
           updated_at?: string
+          valor_total?: number | null
+          vendedor_id?: string | null
         }
         Update: {
           bairro?: string | null
           celular?: string | null
           cep?: string | null
           cidade?: string | null
+          comissao_percentual?: number | null
           complemento?: string | null
           created_at?: string
           created_by?: string | null
+          data_venda?: string | null
           documento?: string | null
           email?: string | null
           endereco?: string | null
           estado?: string | null
+          forma_pagamento?: string | null
           id?: string
           nome?: string
           numero?: string | null
+          numero_proposta?: string | null
           observacoes?: string | null
           telefone?: string | null
           tipo?: string
           updated_at?: string
+          valor_total?: number | null
+          vendedor_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clientes_vendedor_id_fkey"
+            columns: ["vendedor_id"]
+            isOneToOne: false
+            referencedRelation: "vendedores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       financeiro_lancamentos: {
         Row: {
