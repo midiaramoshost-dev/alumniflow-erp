@@ -15,6 +15,7 @@ import {
   Boxes,
   Briefcase,
   Cog,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
