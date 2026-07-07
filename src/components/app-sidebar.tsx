@@ -30,7 +30,10 @@ import {
 const nav = [
   {
     label: "Principal",
-    items: [{ title: "Dashboard", url: "/dashboard", icon: LayoutDashboard }],
+    items: [
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Pipeline", url: "/pipeline", icon: Workflow },
+    ],
   },
   {
     label: "Cadastros",
