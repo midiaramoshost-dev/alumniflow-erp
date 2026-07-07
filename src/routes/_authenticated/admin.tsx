@@ -954,3 +954,241 @@ function ModuleShortcut({
     </Link>
   );
 }
+
+/* ---------------- Invites Manager ---------------- */
+
+type Invitation = {
+  id: string;
+  token: string;
+  email: string | null;
+  role: AppRole;
+  expires_at: string;
+  used_at: string | null;
+  used_by: string | null;
+  created_at: string;
+};
+
+function generateToken() {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function InvitesManager() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<AppRole>("vendedor");
+  const [expiresDays, setExpiresDays] = useState<number>(7);
+
+  const { data: invites, isLoading } = useQuery({
+    queryKey: ["admin", "invitations"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as unknown as { from: (t: string) => any })
+        .from("invitations")
+        .select("id, token, email, role, expires_at, used_at, used_by, created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Invitation[];
+    },
+  });
+
+  const create = useMutation({
+    mutationFn: async () => {
+      const token = generateToken();
+      const expires_at = new Date(Date.now() + expiresDays * 86400000).toISOString();
+      const { error } = await (supabase as unknown as { from: (t: string) => any })
+        .from("invitations")
+        .insert({
+          token,
+          email: email.trim() || null,
+          role,
+          expires_at,
+          created_by: user?.id,
+        });
+      if (error) throw error;
+      return token;
+    },
+    onSuccess: (token) => {
+      qc.invalidateQueries({ queryKey: ["admin", "invitations"] });
+      const url = `${window.location.origin}/invite/${token}`;
+      navigator.clipboard?.writeText(url).catch(() => {});
+      toast.success("Convite criado — link copiado!");
+      setEmail("");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const revoke = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase as unknown as { from: (t: string) => any })
+        .from("invitations")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "invitations"] });
+      toast.success("Convite revogado");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const copyLink = (token: string) => {
+    const url = `${window.location.origin}/invite/${token}`;
+    navigator.clipboard.writeText(url).then(
+      () => toast.success("Link copiado!"),
+      () => toast.error("Falha ao copiar"),
+    );
+  };
+
+  const inviteStatus = (inv: Invitation) => {
+    if (inv.used_at) return { label: "Usado", variant: "secondary" as const };
+    if (new Date(inv.expires_at) < new Date())
+      return { label: "Expirado", variant: "destructive" as const };
+    return { label: "Ativo", variant: "default" as const };
+  };
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mail className="h-5 w-5" /> Gerar convite
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Crie um link de convite. Ao aceitar, o usuário recebe automaticamente o nível de acesso escolhido.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-4">
+            <div className="sm:col-span-2">
+              <Label htmlFor="inv-email">E-mail (opcional)</Label>
+              <Input
+                id="inv-email"
+                type="email"
+                placeholder="usuario@exemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Nível de acesso</Label>
+              <Select value={role} onValueChange={(v) => setRole(v as AppRole)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((r) => (
+                    <SelectItem key={r.key} value={r.key}>
+                      {r.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="inv-days">Validade (dias)</Label>
+              <Input
+                id="inv-days"
+                type="number"
+                min={1}
+                max={90}
+                value={expiresDays}
+                onChange={(e) => setExpiresDays(Number(e.target.value) || 7)}
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end">
+            <Button onClick={() => create.mutate()} disabled={create.isPending}>
+              {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <LinkIcon className="mr-2 h-4 w-4" />
+              Gerar link de convite
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" /> Convites emitidos
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>E-mail</TableHead>
+                <TableHead>Função</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Expira</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-10">
+                    <Loader2 className="h-4 w-4 animate-spin inline mr-2" />
+                    Carregando…
+                  </TableCell>
+                </TableRow>
+              )}
+              {!isLoading && (invites ?? []).length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground text-sm">
+                    Nenhum convite emitido.
+                  </TableCell>
+                </TableRow>
+              )}
+              {(invites ?? []).map((inv) => {
+                const status = inviteStatus(inv);
+                const active = status.label === "Ativo";
+                return (
+                  <TableRow key={inv.id}>
+                    <TableCell className="text-sm">{inv.email ?? "—"}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {ROLES.find((r) => r.key === inv.role)?.label ?? inv.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={status.variant}>{status.label}</Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {new Date(inv.expires_at).toLocaleString("pt-BR")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        {active && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => copyLink(inv.token)}
+                          >
+                            <Copy className="h-3.5 w-3.5 mr-1" /> Copiar link
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            if (confirm("Revogar este convite?")) revoke.mutate(inv.id);
+                          }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
