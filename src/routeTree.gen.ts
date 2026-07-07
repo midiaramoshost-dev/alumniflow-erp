@@ -22,6 +22,7 @@ import { Route as AuthenticatedPedidosRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedObrasRouteImport } from './routes/_authenticated/obras'
 import { Route as AuthenticatedMateriaisRouteImport } from './routes/_authenticated/materiais'
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
+import { Route as AuthenticatedExportarRouteImport } from './routes/_authenticated/exportar'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedControleFabrilRouteImport } from './routes/_authenticated/controle-fabril'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
@@ -95,6 +96,11 @@ const AuthenticatedFinanceiroRoute = AuthenticatedFinanceiroRouteImport.update({
   path: '/financeiro',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedExportarRoute = AuthenticatedExportarRouteImport.update({
+  id: '/exportar',
+  path: '/exportar',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/controle-fabril': typeof AuthenticatedControleFabrilRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/exportar': typeof AuthenticatedExportarRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/materiais': typeof AuthenticatedMateriaisRoute
   '/obras': typeof AuthenticatedObrasRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/controle-fabril': typeof AuthenticatedControleFabrilRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/exportar': typeof AuthenticatedExportarRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/materiais': typeof AuthenticatedMateriaisRoute
   '/obras': typeof AuthenticatedObrasRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/controle-fabril': typeof AuthenticatedControleFabrilRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/exportar': typeof AuthenticatedExportarRoute
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/materiais': typeof AuthenticatedMateriaisRoute
   '/_authenticated/obras': typeof AuthenticatedObrasRoute
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/controle-fabril'
     | '/dashboard'
+    | '/exportar'
     | '/financeiro'
     | '/materiais'
     | '/obras'
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/controle-fabril'
     | '/dashboard'
+    | '/exportar'
     | '/financeiro'
     | '/materiais'
     | '/obras'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/_authenticated/configuracoes'
     | '/_authenticated/controle-fabril'
     | '/_authenticated/dashboard'
+    | '/_authenticated/exportar'
     | '/_authenticated/financeiro'
     | '/_authenticated/materiais'
     | '/_authenticated/obras'
@@ -377,6 +389,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceiroRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/exportar': {
+      id: '/_authenticated/exportar'
+      path: '/exportar'
+      fullPath: '/exportar'
+      preLoaderRoute: typeof AuthenticatedExportarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -455,6 +474,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedControleFabrilRoute: typeof AuthenticatedControleFabrilRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedExportarRoute: typeof AuthenticatedExportarRoute
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
   AuthenticatedMateriaisRoute: typeof AuthenticatedMateriaisRoute
   AuthenticatedObrasRoute: typeof AuthenticatedObrasRoute
@@ -474,6 +494,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedControleFabrilRoute: AuthenticatedControleFabrilRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedExportarRoute: AuthenticatedExportarRoute,
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
   AuthenticatedMateriaisRoute: AuthenticatedMateriaisRoute,
   AuthenticatedObrasRoute: AuthenticatedObrasRoute,
@@ -497,13 +518,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
