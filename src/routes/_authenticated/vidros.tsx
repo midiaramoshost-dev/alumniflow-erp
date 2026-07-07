@@ -149,6 +149,7 @@ function VidrosPage() {
               <TableCell className="hidden md:table-cell text-muted-foreground">{v.tipo ?? "—"}</TableCell>
               <TableCell className="hidden md:table-cell text-muted-foreground">{v.espessura_mm ? `${v.espessura_mm} mm` : "—"}</TableCell>
               <TableCell className="hidden lg:table-cell text-muted-foreground">{v.cor ?? "—"}</TableCell>
+              <TableCell className="hidden lg:table-cell text-muted-foreground">{v.fornecedor ?? "—"}</TableCell>
               <TableCell className="hidden sm:table-cell text-right tabular-nums">{v.preco_m2 != null ? `R$ ${Number(v.preco_m2).toFixed(2)}` : "—"}</TableCell>
               <TableCell><Badge variant={v.ativo ? "default" : "secondary"}>{v.ativo ? "Ativo" : "Inativo"}</Badge></TableCell>
               <TableCell className="text-right">
