@@ -170,6 +170,7 @@ function VidrosPage() {
             <div className="sm:col-span-2"><Label htmlFor="descricao">Descrição *</Label><Input id="descricao" name="descricao" required defaultValue={editing?.descricao ?? ""} /></div>
             <div><Label htmlFor="espessura_mm">Espessura (mm)</Label><Input id="espessura_mm" name="espessura_mm" type="number" step="0.1" defaultValue={editing?.espessura_mm ?? ""} /></div>
             <div><Label htmlFor="cor">Cor</Label><Input id="cor" name="cor" defaultValue={editing?.cor ?? ""} placeholder="Incolor, Fumê, Verde…" /></div>
+            <div className="sm:col-span-2"><Label htmlFor="fornecedor">Fornecedor</Label><Input id="fornecedor" name="fornecedor" defaultValue={editing?.fornecedor ?? ""} placeholder="Nome do fornecedor" /></div>
             <div><Label htmlFor="preco_m2">Preço / m² (R$)</Label><Input id="preco_m2" name="preco_m2" type="number" step="0.01" defaultValue={editing?.preco_m2 ?? ""} /></div>
             <div><Label htmlFor="estoque_m2">Estoque (m²)</Label><Input id="estoque_m2" name="estoque_m2" type="number" step="0.01" defaultValue={editing?.estoque_m2 ?? 0} /></div>
             <div className="flex items-center gap-2 sm:col-span-2">
