@@ -50,6 +50,7 @@ const nav = [
     label: "Operação",
     items: [
       { title: "Vendas", url: "/vendas", icon: ShoppingCart },
+      { title: "Comercial", url: "/comercial", icon: Briefcase },
       { title: "Produção", url: "/producao", icon: Factory },
       { title: "Obras", url: "/obras", icon: Building },
       { title: "Materiais", url: "/materiais", icon: Boxes },
