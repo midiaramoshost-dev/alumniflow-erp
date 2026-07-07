@@ -24,6 +24,7 @@ type Vidro = {
   tipo: string | null;
   espessura_mm: number | null;
   cor: string | null;
+  fornecedor: string | null;
   preco_m2: number | null;
   estoque_m2: number | null;
   ativo: boolean;
