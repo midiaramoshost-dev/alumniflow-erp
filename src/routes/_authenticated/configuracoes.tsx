@@ -280,7 +280,7 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
             className="grid gap-4 max-w-xl"
             onSubmit={(e) => {
               e.preventDefault();
-              save.mutate();
+              save.mutate({});
             }}
             noValidate
           >
