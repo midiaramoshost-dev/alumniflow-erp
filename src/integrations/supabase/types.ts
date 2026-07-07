@@ -385,15 +385,25 @@ export type Database = {
           cliente_id: string | null
           cliente_nome: string | null
           complemento: string | null
+          cortador_nome: string | null
           created_at: string
           created_by: string | null
+          data_compra_acessorios: string | null
+          data_compra_perfis: string | null
+          data_compra_vidros: string | null
+          data_corte: string | null
           data_entrega_prevista: string | null
           data_entrega_real: string | null
+          data_envio_tecnico: string | null
           data_inicio_prevista: string | null
+          data_medicao: string | null
+          data_montagem: string | null
+          data_usinagem: string | null
           descricao: string | null
           estado: string | null
           id: string
           logradouro: string | null
+          montador_nome: string | null
           numero: number
           numero_endereco: string | null
           observacoes: string | null
@@ -407,6 +417,7 @@ export type Database = {
           status: Database["public"]["Enums"]["obra_status"]
           titulo: string
           updated_at: string
+          usinador_nome: string | null
           valor: number | null
         }
         Insert: {
@@ -416,15 +427,25 @@ export type Database = {
           cliente_id?: string | null
           cliente_nome?: string | null
           complemento?: string | null
+          cortador_nome?: string | null
           created_at?: string
           created_by?: string | null
+          data_compra_acessorios?: string | null
+          data_compra_perfis?: string | null
+          data_compra_vidros?: string | null
+          data_corte?: string | null
           data_entrega_prevista?: string | null
           data_entrega_real?: string | null
+          data_envio_tecnico?: string | null
           data_inicio_prevista?: string | null
+          data_medicao?: string | null
+          data_montagem?: string | null
+          data_usinagem?: string | null
           descricao?: string | null
           estado?: string | null
           id?: string
           logradouro?: string | null
+          montador_nome?: string | null
           numero?: number
           numero_endereco?: string | null
           observacoes?: string | null
@@ -438,6 +459,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["obra_status"]
           titulo: string
           updated_at?: string
+          usinador_nome?: string | null
           valor?: number | null
         }
         Update: {
@@ -447,15 +469,25 @@ export type Database = {
           cliente_id?: string | null
           cliente_nome?: string | null
           complemento?: string | null
+          cortador_nome?: string | null
           created_at?: string
           created_by?: string | null
+          data_compra_acessorios?: string | null
+          data_compra_perfis?: string | null
+          data_compra_vidros?: string | null
+          data_corte?: string | null
           data_entrega_prevista?: string | null
           data_entrega_real?: string | null
+          data_envio_tecnico?: string | null
           data_inicio_prevista?: string | null
+          data_medicao?: string | null
+          data_montagem?: string | null
+          data_usinagem?: string | null
           descricao?: string | null
           estado?: string | null
           id?: string
           logradouro?: string | null
+          montador_nome?: string | null
           numero?: number
           numero_endereco?: string | null
           observacoes?: string | null
@@ -469,6 +501,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["obra_status"]
           titulo?: string
           updated_at?: string
+          usinador_nome?: string | null
           valor?: number | null
         }
         Relationships: [
