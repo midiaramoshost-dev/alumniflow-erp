@@ -133,6 +133,7 @@ function VidrosPage() {
             <TableHead className="hidden md:table-cell">Tipo</TableHead>
             <TableHead className="hidden md:table-cell">Espessura</TableHead>
             <TableHead className="hidden lg:table-cell">Cor</TableHead>
+            <TableHead className="hidden lg:table-cell">Fornecedor</TableHead>
             <TableHead className="hidden sm:table-cell text-right">R$ / m²</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
