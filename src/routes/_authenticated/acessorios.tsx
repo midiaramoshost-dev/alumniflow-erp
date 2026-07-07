@@ -114,7 +114,7 @@ function AcessoriosPage() {
       id: editing?.id,
       codigo,
       descricao,
-      categoria: String(fd.get("categoria") ?? "") || null,
+      categoria: categoria || null,
       unidade: String(fd.get("unidade") ?? "UN") || "UN",
       preco_unitario: num(fd.get("preco_unitario")),
       estoque_atual: num(fd.get("estoque_atual")) ?? 0,
