@@ -30,8 +30,29 @@ function AuthPage() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
 
+  const pendingInvite = () => {
+    try {
+      return sessionStorage.getItem("pending_invite");
+    } catch {
+      return null;
+    }
+  };
+  const postAuthRedirect = () => {
+    const token = pendingInvite();
+    if (token) {
+      navigate({ to: "/invite/$token", params: { token } });
+    } else {
+      navigate({ to: "/dashboard" });
+    }
+  };
+
   if (loading) return null;
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) {
+    const token = pendingInvite();
+    if (token) return <Navigate to="/invite/$token" params={{ token }} replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
+
 
   const onSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
