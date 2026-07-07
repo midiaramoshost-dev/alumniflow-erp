@@ -608,6 +608,28 @@ function OrcamentoDialog({
                         placeholder="Ex: Janela de correr 2 folhas"
                       />
                     </div>
+                    <div className="col-span-12 md:col-span-8">
+                      <Label className="text-xs">Perfil (auto-precifica pelo simulador)</Label>
+                      <Select
+                        value={it.perfil_id ?? "none"}
+                        onValueChange={(v) =>
+                          updateItem(idx, { perfil_id: v === "none" ? null : v })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sem perfil (preço manual)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sem perfil (preço manual)</SelectItem>
+                          {(perfis ?? []).map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.codigo} — {p.descricao}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     <div className="col-span-4 md:col-span-1">
                       <Label className="text-xs">Larg. (mm)</Label>
                       <Input
