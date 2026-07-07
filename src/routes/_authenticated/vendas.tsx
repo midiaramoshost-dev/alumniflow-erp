@@ -341,6 +341,27 @@ function OrcamentoDialog({
     enabled: open,
   });
 
+  const { data: perfis } = useQuery({
+    queryKey: ["perfis-lookup"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("perfis_aluminio")
+        .select("id, codigo, descricao, peso_kg_m, preco_kg, preco_metro")
+        .eq("ativo", true)
+        .order("codigo");
+      if (error) throw error;
+      return data as {
+        id: string;
+        codigo: string;
+        descricao: string;
+        peso_kg_m: number | null;
+        preco_kg: number | null;
+        preco_metro: number | null;
+      }[];
+    },
+    enabled: open,
+  });
+
   const { data: existing, isFetching: loadingOrc } = useQuery({
     queryKey: ["orcamento", orcamentoId],
     queryFn: async () => {
