@@ -30,8 +30,29 @@ function AuthPage() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
 
+  const pendingInvite = () => {
+    try {
+      return sessionStorage.getItem("pending_invite");
+    } catch {
+      return null;
+    }
+  };
+  const postAuthRedirect = () => {
+    const token = pendingInvite();
+    if (token) {
+      navigate({ to: "/invite/$token", params: { token } });
+    } else {
+      postAuthRedirect();
+    }
+  };
+
   if (loading) return null;
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) {
+    const token = pendingInvite();
+    if (token) return <Navigate to="/invite/$token" params={{ token }} replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
+
 
   const onSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -49,7 +70,7 @@ function AuthPage() {
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Bem-vindo!");
-    navigate({ to: "/dashboard" });
+    postAuthRedirect();
   };
 
   const onSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -88,7 +109,7 @@ function AuthPage() {
       toast.error("Falha ao entrar com Google");
       return;
     }
-    if (!res.redirected) navigate({ to: "/dashboard" });
+    if (!res.redirected) postAuthRedirect();
   };
 
   return (
