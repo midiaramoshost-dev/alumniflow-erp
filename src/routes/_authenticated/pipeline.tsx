@@ -193,7 +193,11 @@ function PipelinePage() {
                   className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] gap-3 md:gap-2 items-center px-4 md:px-6 py-4 hover:bg-muted/30 transition-colors"
                 >
                   {/* Orçamento */}
-                  <Link to="/vendas" className="min-w-0 group">
+                  <Link
+                    to="/vendas"
+                    search={{ open: r.orc_id }}
+                    className="min-w-0 group cursor-pointer"
+                  >
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <ShoppingCart className="h-3 w-3" /> Orçamento
                     </div>
@@ -221,7 +225,11 @@ function PipelinePage() {
                       <Factory className="h-3 w-3" /> Produção
                     </div>
                     {r.op_id ? (
-                      <Link to="/producao" className="block group">
+                      <Link
+                        to="/producao"
+                        search={{ open: r.op_id }}
+                        className="block group cursor-pointer"
+                      >
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="font-mono text-sm font-semibold">
                             OP #{r.op_numero}
@@ -245,7 +253,11 @@ function PipelinePage() {
                       <Building className="h-3 w-3" /> Obra
                     </div>
                     {r.obra_id ? (
-                      <Link to="/obras" className="block group">
+                      <Link
+                        to="/obras"
+                        search={{ open: r.obra_id }}
+                        className="block group cursor-pointer"
+                      >
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="font-mono text-sm font-semibold">
                             #{r.obra_numero}

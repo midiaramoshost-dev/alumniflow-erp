@@ -51,6 +51,9 @@ import {
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/obras")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    open: typeof s.open === "string" ? s.open : undefined,
+  }),
   component: ObrasPage,
 });
 
@@ -154,6 +157,15 @@ function ObrasPage() {
   const [statusFilter, setStatusFilter] = useState<Status | "todos">("todos");
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const search = Route.useSearch();
+
+  useEffect(() => {
+    if (search.open) {
+      setEditingId(search.open);
+      setOpen(true);
+    }
+  }, [search.open]);
+
 
   useEffect(() => {
     const channel = supabase

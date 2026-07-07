@@ -46,6 +46,9 @@ import {
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/producao")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    open: typeof s.open === "string" ? s.open : undefined,
+  }),
   component: ProducaoPage,
 });
 
@@ -121,6 +124,14 @@ function ProducaoPage() {
   const [etapaFilter, setEtapaFilter] = useState<Etapa | "todos" | "ativos">("ativos");
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const search = Route.useSearch();
+
+  useEffect(() => {
+    if (search.open) {
+      setEditingId(search.open);
+      setOpen(true);
+    }
+  }, [search.open]);
 
   useEffect(() => {
     const channel = supabase
