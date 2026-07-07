@@ -99,7 +99,7 @@ function AuthPage() {
           <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-primary shadow-elegant">
             <Building2 className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold">AluManager</span>
+          <span className="text-xl font-bold">CRM CRISTIANO</span>
         </div>
         <Card className="p-6 shadow-elegant">
           <Tabs defaultValue="signin">
