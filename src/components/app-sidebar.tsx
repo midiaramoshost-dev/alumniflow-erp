@@ -13,6 +13,7 @@ import {
   Settings,
   Building2,
   Boxes,
+  Briefcase,
 } from "lucide-react";
 
 import {
