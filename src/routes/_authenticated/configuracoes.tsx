@@ -128,17 +128,33 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
 
+  // Baseline snapshot for optimistic concurrency
+  const [baseline, setBaseline] = useState<{
+    updated_at: string | null;
+    full_name: string | null;
+    phone: string | null;
+  } | null>(null);
+  const [conflict, setConflict] = useState<{
+    remote: { full_name: string | null; phone: string | null; updated_at: string | null };
+  } | null>(null);
+
   const { data: profile, isLoading } = useQuery({
     queryKey: ["settings", "profile", userId],
     enabled: !!userId,
     queryFn: async () => {
       const { data, error } = await (supabase as unknown as { from: (t: string) => any })
         .from("profiles")
-        .select("id, full_name, email, phone")
+        .select("id, full_name, email, phone, updated_at")
         .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
-      return data as { id: string; full_name: string | null; email: string | null; phone: string | null } | null;
+      return data as {
+        id: string;
+        full_name: string | null;
+        email: string | null;
+        phone: string | null;
+        updated_at: string | null;
+      } | null;
     },
   });
 
@@ -146,6 +162,11 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
     if (profile) {
       setFullName(profile.full_name ?? "");
       setPhone(formatPhoneBR(profile.phone ?? ""));
+      setBaseline({
+        updated_at: profile.updated_at,
+        full_name: profile.full_name,
+        phone: profile.phone,
+      });
     }
   }, [profile]);
 
@@ -153,7 +174,7 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
   const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const save = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (opts?: { force?: boolean }) => {
       const nameParsed = nameSchema.safeParse(fullName);
       const phoneParsed = phoneSchema.safeParse(phone);
       setNameError(nameParsed.success ? null : nameParsed.error.issues[0].message);
@@ -163,22 +184,84 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
       }
       const name = nameParsed.data;
       const tel = phoneParsed.data;
-      const { error } = await (supabase as unknown as { from: (t: string) => any })
-        .from("profiles")
-        .update({ full_name: name || null, phone: tel || null })
-        .eq("id", userId);
+
+      // Build patch containing only fields the user actually changed (merge semantics)
+      const patch: Record<string, string | null> = {};
+      if (!baseline || name !== (baseline.full_name ?? "")) patch.full_name = name || null;
+      if (!baseline || tel !== (baseline.phone ?? "")) patch.phone = tel || null;
+
+      if (Object.keys(patch).length === 0) {
+        return { noop: true as const };
+      }
+
+      const table = (supabase as unknown as { from: (t: string) => any }).from("profiles");
+      let q = table.update(patch).eq("id", userId);
+      // Optimistic concurrency: only update if row hasn't changed since load
+      if (!opts?.force && baseline?.updated_at) {
+        q = q.eq("updated_at", baseline.updated_at);
+      }
+      const { data: updated, error } = await q
+        .select("id, full_name, phone, updated_at")
+        .maybeSingle();
       if (error) throw error;
-      const { error: authErr } = await supabase.auth.updateUser({
-        data: { full_name: name, phone: tel },
-      });
+
+      if (!updated) {
+        // Row wasn't matched → someone else updated it. Fetch remote and surface conflict.
+        const { data: remote } = await (supabase as unknown as { from: (t: string) => any })
+          .from("profiles")
+          .select("full_name, phone, updated_at")
+          .eq("id", userId)
+          .maybeSingle();
+        setConflict({
+          remote: {
+            full_name: remote?.full_name ?? null,
+            phone: remote?.phone ?? null,
+            updated_at: remote?.updated_at ?? null,
+          },
+        });
+        throw new Error("O perfil foi alterado em outra sessão. Revise antes de salvar.");
+      }
+
+      // Merge auth metadata (do not overwrite unrelated keys)
+      const { data: userRes } = await supabase.auth.getUser();
+      const currentMeta = (userRes.user?.user_metadata ?? {}) as Record<string, unknown>;
+      const nextMeta: Record<string, unknown> = { ...currentMeta };
+      if ("full_name" in patch) nextMeta.full_name = patch.full_name ?? "";
+      if ("phone" in patch) nextMeta.phone = patch.phone ?? "";
+      const { error: authErr } = await supabase.auth.updateUser({ data: nextMeta });
       if (authErr) throw authErr;
+
+      return { noop: false as const, updated };
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["settings", "profile", userId] });
-      toast.success("Perfil atualizado");
+      if (res && "noop" in res && res.noop) {
+        toast.info("Nada para salvar");
+      } else {
+        setConflict(null);
+        toast.success("Perfil atualizado");
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const useRemote = () => {
+    if (!conflict) return;
+    setFullName(conflict.remote.full_name ?? "");
+    setPhone(formatPhoneBR(conflict.remote.phone ?? ""));
+    setBaseline({
+      updated_at: conflict.remote.updated_at,
+      full_name: conflict.remote.full_name,
+      phone: conflict.remote.phone,
+    });
+    setConflict(null);
+    toast.info("Valores do servidor carregados");
+  };
+
+  const forceOverwrite = () => {
+    setConflict(null);
+    save.mutate({ force: true });
+  };
 
   return (
     <Card>
@@ -197,7 +280,7 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
             className="grid gap-4 max-w-xl"
             onSubmit={(e) => {
               e.preventDefault();
-              save.mutate();
+              save.mutate({});
             }}
             noValidate
           >
@@ -247,6 +330,37 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
               />
               {phoneError && <p className="text-xs text-destructive mt-1">{phoneError}</p>}
             </div>
+            {conflict && (
+              <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm space-y-2">
+                <p className="font-medium text-destructive">
+                  Este perfil foi alterado em outra sessão
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <div className="text-muted-foreground">Nome (servidor)</div>
+                    <div>{conflict.remote.full_name ?? "—"}</div>
+                  </div>
+                  <div>
+                    <div className="text-muted-foreground">Telefone (servidor)</div>
+                    <div>{formatPhoneBR(conflict.remote.phone ?? "") || "—"}</div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Button type="button" size="sm" variant="outline" onClick={useRemote}>
+                    Usar valores do servidor
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="destructive"
+                    onClick={forceOverwrite}
+                    disabled={save.isPending}
+                  >
+                    Sobrescrever com meus valores
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="flex justify-end">
               <Button type="submit" disabled={save.isPending}>
                 {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
