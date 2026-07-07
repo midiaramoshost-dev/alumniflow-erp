@@ -64,9 +64,11 @@ function AcessoriosPage() {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return data ?? [];
-    return (data ?? []).filter((v) => [v.codigo, v.descricao, v.categoria].some((x) => (x ?? "").toLowerCase().includes(s)));
-  }, [data, q]);
+    let base = data ?? [];
+    if (categoriaFiltro !== "todas") base = base.filter((v) => v.categoria === categoriaFiltro);
+    if (!s) return base;
+    return base.filter((v) => [v.codigo, v.descricao, v.categoria].some((x) => (x ?? "").toLowerCase().includes(s)));
+  }, [data, q, categoriaFiltro]);
 
   const save = useMutation({
     mutationFn: async (payload: Partial<Item> & { id?: string }) => {
