@@ -42,6 +42,16 @@ function AcessoriosPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Item | null>(null);
   const [ativo, setAtivo] = useState(true);
+  const [categoria, setCategoria] = useState<string>("");
+  const [categoriaFiltro, setCategoriaFiltro] = useState<string>("todas");
+
+  const CATEGORIAS = [
+    "Puxadores",
+    "Roldanas",
+    "Borrachas",
+    "Parafusos",
+    "Ferragens",
+  ] as const;
 
   const { data, isLoading } = useQuery({
     queryKey: ["acessorios"],
