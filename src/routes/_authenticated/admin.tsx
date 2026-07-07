@@ -276,7 +276,7 @@ function AdminPage() {
 
   const { data: profiles, isLoading: loadingProfiles } = useQuery({
     queryKey: ["admin", "profiles"],
-    enabled: isAdmin && unlocked,
+    enabled: isAdmin,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
