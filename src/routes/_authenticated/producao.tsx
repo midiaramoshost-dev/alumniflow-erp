@@ -46,6 +46,9 @@ import {
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/producao")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    open: typeof s.open === "string" ? s.open : undefined,
+  }),
   component: ProducaoPage,
 });
 
