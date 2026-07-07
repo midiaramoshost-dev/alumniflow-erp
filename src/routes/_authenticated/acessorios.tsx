@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Search, Loader2 } from "lucide-react";
@@ -41,6 +42,16 @@ function AcessoriosPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Item | null>(null);
   const [ativo, setAtivo] = useState(true);
+  const [categoria, setCategoria] = useState<string>("");
+  const [categoriaFiltro, setCategoriaFiltro] = useState<string>("todas");
+
+  const CATEGORIAS = [
+    "Puxadores",
+    "Roldanas",
+    "Borrachas",
+    "Parafusos",
+    "Ferragens",
+  ] as const;
 
   const { data, isLoading } = useQuery({
     queryKey: ["acessorios"],
@@ -53,9 +64,11 @@ function AcessoriosPage() {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return data ?? [];
-    return (data ?? []).filter((v) => [v.codigo, v.descricao, v.categoria].some((x) => (x ?? "").toLowerCase().includes(s)));
-  }, [data, q]);
+    let base = data ?? [];
+    if (categoriaFiltro !== "todas") base = base.filter((v) => v.categoria === categoriaFiltro);
+    if (!s) return base;
+    return base.filter((v) => [v.codigo, v.descricao, v.categoria].some((x) => (x ?? "").toLowerCase().includes(s)));
+  }, [data, q, categoriaFiltro]);
 
   const save = useMutation({
     mutationFn: async (payload: Partial<Item> & { id?: string }) => {
@@ -101,7 +114,7 @@ function AcessoriosPage() {
       id: editing?.id,
       codigo,
       descricao,
-      categoria: String(fd.get("categoria") ?? "") || null,
+      categoria: categoria || null,
       unidade: String(fd.get("unidade") ?? "UN") || "UN",
       preco_unitario: num(fd.get("preco_unitario")),
       estoque_atual: num(fd.get("estoque_atual")) ?? 0,
@@ -115,11 +128,20 @@ function AcessoriosPage() {
       title="Acessórios"
       description="Puxadores, roldanas, borrachas, parafusos, ferragens"
       newLabel="Novo acessório"
-      onNew={() => { setEditing(null); setAtivo(true); setOpen(true); }}
+      onNew={() => { setEditing(null); setAtivo(true); setCategoria(""); setOpen(true); }}
       actions={
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar…" className="pl-8 w-56" value={q} onChange={(e) => setQ(e.target.value)} />
+        <div className="flex items-center gap-2">
+          <Select value={categoriaFiltro} onValueChange={setCategoriaFiltro}>
+            <SelectTrigger className="w-40"><SelectValue placeholder="Categoria" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas as categorias</SelectItem>
+              {CATEGORIAS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Buscar…" className="pl-8 w-56" value={q} onChange={(e) => setQ(e.target.value)} />
+          </div>
         </div>
       }
     >
@@ -158,7 +180,7 @@ function AcessoriosPage() {
                 </TableCell>
                 <TableCell><Badge variant={v.ativo ? "default" : "secondary"}>{v.ativo ? "Ativo" : "Inativo"}</Badge></TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => { setEditing(v); setAtivo(v.ativo); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => { setEditing(v); setAtivo(v.ativo); setCategoria(v.categoria ?? ""); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => confirm(`Excluir "${v.codigo}"?`) && remove.mutate(v.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 </TableCell>
               </TableRow>
@@ -172,7 +194,15 @@ function AcessoriosPage() {
           <DialogHeader><DialogTitle>{editing ? "Editar acessório" : "Novo acessório"}</DialogTitle></DialogHeader>
           <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
             <div><Label htmlFor="codigo">Código *</Label><Input id="codigo" name="codigo" required defaultValue={editing?.codigo ?? ""} /></div>
-            <div><Label htmlFor="categoria">Categoria</Label><Input id="categoria" name="categoria" defaultValue={editing?.categoria ?? ""} placeholder="Ferragem, Vedação…" /></div>
+            <div><Label htmlFor="categoria">Categoria</Label>
+              <Select value={categoria || "none"} onValueChange={(v) => setCategoria(v === "none" ? "" : v)}>
+                <SelectTrigger id="categoria"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Sem categoria —</SelectItem>
+                  {CATEGORIAS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="sm:col-span-2"><Label htmlFor="descricao">Descrição *</Label><Input id="descricao" name="descricao" required defaultValue={editing?.descricao ?? ""} /></div>
             <div><Label htmlFor="unidade">Unidade</Label><Input id="unidade" name="unidade" defaultValue={editing?.unidade ?? "UN"} placeholder="UN, MT, KG…" /></div>
             <div><Label htmlFor="preco_unitario">Preço unitário (R$)</Label><Input id="preco_unitario" name="preco_unitario" type="number" step="0.01" defaultValue={editing?.preco_unitario ?? ""} /></div>
