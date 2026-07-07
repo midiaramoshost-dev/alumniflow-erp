@@ -187,3 +187,8 @@
 @utility shadow-elegant {
   box-shadow: var(--shadow-elegant);
 }
+
+
+#lovable-badge {
+  display: none !important;
+}
