@@ -292,6 +292,21 @@ function PipelinePage() {
                         </div>
                         <Progress value={r.op_progresso ?? 0} className="h-1.5 mt-2" />
                       </Link>
+                    ) : ["aprovado", "convertido"].includes(r.orc_status) ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-1 h-8 gap-1"
+                        disabled={criarOpObra.isPending}
+                        onClick={() => criarOpObra.mutate(r)}
+                      >
+                        {criarOpObra.isPending ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Zap className="h-3 w-3" />
+                        )}
+                        Criar OP e Obra
+                      </Button>
                     ) : (
                       <p className="text-sm text-muted-foreground mt-1">— aguardando aprovação</p>
                     )}
