@@ -16,6 +16,7 @@ import {
   Briefcase,
   Cog,
   ShieldCheck,
+  FileSpreadsheet,
 } from "lucide-react";
 
 import {
