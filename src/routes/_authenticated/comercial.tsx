@@ -59,7 +59,7 @@ function ComercialPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["vendedores"],
     queryFn: async () => {
-      const { data, error } = await (supabase.from("vendedores" as never) as never)
+      const { data, error } = await (supabase as unknown as { from: (t: string) => any }).from("vendedores")
         .select("*")
         .order("nome");
       if (error) throw error;
@@ -95,12 +95,12 @@ function ComercialPage() {
     mutationFn: async (payload: Partial<Vendedor> & { id?: string }) => {
       const { id, ...rest } = payload;
       if (id) {
-        const { error } = await (supabase.from("vendedores" as never) as never)
+        const { error } = await (supabase as unknown as { from: (t: string) => any }).from("vendedores")
           .update(rest)
           .eq("id", id);
         if (error) throw error;
       } else {
-        const { error } = await (supabase.from("vendedores" as never) as never).insert(rest);
+        const { error } = await (supabase as unknown as { from: (t: string) => any }).from("vendedores").insert(rest);
         if (error) throw error;
       }
     },
@@ -115,7 +115,7 @@ function ComercialPage() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase.from("vendedores" as never) as never).delete().eq("id", id);
+      const { error } = await (supabase as unknown as { from: (t: string) => any }).from("vendedores").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
