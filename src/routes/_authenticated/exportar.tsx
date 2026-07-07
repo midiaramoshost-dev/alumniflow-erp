@@ -470,8 +470,10 @@ function applySectionTitle(cell: ExcelJS.Cell, span: number) {
   cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: SECTION_HEAD } };
   cell.alignment = { vertical: "middle", horizontal: "left" };
   const ws = cell.worksheet;
-  ws.mergeCells(cell.row, cell.col, cell.row, cell.col + span - 1);
-  ws.getRow(cell.row).height = 26;
+  const r = Number(cell.row);
+  const c = Number(cell.col);
+  ws.mergeCells(r, c, r, c + span - 1);
+  ws.getRow(r).height = 26;
 }
 
 function cellFormatFor(kind?: ColKind): Partial<ExcelJS.Style> {
