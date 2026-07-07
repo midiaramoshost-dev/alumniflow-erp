@@ -46,6 +46,55 @@ const statusColor = (s: string | null | undefined) => {
 
 function PipelinePage() {
   const qc = useQueryClient();
+  const { user } = useAuth();
+
+  const criarOpObra = useMutation({
+    mutationFn: async (r: Row) => {
+      const titulo = `Orçamento #${r.orc_numero} - ${r.cliente_nome ?? "Cliente"}`;
+      let opId = r.op_id;
+      let opNumero = r.op_numero;
+
+      if (!opId) {
+        const { data: op, error } = await supabase
+          .from("ordens_producao")
+          .insert({
+            orcamento_id: r.orc_id,
+            orcamento_numero: r.orc_numero,
+            cliente_nome: r.cliente_nome,
+            titulo,
+            etapa: "aguardando",
+            prioridade: "media",
+            created_by: user?.id ?? null,
+          } as never)
+          .select("id, numero")
+          .single();
+        if (error) throw error;
+        opId = (op as { id: string }).id;
+        opNumero = (op as { numero: number }).numero;
+      }
+
+      if (!r.obra_id) {
+        const { error } = await supabase.from("obras").insert({
+          titulo,
+          cliente_nome: r.cliente_nome,
+          orcamento_id: r.orc_id,
+          orcamento_numero: r.orc_numero,
+          ordem_producao_id: opId,
+          ordem_producao_numero: opNumero,
+          status: "planejamento",
+          valor: r.orc_total,
+          created_by: user?.id ?? null,
+        } as never);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("OP e Obra criadas");
+      qc.invalidateQueries({ queryKey: ["pipeline"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const { data, isLoading } = useQuery({
     queryKey: ["pipeline"],
