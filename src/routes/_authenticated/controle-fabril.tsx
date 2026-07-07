@@ -77,6 +77,7 @@ const STAGES: {
   { key: "data_corte", label: "Corte", icon: Scissors, nameKey: "cortador_nome", nameLabel: "Cortador" },
   { key: "data_usinagem", label: "Usinagem", icon: Cog, nameKey: "usinador_nome", nameLabel: "Usinador" },
   { key: "data_montagem", label: "Montagem", icon: Wrench, nameKey: "montador_nome", nameLabel: "Montador" },
+  { key: "data_conferencia", label: "Conferência", icon: ClipboardCheck, nameKey: "conferido_por", nameLabel: "Conferido por" },
 ];
 
 function ControleFabrilPage() {
