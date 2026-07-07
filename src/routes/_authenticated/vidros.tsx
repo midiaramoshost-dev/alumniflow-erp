@@ -55,7 +55,7 @@ function VidrosPage() {
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return data ?? [];
-    return (data ?? []).filter((v) => [v.codigo, v.descricao, v.tipo, v.cor].some((x) => (x ?? "").toLowerCase().includes(s)));
+    return (data ?? []).filter((v) => [v.codigo, v.descricao, v.tipo, v.cor, v.fornecedor].some((x) => (x ?? "").toLowerCase().includes(s)));
   }, [data, q]);
 
   const save = useMutation({
