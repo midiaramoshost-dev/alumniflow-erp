@@ -42,7 +42,7 @@ function AuthPage() {
     if (token) {
       navigate({ to: "/invite/$token", params: { token } });
     } else {
-      navigate({ to: "/dashboard" });
+      postAuthRedirect();
     }
   };
 
@@ -70,7 +70,7 @@ function AuthPage() {
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Bem-vindo!");
-    navigate({ to: "/dashboard" });
+    postAuthRedirect();
   };
 
   const onSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -109,7 +109,7 @@ function AuthPage() {
       toast.error("Falha ao entrar com Google");
       return;
     }
-    if (!res.redirected) navigate({ to: "/dashboard" });
+    if (!res.redirected) postAuthRedirect();
   };
 
   return (
