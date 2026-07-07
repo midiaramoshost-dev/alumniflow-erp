@@ -1178,6 +1178,7 @@ export type Database = {
           descricao: string
           espessura_mm: number | null
           estoque_m2: number | null
+          fornecedor: string | null
           id: string
           observacoes: string | null
           preco_m2: number | null
@@ -1192,6 +1193,7 @@ export type Database = {
           descricao: string
           espessura_mm?: number | null
           estoque_m2?: number | null
+          fornecedor?: string | null
           id?: string
           observacoes?: string | null
           preco_m2?: number | null
@@ -1206,6 +1208,7 @@ export type Database = {
           descricao?: string
           espessura_mm?: number | null
           estoque_m2?: number | null
+          fornecedor?: string | null
           id?: string
           observacoes?: string | null
           preco_m2?: number | null

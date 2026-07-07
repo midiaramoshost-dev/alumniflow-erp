@@ -24,6 +24,7 @@ type Vidro = {
   tipo: string | null;
   espessura_mm: number | null;
   cor: string | null;
+  fornecedor: string | null;
   preco_m2: number | null;
   estoque_m2: number | null;
   ativo: boolean;
@@ -54,7 +55,7 @@ function VidrosPage() {
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return data ?? [];
-    return (data ?? []).filter((v) => [v.codigo, v.descricao, v.tipo, v.cor].some((x) => (x ?? "").toLowerCase().includes(s)));
+    return (data ?? []).filter((v) => [v.codigo, v.descricao, v.tipo, v.cor, v.fornecedor].some((x) => (x ?? "").toLowerCase().includes(s)));
   }, [data, q]);
 
   const save = useMutation({
@@ -104,6 +105,7 @@ function VidrosPage() {
       tipo: String(fd.get("tipo") ?? "") || null,
       espessura_mm: num(fd.get("espessura_mm")),
       cor: String(fd.get("cor") ?? "") || null,
+      fornecedor: String(fd.get("fornecedor") ?? "").trim() || null,
       preco_m2: num(fd.get("preco_m2")),
       estoque_m2: num(fd.get("estoque_m2")) ?? 0,
       ativo,
@@ -131,14 +133,15 @@ function VidrosPage() {
             <TableHead className="hidden md:table-cell">Tipo</TableHead>
             <TableHead className="hidden md:table-cell">Espessura</TableHead>
             <TableHead className="hidden lg:table-cell">Cor</TableHead>
+            <TableHead className="hidden lg:table-cell">Fornecedor</TableHead>
             <TableHead className="hidden sm:table-cell text-right">R$ / m²</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading && <TableRow><TableCell colSpan={8} className="text-center py-10"><Loader2 className="h-4 w-4 animate-spin inline mr-2" />Carregando…</TableCell></TableRow>}
-          {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground text-sm">Nenhum vidro cadastrado.</TableCell></TableRow>}
+          {isLoading && <TableRow><TableCell colSpan={9} className="text-center py-10"><Loader2 className="h-4 w-4 animate-spin inline mr-2" />Carregando…</TableCell></TableRow>}
+          {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={9} className="text-center py-10 text-muted-foreground text-sm">Nenhum vidro cadastrado.</TableCell></TableRow>}
           {filtered.map((v) => (
             <TableRow key={v.id}>
               <TableCell className="font-mono text-xs">{v.codigo}</TableCell>
@@ -146,6 +149,7 @@ function VidrosPage() {
               <TableCell className="hidden md:table-cell text-muted-foreground">{v.tipo ?? "—"}</TableCell>
               <TableCell className="hidden md:table-cell text-muted-foreground">{v.espessura_mm ? `${v.espessura_mm} mm` : "—"}</TableCell>
               <TableCell className="hidden lg:table-cell text-muted-foreground">{v.cor ?? "—"}</TableCell>
+              <TableCell className="hidden lg:table-cell text-muted-foreground">{v.fornecedor ?? "—"}</TableCell>
               <TableCell className="hidden sm:table-cell text-right tabular-nums">{v.preco_m2 != null ? `R$ ${Number(v.preco_m2).toFixed(2)}` : "—"}</TableCell>
               <TableCell><Badge variant={v.ativo ? "default" : "secondary"}>{v.ativo ? "Ativo" : "Inativo"}</Badge></TableCell>
               <TableCell className="text-right">
@@ -166,6 +170,7 @@ function VidrosPage() {
             <div className="sm:col-span-2"><Label htmlFor="descricao">Descrição *</Label><Input id="descricao" name="descricao" required defaultValue={editing?.descricao ?? ""} /></div>
             <div><Label htmlFor="espessura_mm">Espessura (mm)</Label><Input id="espessura_mm" name="espessura_mm" type="number" step="0.1" defaultValue={editing?.espessura_mm ?? ""} /></div>
             <div><Label htmlFor="cor">Cor</Label><Input id="cor" name="cor" defaultValue={editing?.cor ?? ""} placeholder="Incolor, Fumê, Verde…" /></div>
+            <div className="sm:col-span-2"><Label htmlFor="fornecedor">Fornecedor</Label><Input id="fornecedor" name="fornecedor" defaultValue={editing?.fornecedor ?? ""} placeholder="Nome do fornecedor" /></div>
             <div><Label htmlFor="preco_m2">Preço / m² (R$)</Label><Input id="preco_m2" name="preco_m2" type="number" step="0.01" defaultValue={editing?.preco_m2 ?? ""} /></div>
             <div><Label htmlFor="estoque_m2">Estoque (m²)</Label><Input id="estoque_m2" name="estoque_m2" type="number" step="0.01" defaultValue={editing?.estoque_m2 ?? 0} /></div>
             <div className="flex items-center gap-2 sm:col-span-2">
