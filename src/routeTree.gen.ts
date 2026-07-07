@@ -23,6 +23,7 @@ import { Route as AuthenticatedMateriaisRouteImport } from './routes/_authentica
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedControleFabrilRouteImport } from './routes/_authenticated/controle-fabril'
+import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedComercialRouteImport } from './routes/_authenticated/comercial'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -98,6 +99,12 @@ const AuthenticatedControleFabrilRoute =
     path: '/controle-fabril',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedConfiguracoesRoute =
+  AuthenticatedConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedComercialRoute = AuthenticatedComercialRouteImport.update({
   id: '/comercial',
   path: '/comercial',
@@ -126,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/comercial': typeof AuthenticatedComercialRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/controle-fabril': typeof AuthenticatedControleFabrilRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
@@ -145,6 +153,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/comercial': typeof AuthenticatedComercialRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/controle-fabril': typeof AuthenticatedControleFabrilRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
@@ -166,6 +175,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/comercial': typeof AuthenticatedComercialRoute
+  '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/controle-fabril': typeof AuthenticatedControleFabrilRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/clientes'
     | '/comercial'
+    | '/configuracoes'
     | '/controle-fabril'
     | '/dashboard'
     | '/financeiro'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/clientes'
     | '/comercial'
+    | '/configuracoes'
     | '/controle-fabril'
     | '/dashboard'
     | '/financeiro'
@@ -226,6 +238,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/clientes'
     | '/_authenticated/comercial'
+    | '/_authenticated/configuracoes'
     | '/_authenticated/controle-fabril'
     | '/_authenticated/dashboard'
     | '/_authenticated/financeiro'
@@ -346,6 +359,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedControleFabrilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/configuracoes': {
+      id: '/_authenticated/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/comercial': {
       id: '/_authenticated/comercial'
       path: '/comercial'
@@ -382,6 +402,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedComercialRoute: typeof AuthenticatedComercialRoute
+  AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedControleFabrilRoute: typeof AuthenticatedControleFabrilRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
@@ -399,6 +420,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedComercialRoute: AuthenticatedComercialRoute,
+  AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedControleFabrilRoute: AuthenticatedControleFabrilRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
@@ -423,13 +445,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
