@@ -105,6 +105,7 @@ function VidrosPage() {
       tipo: String(fd.get("tipo") ?? "") || null,
       espessura_mm: num(fd.get("espessura_mm")),
       cor: String(fd.get("cor") ?? "") || null,
+      fornecedor: String(fd.get("fornecedor") ?? "").trim() || null,
       preco_m2: num(fd.get("preco_m2")),
       estoque_m2: num(fd.get("estoque_m2")) ?? 0,
       ativo,
