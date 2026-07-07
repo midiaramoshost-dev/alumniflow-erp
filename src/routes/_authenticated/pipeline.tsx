@@ -1,12 +1,15 @@
 import { useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ShoppingCart, Factory, Building, Wifi, ArrowRight } from "lucide-react";
+import { ShoppingCart, Factory, Building, Wifi, ArrowRight, Loader2, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/pipeline")({
   component: PipelinePage,
@@ -43,6 +46,55 @@ const statusColor = (s: string | null | undefined) => {
 
 function PipelinePage() {
   const qc = useQueryClient();
+  const { user } = useAuth();
+
+  const criarOpObra = useMutation({
+    mutationFn: async (r: Row) => {
+      const titulo = `Orçamento #${r.orc_numero} - ${r.cliente_nome ?? "Cliente"}`;
+      let opId = r.op_id;
+      let opNumero = r.op_numero;
+
+      if (!opId) {
+        const { data: op, error } = await supabase
+          .from("ordens_producao")
+          .insert({
+            orcamento_id: r.orc_id,
+            orcamento_numero: r.orc_numero,
+            cliente_nome: r.cliente_nome,
+            titulo,
+            etapa: "aguardando",
+            prioridade: "media",
+            created_by: user?.id ?? null,
+          } as never)
+          .select("id, numero")
+          .single();
+        if (error) throw error;
+        opId = (op as { id: string }).id;
+        opNumero = (op as { numero: number }).numero;
+      }
+
+      if (!r.obra_id) {
+        const { error } = await supabase.from("obras").insert({
+          titulo,
+          cliente_nome: r.cliente_nome,
+          orcamento_id: r.orc_id,
+          orcamento_numero: r.orc_numero,
+          ordem_producao_id: opId,
+          ordem_producao_numero: opNumero,
+          status: "planejamento",
+          valor: r.orc_total,
+          created_by: user?.id ?? null,
+        } as never);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("OP e Obra criadas");
+      qc.invalidateQueries({ queryKey: ["pipeline"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const { data, isLoading } = useQuery({
     queryKey: ["pipeline"],
@@ -240,6 +292,21 @@ function PipelinePage() {
                         </div>
                         <Progress value={r.op_progresso ?? 0} className="h-1.5 mt-2" />
                       </Link>
+                    ) : ["aprovado", "convertido"].includes(r.orc_status) ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-1 h-8 gap-1"
+                        disabled={criarOpObra.isPending}
+                        onClick={() => criarOpObra.mutate(r)}
+                      >
+                        {criarOpObra.isPending ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Zap className="h-3 w-3" />
+                        )}
+                        Criar OP e Obra
+                      </Button>
                     ) : (
                       <p className="text-sm text-muted-foreground mt-1">— aguardando aprovação</p>
                     )}

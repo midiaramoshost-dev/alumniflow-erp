@@ -341,6 +341,27 @@ function OrcamentoDialog({
     enabled: open,
   });
 
+  const { data: perfis } = useQuery({
+    queryKey: ["perfis-lookup"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("perfis_aluminio")
+        .select("id, codigo, descricao, peso_kg_m, preco_kg, preco_metro")
+        .eq("ativo", true)
+        .order("codigo");
+      if (error) throw error;
+      return data as {
+        id: string;
+        codigo: string;
+        descricao: string;
+        peso_kg_m: number | null;
+        preco_kg: number | null;
+        preco_metro: number | null;
+      }[];
+    },
+    enabled: open,
+  });
+
   const { data: existing, isFetching: loadingOrc } = useQuery({
     queryKey: ["orcamento", orcamentoId],
     queryFn: async () => {
@@ -456,6 +477,27 @@ function OrcamentoDialog({
     setItens((prev) => {
       const next = [...prev];
       const merged = { ...next[idx], ...patch };
+
+      // Auto-calculate preço unitário from Perfil simulator when perfil + dimensions are set
+      const perfilChanged = "perfil_id" in patch;
+      const dimChanged = "largura_mm" in patch || "altura_mm" in patch;
+      const precoTouched = "preco_unitario" in patch;
+      if ((perfilChanged || dimChanged) && !precoTouched && merged.perfil_id) {
+        const p = perfis?.find((x) => x.id === merged.perfil_id);
+        const h = Number(merged.altura_mm ?? 0);
+        const w = Number(merged.largura_mm ?? 0);
+        if (p && h > 0 && w > 0) {
+          const perimetroM = ((h + w) * 2) / 1000; // por unidade
+          const precoMetro = Number(p.preco_metro ?? 0);
+          const precoKg = Number(p.preco_kg ?? 0);
+          const pesoKgM = Number(p.peso_kg_m ?? 0);
+          const porMetro = perimetroM * precoMetro;
+          const porPeso = perimetroM * pesoKgM * precoKg;
+          const calc = porMetro > 0 ? porMetro : porPeso;
+          if (calc > 0) merged.preco_unitario = Number(calc.toFixed(2));
+        }
+      }
+
       const qtd = Number(merged.quantidade ?? 0);
       const preco = Number(merged.preco_unitario ?? 0);
       merged.subtotal = qtd * preco;
@@ -566,6 +608,28 @@ function OrcamentoDialog({
                         placeholder="Ex: Janela de correr 2 folhas"
                       />
                     </div>
+                    <div className="col-span-12 md:col-span-8">
+                      <Label className="text-xs">Perfil (auto-precifica pelo simulador)</Label>
+                      <Select
+                        value={it.perfil_id ?? "none"}
+                        onValueChange={(v) =>
+                          updateItem(idx, { perfil_id: v === "none" ? null : v })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sem perfil (preço manual)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sem perfil (preço manual)</SelectItem>
+                          {(perfis ?? []).map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.codigo} — {p.descricao}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     <div className="col-span-4 md:col-span-1">
                       <Label className="text-xs">Larg. (mm)</Label>
                       <Input
