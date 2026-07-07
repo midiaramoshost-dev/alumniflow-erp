@@ -52,7 +52,7 @@ const nav = [
       { title: "Produção", url: "/producao", icon: Factory },
       { title: "Obras", url: "/obras", icon: Building },
       { title: "Materiais", url: "/materiais", icon: Boxes },
-      { title: "Financeiro", url: "/financeiro", icon: Wallet, soon: true },
+      { title: "Financeiro", url: "/financeiro", icon: Wallet },
     ],
   },
   {
