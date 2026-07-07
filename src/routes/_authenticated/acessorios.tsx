@@ -128,11 +128,20 @@ function AcessoriosPage() {
       title="Acessórios"
       description="Puxadores, roldanas, borrachas, parafusos, ferragens"
       newLabel="Novo acessório"
-      onNew={() => { setEditing(null); setAtivo(true); setOpen(true); }}
+      onNew={() => { setEditing(null); setAtivo(true); setCategoria(""); setOpen(true); }}
       actions={
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar…" className="pl-8 w-56" value={q} onChange={(e) => setQ(e.target.value)} />
+        <div className="flex items-center gap-2">
+          <Select value={categoriaFiltro} onValueChange={setCategoriaFiltro}>
+            <SelectTrigger className="w-40"><SelectValue placeholder="Categoria" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas as categorias</SelectItem>
+              {CATEGORIAS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Buscar…" className="pl-8 w-56" value={q} onChange={(e) => setQ(e.target.value)} />
+          </div>
         </div>
       }
     >
