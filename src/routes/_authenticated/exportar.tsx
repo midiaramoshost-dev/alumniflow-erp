@@ -128,7 +128,7 @@ function ExportarPage() {
       const wb = XLSX.utils.book_new();
 
       // Índice
-      const indexRows = [
+      const indexRows: (string | number)[][] = [
         ["ERP Esquadrias - Exportação completa"],
         [`Gerado em: ${new Date().toLocaleString("pt-BR")}`],
         [],
