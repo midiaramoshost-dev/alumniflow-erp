@@ -225,7 +225,11 @@ function PipelinePage() {
                       <Factory className="h-3 w-3" /> Produção
                     </div>
                     {r.op_id ? (
-                      <Link to="/producao" className="block group">
+                      <Link
+                        to="/producao"
+                        search={{ open: r.op_id }}
+                        className="block group cursor-pointer"
+                      >
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="font-mono text-sm font-semibold">
                             OP #{r.op_numero}
