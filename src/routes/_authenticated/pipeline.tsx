@@ -266,6 +266,6 @@ function PipelinePage() {
           )}
         </CardContent>
       </Card>
-    </PageShell>
+    </div>
   );
 }
