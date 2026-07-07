@@ -1,12 +1,15 @@
 import { useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ShoppingCart, Factory, Building, Wifi, ArrowRight } from "lucide-react";
+import { ShoppingCart, Factory, Building, Wifi, ArrowRight, Loader2, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/pipeline")({
   component: PipelinePage,
