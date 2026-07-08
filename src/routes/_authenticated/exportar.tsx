@@ -596,7 +596,6 @@ function renderBlock(
     columns: cols.map((c) => ({
       name: c.header,
       filterButton: true,
-      totalsRowLabel: c.total ? undefined : undefined,
       totalsRowFunction: c.total ?? "none",
     })),
     rows: dataRows,
