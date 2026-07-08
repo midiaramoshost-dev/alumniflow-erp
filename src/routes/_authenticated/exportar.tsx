@@ -22,7 +22,7 @@ const SECTION_HEAD = "FF334155"; // slate-700
 const HEADER_TEXT = "FFFFFFFF";
 const ZEBRA = "FFF8FAFC"; // slate-50
 
-type ColKind = "text" | "int" | "money" | "percent" | "date" | "datetime" | "bool" | "status";
+type ColKind = "text" | "int" | "money" | "percent" | "date" | "datetime" | "bool" | "status" | "formula";
 
 type Col = {
   key: string;
@@ -31,10 +31,14 @@ type Col = {
   width?: number;
   /** transforma valor bruto do banco para valor exibido */
   map?: (row: Record<string, unknown>, ctx: ExportContext) => unknown;
+  /** gera fórmula em função do número da linha (ex.: (r) => `F${r}-G${r}`) */
+  formula?: (excelRow: number) => string;
+  /** função na linha de totais */
+  total?: "sum" | "average" | "count";
 };
 
 type ExportContext = {
-  users: Map<string, string>; // user_id -> nome
+  users: Map<string, string>;
   clientes: Map<string, string>;
   vendedores: Map<string, string>;
   perfis: Map<string, string>;
