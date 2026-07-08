@@ -176,7 +176,7 @@ const SECTIONS: Section[] = [
           { key: "cep", header: "CEP", width: 12 },
           { key: "endereco", header: "Endereço", width: 34 },
           { key: "vendedor", header: "Vendedor", width: 22, map: (r, c) => c.vendedores.get(s(r.vendedor_id)) ?? "" },
-          { key: "valor_total", header: "Valor total", kind: "money", width: 14 },
+          { key: "valor_total", header: "Valor total", kind: "money", width: 14, total: "sum" },
           { key: "data_venda", header: "Data da venda", kind: "date", width: 14 },
           { key: "created_at", header: "Cadastrado em", kind: "datetime", width: 18 },
         ],
