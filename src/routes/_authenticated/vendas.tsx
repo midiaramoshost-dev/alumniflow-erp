@@ -57,6 +57,32 @@ type Orcamento = {
   total: number;
   observacoes: string | null;
   created_at: string;
+  // enriquecidos
+  vendedor_id: string | null;
+  percentual_comissao: number;
+  valor_comissao: number;
+  margem_percentual: number;
+  imposto_percentual: number;
+  valor_impostos: number;
+  forma_pagamento: string | null;
+  prazo_entrega_dias: number | null;
+  obra_endereco: string | null;
+  obra_numero: string | null;
+  obra_bairro: string | null;
+  obra_cidade: string | null;
+  obra_estado: string | null;
+  obra_cep: string | null;
+  obra_ambiente: string | null;
+  obra_pavimento: string | null;
+  obra_referencia: string | null;
+};
+
+type ItemAcessorio = {
+  acessorio_id: string;
+  codigo?: string;
+  descricao?: string;
+  quantidade: number;
+  preco_unitario: number;
 };
 
 type Item = {
@@ -70,6 +96,12 @@ type Item = {
   quantidade: number;
   perfil_id: string | null;
   vidro_id: string | null;
+  cor_perfil: string | null;
+  acabamento_perfil: string | null;
+  valor_perfil: number;
+  valor_vidro: number;
+  valor_acessorios: number;
+  acessorios: ItemAcessorio[];
   preco_unitario: number;
   subtotal: number;
 };
