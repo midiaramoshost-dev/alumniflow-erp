@@ -572,7 +572,10 @@ export type Database = {
       }
       orcamento_itens: {
         Row: {
+          acabamento_perfil: string | null
+          acessorios: Json
           altura_mm: number | null
+          cor_perfil: string | null
           created_at: string
           descricao: string
           id: string
@@ -586,10 +589,16 @@ export type Database = {
           subtotal: number
           tipo: string | null
           updated_at: string
+          valor_acessorios: number
+          valor_perfil: number
+          valor_vidro: number
           vidro_id: string | null
         }
         Insert: {
+          acabamento_perfil?: string | null
+          acessorios?: Json
           altura_mm?: number | null
+          cor_perfil?: string | null
           created_at?: string
           descricao: string
           id?: string
@@ -603,10 +612,16 @@ export type Database = {
           subtotal?: number
           tipo?: string | null
           updated_at?: string
+          valor_acessorios?: number
+          valor_perfil?: number
+          valor_vidro?: number
           vidro_id?: string | null
         }
         Update: {
+          acabamento_perfil?: string | null
+          acessorios?: Json
           altura_mm?: number | null
+          cor_perfil?: string | null
           created_at?: string
           descricao?: string
           id?: string
@@ -620,6 +635,9 @@ export type Database = {
           subtotal?: number
           tipo?: string | null
           updated_at?: string
+          valor_acessorios?: number
+          valor_perfil?: number
+          valor_vidro?: number
           vidro_id?: string | null
         }
         Relationships: [
@@ -654,14 +672,31 @@ export type Database = {
           created_by: string | null
           data_orcamento: string
           desconto: number
+          forma_pagamento: string | null
           id: string
+          imposto_percentual: number
+          margem_percentual: number
           numero: number
+          obra_ambiente: string | null
+          obra_bairro: string | null
+          obra_cep: string | null
+          obra_cidade: string | null
+          obra_endereco: string | null
+          obra_estado: string | null
+          obra_numero: string | null
+          obra_pavimento: string | null
+          obra_referencia: string | null
           observacoes: string | null
+          percentual_comissao: number
+          prazo_entrega_dias: number | null
           status: string
           subtotal: number
           total: number
           updated_at: string
           validade_dias: number
+          valor_comissao: number
+          valor_impostos: number
+          vendedor_id: string | null
         }
         Insert: {
           cliente_id?: string | null
@@ -670,14 +705,31 @@ export type Database = {
           created_by?: string | null
           data_orcamento?: string
           desconto?: number
+          forma_pagamento?: string | null
           id?: string
+          imposto_percentual?: number
+          margem_percentual?: number
           numero?: number
+          obra_ambiente?: string | null
+          obra_bairro?: string | null
+          obra_cep?: string | null
+          obra_cidade?: string | null
+          obra_endereco?: string | null
+          obra_estado?: string | null
+          obra_numero?: string | null
+          obra_pavimento?: string | null
+          obra_referencia?: string | null
           observacoes?: string | null
+          percentual_comissao?: number
+          prazo_entrega_dias?: number | null
           status?: string
           subtotal?: number
           total?: number
           updated_at?: string
           validade_dias?: number
+          valor_comissao?: number
+          valor_impostos?: number
+          vendedor_id?: string | null
         }
         Update: {
           cliente_id?: string | null
@@ -686,14 +738,31 @@ export type Database = {
           created_by?: string | null
           data_orcamento?: string
           desconto?: number
+          forma_pagamento?: string | null
           id?: string
+          imposto_percentual?: number
+          margem_percentual?: number
           numero?: number
+          obra_ambiente?: string | null
+          obra_bairro?: string | null
+          obra_cep?: string | null
+          obra_cidade?: string | null
+          obra_endereco?: string | null
+          obra_estado?: string | null
+          obra_numero?: string | null
+          obra_pavimento?: string | null
+          obra_referencia?: string | null
           observacoes?: string | null
+          percentual_comissao?: number
+          prazo_entrega_dias?: number | null
           status?: string
           subtotal?: number
           total?: number
           updated_at?: string
           validade_dias?: number
+          valor_comissao?: number
+          valor_impostos?: number
+          vendedor_id?: string | null
         }
         Relationships: [
           {
@@ -701,6 +770,13 @@ export type Database = {
             columns: ["cliente_id"]
             isOneToOne: false
             referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orcamentos_vendedor_id_fkey"
+            columns: ["vendedor_id"]
+            isOneToOne: false
+            referencedRelation: "vendedores"
             referencedColumns: ["id"]
           },
         ]
