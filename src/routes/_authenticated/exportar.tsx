@@ -22,7 +22,7 @@ const SECTION_HEAD = "FF334155"; // slate-700
 const HEADER_TEXT = "FFFFFFFF";
 const ZEBRA = "FFF8FAFC"; // slate-50
 
-type ColKind = "text" | "int" | "money" | "percent" | "date" | "datetime" | "bool" | "status";
+type ColKind = "text" | "int" | "money" | "percent" | "date" | "datetime" | "bool" | "status" | "formula";
 
 type Col = {
   key: string;
@@ -31,10 +31,14 @@ type Col = {
   width?: number;
   /** transforma valor bruto do banco para valor exibido */
   map?: (row: Record<string, unknown>, ctx: ExportContext) => unknown;
+  /** gera fórmula em função do número da linha (ex.: (r) => `F${r}-G${r}`) */
+  formula?: (excelRow: number) => string;
+  /** função na linha de totais */
+  total?: "sum" | "average" | "count";
 };
 
 type ExportContext = {
-  users: Map<string, string>; // user_id -> nome
+  users: Map<string, string>;
   clientes: Map<string, string>;
   vendedores: Map<string, string>;
   perfis: Map<string, string>;
@@ -172,7 +176,7 @@ const SECTIONS: Section[] = [
           { key: "cep", header: "CEP", width: 12 },
           { key: "endereco", header: "Endereço", width: 34 },
           { key: "vendedor", header: "Vendedor", width: 22, map: (r, c) => c.vendedores.get(s(r.vendedor_id)) ?? "" },
-          { key: "valor_total", header: "Valor total", kind: "money", width: 14 },
+          { key: "valor_total", header: "Valor total", kind: "money", width: 14, total: "sum" },
           { key: "data_venda", header: "Data da venda", kind: "date", width: 14 },
           { key: "created_at", header: "Cadastrado em", kind: "datetime", width: 18 },
         ],
@@ -259,9 +263,11 @@ const SECTIONS: Section[] = [
           { key: "cliente_nome", header: "Cliente", width: 30 },
           { key: "data_orcamento", header: "Data", kind: "date", width: 12 },
           { key: "validade_dias", header: "Validade (dias)", kind: "int", width: 14 },
-          { key: "subtotal", header: "Subtotal", kind: "money", width: 14 },
-          { key: "desconto", header: "Desconto", kind: "money", width: 14 },
-          { key: "total", header: "Total", kind: "money", width: 14 },
+          { key: "subtotal", header: "Subtotal", kind: "money", width: 14, total: "sum" },
+          { key: "desconto", header: "Desconto", kind: "money", width: 14, total: "sum" },
+          // Total = Subtotal - Desconto (fórmula viva no Excel)
+          { key: "total", header: "Total", kind: "formula", width: 14, total: "sum",
+            formula: (r) => `E${r}-F${r}` },
           { key: "status", header: "Situação", kind: "status", width: 14 },
           { key: "observacoes", header: "Observações", width: 40 },
         ],
@@ -278,9 +284,11 @@ const SECTIONS: Section[] = [
           { key: "vidro", header: "Vidro", width: 26, map: (r, c) => c.vidros.get(s(r.vidro_id)) ?? "" },
           { key: "largura_mm", header: "Largura (mm)", kind: "int", width: 12 },
           { key: "altura_mm", header: "Altura (mm)", kind: "int", width: 12 },
-          { key: "quantidade", header: "Qtd.", width: 8 },
+          { key: "quantidade", header: "Qtd.", kind: "int", width: 8, total: "sum" },
           { key: "preco_unitario", header: "Preço unit.", kind: "money", width: 14 },
-          { key: "subtotal", header: "Subtotal", kind: "money", width: 14 },
+          // Subtotal = Qtd × Preço unitário
+          { key: "subtotal", header: "Subtotal", kind: "formula", width: 14, total: "sum",
+            formula: (r) => `H${r}*I${r}` },
         ],
       },
     ],
@@ -340,7 +348,7 @@ const SECTIONS: Section[] = [
           { key: "cliente_nome", header: "Cliente", width: 28 },
           { key: "status", header: "Situação", kind: "status", width: 18 },
           { key: "progresso", header: "Progresso", kind: "percent", width: 12, map: (r) => (r.progresso == null ? null : Number(r.progresso) / 100) },
-          { key: "valor", header: "Valor", kind: "money", width: 14 },
+          { key: "valor", header: "Valor", kind: "money", width: 14, total: "sum" },
           { key: "responsavel_nome", header: "Responsável", width: 22 },
           { key: "cidade", header: "Cidade", width: 18 },
           { key: "estado", header: "UF", width: 6 },
@@ -375,8 +383,11 @@ const SECTIONS: Section[] = [
           { key: "obra_id", header: "Obra", width: 14 },
           { key: "descricao", header: "Material", width: 34 },
           { key: "unidade", header: "Unidade", width: 10 },
-          { key: "quantidade_prevista", header: "Qtd. prevista", width: 14 },
-          { key: "quantidade_utilizada", header: "Qtd. utilizada", width: 14 },
+          { key: "quantidade_prevista", header: "Qtd. prevista", width: 14, total: "sum" },
+          { key: "quantidade_utilizada", header: "Qtd. utilizada", width: 14, total: "sum" },
+          // Saldo = Prevista - Utilizada
+          { key: "saldo", header: "Saldo", kind: "formula", width: 12, total: "sum",
+            formula: (r) => `D${r}-E${r}` },
           { key: "observacoes", header: "Observações", width: 40 },
         ],
       },
@@ -412,7 +423,7 @@ const SECTIONS: Section[] = [
           { key: "descricao", header: "Descrição", width: 40 },
           { key: "categoria", header: "Categoria", width: 18 },
           { key: "cliente_nome", header: "Cliente / Fornecedor", width: 28 },
-          { key: "valor", header: "Valor", kind: "money", width: 14 },
+          { key: "valor", header: "Valor", kind: "money", width: 14, total: "sum" },
           { key: "data_vencimento", header: "Vencimento", kind: "date", width: 14 },
           { key: "data_pagamento", header: "Pagamento", kind: "date", width: 14 },
           { key: "status", header: "Situação", kind: "status", width: 14 },
@@ -519,8 +530,26 @@ function toCellValue(kind: ColKind | undefined, raw: unknown): unknown {
 }
 
 /* =========================================================================
-   Renderização de um bloco de tabela em uma sheet
+   Renderização de um bloco como TABELA NATIVA do Excel
+   (banded rows, autofilter, linha de totais, fórmulas vivas)
    ========================================================================= */
+function colLetter(n: number): string {
+  let s = "";
+  while (n > 0) {
+    const m = (n - 1) % 26;
+    s = String.fromCharCode(65 + m) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
+
+let TABLE_SEQ = 0;
+function safeTableName(title: string) {
+  TABLE_SEQ += 1;
+  const base = title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9_]/g, "_");
+  return `tbl_${base}_${TABLE_SEQ}`;
+}
+
 function renderBlock(
   ws: ExcelJS.Worksheet,
   block: SubTable,
@@ -530,47 +559,89 @@ function renderBlock(
 ): number {
   const { cols } = block;
 
-  // Título do bloco
+  // Título do bloco (faixa colorida)
   const titleCell = ws.getCell(startRow, 1);
   titleCell.value = `${block.title}  (${rows.length})`;
   applySectionTitle(titleCell, cols.length);
 
-  // Cabeçalho
-  const headerRow = ws.getRow(startRow + 1);
+  // Larguras
   cols.forEach((c, i) => {
-    headerRow.getCell(i + 1).value = c.header;
     const col = ws.getColumn(i + 1);
     if (c.width && (col.width ?? 0) < c.width) col.width = c.width;
   });
-  applyHeaderStyle(headerRow, cols);
 
-  // Dados
-  rows.forEach((r, idx) => {
-    const excelRow = ws.getRow(startRow + 2 + idx);
-    cols.forEach((c, i) => {
+  const headerExcelRow = startRow + 1;
+  const hasTotals = cols.some((c) => c.total);
+  const dataRows = rows.length === 0 ? [Array(cols.length).fill(null)] : rows.map((r, idx) => {
+    const excelRow = headerExcelRow + 1 + idx;
+    return cols.map((c) => {
+      if (c.kind === "formula" && c.formula) {
+        return { formula: c.formula(excelRow), result: undefined } as ExcelJS.CellFormulaValue;
+      }
       const raw = c.map ? c.map(r, ctx) : r[c.key];
+      return toCellValue(c.kind, raw) as ExcelJS.CellValue;
+    });
+  });
+
+  ws.addTable({
+    name: safeTableName(block.title),
+    ref: `${colLetter(1)}${headerExcelRow}`,
+    headerRow: true,
+    totalsRow: hasTotals,
+    style: {
+      theme: "TableStyleMedium9", // azul moderno
+      showRowStripes: true,
+      showFirstColumn: false,
+    },
+    columns: cols.map((c) => ({
+      name: c.header,
+      filterButton: true,
+      totalsRowFunction: c.total ?? "none",
+    })),
+    rows: dataRows,
+  });
+
+  // Rótulo "Total" na primeira coluna da linha de totais
+  if (hasTotals) {
+    const totalsExcelRow = headerExcelRow + 1 + (rows.length === 0 ? 1 : rows.length);
+    const firstTotalIdx = cols.findIndex((c) => c.total);
+    if (firstTotalIdx > 0) {
+      const lbl = ws.getCell(totalsExcelRow, 1);
+      lbl.value = "Total";
+      lbl.font = { bold: true, color: { argb: BRAND } };
+    }
+    // formatos numéricos na linha de totais
+    cols.forEach((c, i) => {
+      if (!c.total) return;
+      const cell = ws.getCell(totalsExcelRow, i + 1);
+      const fmt = cellFormatFor(c.kind === "formula" ? "money" : c.kind);
+      if (fmt.numFmt) cell.numFmt = fmt.numFmt;
+      cell.font = { bold: true, color: { argb: BRAND } };
+    });
+  }
+
+  // Formatação das células de dados (numFmt + alinhamento) — a tabela cuida das cores
+  rows.forEach((_, idx) => {
+    const excelRow = ws.getRow(headerExcelRow + 1 + idx);
+    cols.forEach((c, i) => {
+      const kind: ColKind | undefined = c.kind === "formula" ? "money" : c.kind;
+      const st = cellFormatFor(kind);
       const cell = excelRow.getCell(i + 1);
-      cell.value = toCellValue(c.kind, raw) as ExcelJS.CellValue;
-      const st = cellFormatFor(c.kind);
       if (st.numFmt) cell.numFmt = st.numFmt;
       if (st.alignment) cell.alignment = st.alignment;
       cell.font = { size: 10, color: { argb: "FF0F172A" } };
-      if (idx % 2 === 1) {
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: ZEBRA } };
-      }
-      cell.border = {
-        bottom: { style: "hair", color: { argb: "FFE2E8F0" } },
-      };
     });
     excelRow.height = 18;
   });
 
   // Congelar cabeçalho no primeiro bloco da sheet
   if (startRow === 1) {
-    ws.views = [{ state: "frozen", ySplit: startRow + 1 }];
+    ws.views = [{ state: "frozen", ySplit: headerExcelRow }];
   }
 
-  return startRow + 2 + rows.length + 2; // deixa 2 linhas em branco
+  const totalsExtra = hasTotals ? 1 : 0;
+  const dataCount = rows.length === 0 ? 1 : rows.length;
+  return headerExcelRow + 1 + dataCount + totalsExtra + 2; // 2 linhas em branco
 }
 
 /* =========================================================================
