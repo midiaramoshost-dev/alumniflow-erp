@@ -423,7 +423,7 @@ const SECTIONS: Section[] = [
           { key: "descricao", header: "Descrição", width: 40 },
           { key: "categoria", header: "Categoria", width: 18 },
           { key: "cliente_nome", header: "Cliente / Fornecedor", width: 28 },
-          { key: "valor", header: "Valor", kind: "money", width: 14 },
+          { key: "valor", header: "Valor", kind: "money", width: 14, total: "sum" },
           { key: "data_vencimento", header: "Vencimento", kind: "date", width: 14 },
           { key: "data_pagamento", header: "Pagamento", kind: "date", width: 14 },
           { key: "status", header: "Situação", kind: "status", width: 14 },
