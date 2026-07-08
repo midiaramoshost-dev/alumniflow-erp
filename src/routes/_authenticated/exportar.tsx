@@ -348,7 +348,7 @@ const SECTIONS: Section[] = [
           { key: "cliente_nome", header: "Cliente", width: 28 },
           { key: "status", header: "Situação", kind: "status", width: 18 },
           { key: "progresso", header: "Progresso", kind: "percent", width: 12, map: (r) => (r.progresso == null ? null : Number(r.progresso) / 100) },
-          { key: "valor", header: "Valor", kind: "money", width: 14 },
+          { key: "valor", header: "Valor", kind: "money", width: 14, total: "sum" },
           { key: "responsavel_nome", header: "Responsável", width: 22 },
           { key: "cidade", header: "Cidade", width: 18 },
           { key: "estado", header: "UF", width: 6 },
