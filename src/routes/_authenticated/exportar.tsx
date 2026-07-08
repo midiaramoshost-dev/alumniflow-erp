@@ -530,8 +530,26 @@ function toCellValue(kind: ColKind | undefined, raw: unknown): unknown {
 }
 
 /* =========================================================================
-   Renderização de um bloco de tabela em uma sheet
+   Renderização de um bloco como TABELA NATIVA do Excel
+   (banded rows, autofilter, linha de totais, fórmulas vivas)
    ========================================================================= */
+function colLetter(n: number): string {
+  let s = "";
+  while (n > 0) {
+    const m = (n - 1) % 26;
+    s = String.fromCharCode(65 + m) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
+
+let TABLE_SEQ = 0;
+function safeTableName(title: string) {
+  TABLE_SEQ += 1;
+  const base = title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9_]/g, "_");
+  return `tbl_${base}_${TABLE_SEQ}`;
+}
+
 function renderBlock(
   ws: ExcelJS.Worksheet,
   block: SubTable,
@@ -541,47 +559,90 @@ function renderBlock(
 ): number {
   const { cols } = block;
 
-  // Título do bloco
+  // Título do bloco (faixa colorida)
   const titleCell = ws.getCell(startRow, 1);
   titleCell.value = `${block.title}  (${rows.length})`;
   applySectionTitle(titleCell, cols.length);
 
-  // Cabeçalho
-  const headerRow = ws.getRow(startRow + 1);
+  // Larguras
   cols.forEach((c, i) => {
-    headerRow.getCell(i + 1).value = c.header;
     const col = ws.getColumn(i + 1);
     if (c.width && (col.width ?? 0) < c.width) col.width = c.width;
   });
-  applyHeaderStyle(headerRow, cols);
 
-  // Dados
-  rows.forEach((r, idx) => {
-    const excelRow = ws.getRow(startRow + 2 + idx);
-    cols.forEach((c, i) => {
+  const headerExcelRow = startRow + 1;
+  const hasTotals = cols.some((c) => c.total);
+  const dataRows = rows.length === 0 ? [Array(cols.length).fill(null)] : rows.map((r, idx) => {
+    const excelRow = headerExcelRow + 1 + idx;
+    return cols.map((c) => {
+      if (c.kind === "formula" && c.formula) {
+        return { formula: c.formula(excelRow), result: undefined } as ExcelJS.CellFormulaValue;
+      }
       const raw = c.map ? c.map(r, ctx) : r[c.key];
+      return toCellValue(c.kind, raw) as ExcelJS.CellValue;
+    });
+  });
+
+  ws.addTable({
+    name: safeTableName(block.title),
+    ref: `${colLetter(1)}${headerExcelRow}`,
+    headerRow: true,
+    totalsRow: hasTotals,
+    style: {
+      theme: "TableStyleMedium9", // azul moderno
+      showRowStripes: true,
+      showFirstColumn: false,
+    },
+    columns: cols.map((c) => ({
+      name: c.header,
+      filterButton: true,
+      totalsRowLabel: c.total ? undefined : undefined,
+      totalsRowFunction: c.total ?? "none",
+    })),
+    rows: dataRows,
+  });
+
+  // Rótulo "Total" na primeira coluna da linha de totais
+  if (hasTotals) {
+    const totalsExcelRow = headerExcelRow + 1 + (rows.length === 0 ? 1 : rows.length);
+    const firstTotalIdx = cols.findIndex((c) => c.total);
+    if (firstTotalIdx > 0) {
+      const lbl = ws.getCell(totalsExcelRow, 1);
+      lbl.value = "Total";
+      lbl.font = { bold: true, color: { argb: BRAND } };
+    }
+    // formatos numéricos na linha de totais
+    cols.forEach((c, i) => {
+      if (!c.total) return;
+      const cell = ws.getCell(totalsExcelRow, i + 1);
+      const fmt = cellFormatFor(c.kind === "formula" ? "money" : c.kind);
+      if (fmt.numFmt) cell.numFmt = fmt.numFmt;
+      cell.font = { bold: true, color: { argb: BRAND } };
+    });
+  }
+
+  // Formatação das células de dados (numFmt + alinhamento) — a tabela cuida das cores
+  rows.forEach((_, idx) => {
+    const excelRow = ws.getRow(headerExcelRow + 1 + idx);
+    cols.forEach((c, i) => {
+      const kind: ColKind | undefined = c.kind === "formula" ? "money" : c.kind;
+      const st = cellFormatFor(kind);
       const cell = excelRow.getCell(i + 1);
-      cell.value = toCellValue(c.kind, raw) as ExcelJS.CellValue;
-      const st = cellFormatFor(c.kind);
       if (st.numFmt) cell.numFmt = st.numFmt;
       if (st.alignment) cell.alignment = st.alignment;
       cell.font = { size: 10, color: { argb: "FF0F172A" } };
-      if (idx % 2 === 1) {
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: ZEBRA } };
-      }
-      cell.border = {
-        bottom: { style: "hair", color: { argb: "FFE2E8F0" } },
-      };
     });
     excelRow.height = 18;
   });
 
   // Congelar cabeçalho no primeiro bloco da sheet
   if (startRow === 1) {
-    ws.views = [{ state: "frozen", ySplit: startRow + 1 }];
+    ws.views = [{ state: "frozen", ySplit: headerExcelRow }];
   }
 
-  return startRow + 2 + rows.length + 2; // deixa 2 linhas em branco
+  const totalsExtra = hasTotals ? 1 : 0;
+  const dataCount = rows.length === 0 ? 1 : rows.length;
+  return headerExcelRow + 1 + dataCount + totalsExtra + 2; // 2 linhas em branco
 }
 
 /* =========================================================================
