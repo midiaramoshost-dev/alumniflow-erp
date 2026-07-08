@@ -383,8 +383,11 @@ const SECTIONS: Section[] = [
           { key: "obra_id", header: "Obra", width: 14 },
           { key: "descricao", header: "Material", width: 34 },
           { key: "unidade", header: "Unidade", width: 10 },
-          { key: "quantidade_prevista", header: "Qtd. prevista", width: 14 },
-          { key: "quantidade_utilizada", header: "Qtd. utilizada", width: 14 },
+          { key: "quantidade_prevista", header: "Qtd. prevista", width: 14, total: "sum" },
+          { key: "quantidade_utilizada", header: "Qtd. utilizada", width: 14, total: "sum" },
+          // Saldo = Prevista - Utilizada
+          { key: "saldo", header: "Saldo", kind: "formula", width: 12, total: "sum",
+            formula: (r) => `D${r}-E${r}` },
           { key: "observacoes", header: "Observações", width: 40 },
         ],
       },
