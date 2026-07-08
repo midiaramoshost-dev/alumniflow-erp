@@ -1237,7 +1237,7 @@ function blankItem(): Partial<Item> {
   };
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground border-b pb-1">
       {children}
