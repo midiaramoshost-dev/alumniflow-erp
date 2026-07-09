@@ -489,7 +489,10 @@ function ControleFabrilPage() {
         <Kpi label="Conferidas" value={String(stats.concluidas)} icon={ClipboardCheck} />
       </div>
 
+      <StageLegend />
+
       <div className="overflow-x-auto">
+
         <Table>
           <TableHeader>
             <TableRow>
