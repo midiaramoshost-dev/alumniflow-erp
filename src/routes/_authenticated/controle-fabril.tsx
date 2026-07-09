@@ -38,6 +38,7 @@ import {
   LogOut,
   Sparkles,
   Square,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 
