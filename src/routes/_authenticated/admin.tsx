@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { adminCreateUser } from "@/lib/admin-users.functions";
+import { UserPlus, Eye, EyeOff } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -276,6 +279,9 @@ function AdminPage() {
   const [editing, setEditing] = useState<Profile | null>(null);
 
   const isAdmin = hasRole("admin");
+  const [creatingUser, setCreatingUser] = useState(false);
+
+
 
 
   const { data: profiles, isLoading: loadingProfiles } = useQuery({
@@ -450,14 +456,19 @@ function AdminPage() {
                   Atribua funções para controlar o que cada usuário pode fazer.
                 </p>
               </div>
-              <div className="relative w-64">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  className="pl-8"
-                  placeholder="Buscar por nome ou e-mail…"
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                />
+              <div className="flex items-center gap-2">
+                <div className="relative w-64">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    className="pl-8"
+                    placeholder="Buscar por nome ou e-mail…"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                  />
+                </div>
+                <Button size="sm" onClick={() => setCreatingUser(true)}>
+                  <UserPlus className="h-4 w-4 mr-1" /> Novo usuário
+                </Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -561,6 +572,15 @@ function AdminPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <CreateUserDialog
+        open={creatingUser}
+        onOpenChange={setCreatingUser}
+        onCreated={() => {
+          qc.invalidateQueries({ queryKey: ["admin", "profiles"] });
+          qc.invalidateQueries({ queryKey: ["admin", "user_roles"] });
+        }}
+      />
     </PageShell>
   );
 }
@@ -1201,3 +1221,159 @@ function InvitesManager() {
   );
 }
 
+
+/* ---------------- Create User Dialog ---------------- */
+
+function CreateUserDialog({
+  open,
+  onOpenChange,
+  onCreated,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onCreated: () => void;
+}) {
+  const createUser = useServerFn(adminCreateUser);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [roles, setRoles] = useState<AppRole[]>(["vendedor"]);
+  const [submitting, setSubmitting] = useState(false);
+
+  const reset = () => {
+    setEmail("");
+    setPassword("");
+    setFullName("");
+    setRoles(["vendedor"]);
+    setShowPwd(false);
+  };
+
+  const toggleRole = (r: AppRole, checked: boolean) => {
+    setRoles((prev) => (checked ? Array.from(new Set([...prev, r])) : prev.filter((x) => x !== r)));
+  };
+
+  const genPassword = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#$%";
+    let out = "";
+    const arr = new Uint32Array(14);
+    crypto.getRandomValues(arr);
+    for (let i = 0; i < arr.length; i++) out += chars[arr[i] % chars.length];
+    setPassword(out);
+    setShowPwd(true);
+  };
+
+  const submit = async () => {
+    if (!email.trim()) return toast.error("Informe o e-mail");
+    if (password.length < 8) return toast.error("Senha deve ter pelo menos 8 caracteres");
+    if (roles.length === 0) return toast.error("Selecione ao menos uma função");
+    setSubmitting(true);
+    try {
+      await createUser({ data: { email, password, full_name: fullName, roles } });
+      toast.success("Usuário criado com sucesso");
+      onCreated();
+      reset();
+      onOpenChange(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao criar usuário");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) reset();
+        onOpenChange(v);
+      }}
+    >
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5" /> Novo usuário
+          </DialogTitle>
+          <DialogDescription>
+            Crie um usuário com e-mail e senha e defina as funções (permissões por módulo).
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label>Nome completo</Label>
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="João da Silva" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>E-mail</Label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="usuario@empresa.com"
+              autoComplete="off"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Senha (mín. 8 caracteres)</Label>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Input
+                  type={showPwd ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                >
+                  {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <Button type="button" variant="outline" onClick={genPassword}>
+                Gerar
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Funções (permissões por módulo)</Label>
+            <div className="space-y-2 rounded-md border p-3">
+              {ROLES.map((r) => {
+                const checked = roles.includes(r.key);
+                return (
+                  <label key={r.key} className="flex items-start gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={(v) => toggleRole(r.key, v === true)}
+                    />
+                    <div>
+                      <div className="text-sm font-medium">{r.label}</div>
+                      <div className="text-xs text-muted-foreground">{r.description}</div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              As permissões por módulo/ação de cada função são configuradas na aba{" "}
+              <strong>Permissões</strong>.
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            Cancelar
+          </Button>
+          <Button onClick={submit} disabled={submitting}>
+            {submitting && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+            Criar usuário
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
