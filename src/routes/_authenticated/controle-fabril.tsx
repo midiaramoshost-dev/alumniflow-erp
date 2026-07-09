@@ -419,6 +419,24 @@ function ControleFabrilPage() {
     });
   };
 
+  /** Marca a etapa como concluída direto pela UI (bolinha/badge). */
+  const completePreStage = (o: Obra, s: PreStage) => {
+    if (o[s.key]) return;
+    quickStamp(o, s.key);
+    toast.success(`${s.label} marcada como concluída`);
+  };
+  const completeSectorStage = (o: Obra, s: SectorStage) => {
+    const ent = o[s.entradaKey] as string | null;
+    const sai = o[s.saidaKey] as string | null;
+    if (sai) return;
+    const now = new Date().toISOString();
+    const patch: Partial<Obra> & { id: string } = { id: o.id };
+    if (!ent) (patch as Record<string, unknown>)[s.entradaKey as string] = now;
+    (patch as Record<string, unknown>)[s.saidaKey as string] = now;
+    save.mutate(patch);
+    toast.success(`${s.label} concluída — avance para a próxima etapa`);
+  };
+
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editing) return;
@@ -471,7 +489,10 @@ function ControleFabrilPage() {
         <Kpi label="Conferidas" value={String(stats.concluidas)} icon={ClipboardCheck} />
       </div>
 
+      <StageLegend />
+
       <div className="overflow-x-auto">
+
         <Table>
           <TableHeader>
             <TableRow>
@@ -519,7 +540,15 @@ function ControleFabrilPage() {
                   return (
                     <TableCell key={String(s.key)} className="text-center">
                       <div className="flex items-center justify-center gap-1.5">
-                        <StatusDot state={v ? "done" : "empty"} />
+                        <StatusDot
+                          state={v ? "done" : "empty"}
+                          onClick={v ? undefined : () => completePreStage(o, s)}
+                          title={
+                            v
+                              ? `${s.label} — concluída em ${fmtDate(v)}`
+                              : `Clique para marcar ${s.label} como concluída hoje`
+                          }
+                        />
                         {v ? (
                           <Badge variant="default" className="text-[10px]">
                             {fmtDate(v)}
@@ -544,7 +573,21 @@ function ControleFabrilPage() {
                   return (
                     <TableCell key={s.label} className="text-center align-top">
                       <div className="flex flex-col gap-1 items-center">
-                        <StatusDot state={cellState} />
+                        <StatusDot
+                          state={cellState}
+                          onClick={
+                            cellState === "done"
+                              ? undefined
+                              : () => completeSectorStage(o, s)
+                          }
+                          title={
+                            cellState === "done"
+                              ? `${s.label} — concluída em ${fmtDate(sai)}`
+                              : cellState === "in_progress"
+                                ? `Clique para registrar a saída de ${s.label} agora`
+                                : `Clique para concluir ${s.label} (entrada e saída = agora)`
+                          }
+                        />
                         <div className="flex flex-col items-center gap-0.5 text-[10px]">
                           <div className="flex items-center gap-1">
                             <LogIn className="h-2.5 w-2.5 text-blue-600" />
@@ -994,39 +1037,86 @@ function Kpi({
   );
 }
 
+const STATUS_LABEL: Record<
+  "empty" | "in_progress" | "incomplete" | "done",
+  string
+> = {
+  empty: "Pendente — etapa ainda não iniciada",
+  in_progress: "Em curso — entrada registrada, aguardando saída",
+  incomplete: "Incompleto — dados faltando ou inconsistentes",
+  done: "Concluído — etapa finalizada",
+};
+
 export function StatusDot({
   state,
   className = "",
+  onClick,
+  title,
 }: {
   state: "empty" | "in_progress" | "incomplete" | "done";
   className?: string;
+  onClick?: () => void;
+  title?: string;
 }) {
   const base = "inline-block h-2 w-2 rounded-full shrink-0";
-  if (state === "done") {
-    return (
+  const tip = title ?? STATUS_LABEL[state];
+  const clickableCls = onClick ? "cursor-pointer hover:scale-125 transition-transform" : "";
+  const content =
+    state === "done" ? (
       <span
-        aria-label="Concluído"
-        className={`${base} bg-green-500 shadow-[0_0_0_2px_rgba(34,197,94,0.2)] ${className}`}
+        aria-label={tip}
+        title={tip}
+        onClick={onClick}
+        className={`${base} bg-green-500 shadow-[0_0_0_2px_rgba(34,197,94,0.2)] ${clickableCls} ${className}`}
       />
-    );
-  }
-  if (state === "in_progress") {
-    return (
-      <span aria-label="Em curso" className={`relative ${base} ${className}`}>
+    ) : state === "in_progress" ? (
+      <span
+        aria-label={tip}
+        title={tip}
+        onClick={onClick}
+        className={`relative ${base} ${clickableCls} ${className}`}
+      >
         <span className="absolute inset-0 rounded-full bg-amber-500 animate-ping opacity-75" />
         <span className="relative block h-2 w-2 rounded-full bg-amber-500" />
       </span>
+    ) : (
+      <span
+        aria-label={tip}
+        title={tip}
+        onClick={onClick}
+        className={`relative ${base} ${clickableCls} ${className}`}
+      >
+        <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
+        <span className="relative block h-2 w-2 rounded-full bg-red-500" />
+      </span>
     );
-  }
-  // empty (pendente) e incomplete → bolinha vermelha piscando
+  return content;
+}
+
+export function StageLegend() {
   return (
-    <span
-      aria-label={state === "incomplete" ? "Incompleto" : "Pendente"}
-      className={`relative ${base} ${className}`}
-    >
-      <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
-      <span className="relative block h-2 w-2 rounded-full bg-red-500" />
-    </span>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground mb-4">
+      <span className="font-medium text-foreground">Legenda:</span>
+      <span className="flex items-center gap-1.5">
+        <StatusDot state="empty" />
+        Pendente
+      </span>
+      <span className="flex items-center gap-1.5">
+        <StatusDot state="in_progress" />
+        Em curso (entrada registrada)
+      </span>
+      <span className="flex items-center gap-1.5">
+        <StatusDot state="incomplete" />
+        Incompleto (saída sem entrada, datas inválidas, responsável faltando)
+      </span>
+      <span className="flex items-center gap-1.5">
+        <StatusDot state="done" />
+        Concluído
+      </span>
+      <span className="ml-auto italic">
+        Clique na bolinha para marcar a etapa como concluída e avançar
+      </span>
+    </div>
   );
 }
 
