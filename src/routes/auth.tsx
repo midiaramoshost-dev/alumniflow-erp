@@ -4,13 +4,8 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Building2, Loader2 } from "lucide-react";
+import { Loader2, Mail, Lock, User, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -25,10 +20,14 @@ const signUpSchema = signInSchema.extend({
   full_name: z.string().trim().min(2, "Informe seu nome").max(100),
 });
 
+type Mode = "signin" | "signup";
+
 function AuthPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [mode, setMode] = useState<Mode>("signin");
+  const [showPw, setShowPw] = useState(false);
 
   const pendingInvite = () => {
     try {
@@ -53,7 +52,6 @@ function AuthPage() {
     if (token) return <Navigate to="/invite/$token" params={{ token }} replace />;
     return <Navigate to="/dashboard" replace />;
   }
-
 
   const onSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -98,6 +96,7 @@ function AuthPage() {
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Conta criada! Você já pode entrar.");
+    setMode("signin");
   };
 
   const onGoogle = async () => {
@@ -114,94 +113,161 @@ function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="absolute inset-0 bg-gradient-primary opacity-[0.04] pointer-events-none" />
-      <div className="relative w-full max-w-md">
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-primary shadow-elegant">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold">CRM CRISTIANO</span>
-        </div>
-        <Card className="p-6 shadow-elegant">
-          <Tabs defaultValue="signin">
-            <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="signin">Entrar</TabsTrigger>
-              <TabsTrigger value="signup">Criar conta</TabsTrigger>
-            </TabsList>
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#0b1120] p-4 overflow-hidden">
+      {/* Ambient glows */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-[15%] -left-[10%] h-[45%] w-[45%] rounded-full bg-blue-600/25 blur-[140px]" />
+        <div className="absolute -bottom-[15%] -right-[10%] h-[45%] w-[45%] rounded-full bg-cyan-500/15 blur-[140px]" />
+        <div
+          className="absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage: "radial-gradient(#fff 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+      </div>
 
-            <TabsContent value="signin" className="mt-6">
-              <form onSubmit={onSignIn} className="space-y-4">
-                <div>
-                  <Label htmlFor="si-email">E-mail</Label>
-                  <Input id="si-email" name="email" type="email" required autoComplete="email" />
-                </div>
-                <div>
-                  <Label htmlFor="si-password">Senha</Label>
-                  <Input
-                    id="si-password"
-                    name="password"
-                    type="password"
-                    required
-                    autoComplete="current-password"
-                  />
-                </div>
-                <Button type="submit" disabled={busy} className="w-full">
-                  {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Entrar
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="signup" className="mt-6">
-              <form onSubmit={onSignUp} className="space-y-4">
-                <div>
-                  <Label htmlFor="su-name">Nome completo</Label>
-                  <Input id="su-name" name="full_name" required />
-                </div>
-                <div>
-                  <Label htmlFor="su-email">E-mail</Label>
-                  <Input id="su-email" name="email" type="email" required autoComplete="email" />
-                </div>
-                <div>
-                  <Label htmlFor="su-password">Senha</Label>
-                  <Input
-                    id="su-password"
-                    name="password"
-                    type="password"
-                    required
-                    minLength={6}
-                    autoComplete="new-password"
-                  />
-                </div>
-                <Button type="submit" disabled={busy} className="w-full">
-                  {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Criar conta
-                </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  O primeiro usuário criado será automaticamente Administrador.
-                </p>
-              </form>
-            </TabsContent>
-          </Tabs>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
+      {/* Card */}
+      <div className="relative w-full max-w-md animate-fade-in">
+        <div
+          className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-blue-950/40"
+          style={{ backdropFilter: "blur(24px) saturate(140%)" }}
+        >
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-600/40 ring-1 ring-white/20">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-7 w-7 text-white"
+              >
+                <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16" />
+                <path d="M3 21h18M9 7h1M9 11h1M14 7h1M14 11h1M10 21v-4h4v4" />
+              </svg>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">ou</span>
-            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-white">
+              CRM <span className="text-blue-400">CRISTIANO</span>
+            </h1>
+            <p className="mt-1.5 text-sm text-slate-400">
+              Gestão para serralheria e vidraçaria
+            </p>
           </div>
 
-          <Button
+          {/* Tabs */}
+          <div className="mb-8 flex border-b border-white/10">
+            <button
+              type="button"
+              onClick={() => setMode("signin")}
+              className={`flex-1 pb-3 text-sm font-semibold transition-colors ${
+                mode === "signin"
+                  ? "border-b-2 border-blue-500 text-white"
+                  : "border-b-2 border-transparent text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              Entrar
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("signup")}
+              className={`flex-1 pb-3 text-sm font-semibold transition-colors ${
+                mode === "signup"
+                  ? "border-b-2 border-blue-500 text-white"
+                  : "border-b-2 border-transparent text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              Criar conta
+            </button>
+          </div>
+
+          {/* Forms */}
+          {mode === "signin" ? (
+            <form onSubmit={onSignIn} className="space-y-5">
+              <Field
+                id="si-email"
+                name="email"
+                type="email"
+                label="E-mail"
+                placeholder="seu@email.com"
+                autoComplete="email"
+                icon={<Mail className="h-4 w-4" />}
+                required
+              />
+              <PasswordField
+                id="si-password"
+                label="Senha"
+                autoComplete="current-password"
+                show={showPw}
+                onToggle={() => setShowPw((s) => !s)}
+                rightSlot={
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-blue-400 hover:text-blue-300"
+                    onClick={() =>
+                      toast.info("Peça um novo link de convite ao administrador.")
+                    }
+                  >
+                    Esqueceu?
+                  </button>
+                }
+              />
+              <SubmitButton busy={busy} label="Entrar no sistema" />
+            </form>
+          ) : (
+            <form onSubmit={onSignUp} className="space-y-5">
+              <Field
+                id="su-name"
+                name="full_name"
+                label="Nome completo"
+                placeholder="Seu nome"
+                icon={<User className="h-4 w-4" />}
+                required
+              />
+              <Field
+                id="su-email"
+                name="email"
+                type="email"
+                label="E-mail"
+                placeholder="seu@email.com"
+                autoComplete="email"
+                icon={<Mail className="h-4 w-4" />}
+                required
+              />
+              <PasswordField
+                id="su-password"
+                label="Senha"
+                autoComplete="new-password"
+                show={showPw}
+                onToggle={() => setShowPw((s) => !s)}
+                minLength={6}
+              />
+              <SubmitButton busy={busy} label="Criar conta" />
+              <p className="text-center text-xs text-slate-500">
+                O primeiro usuário criado será automaticamente Administrador.
+              </p>
+            </form>
+          )}
+
+          {/* Divider */}
+          <div className="relative my-8 flex items-center">
+            <div className="h-px flex-1 bg-white/10" />
+            <span className="px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+              ou
+            </span>
+            <div className="h-px flex-1 bg-white/10" />
+          </div>
+
+          {/* Google */}
+          <button
             type="button"
-            variant="outline"
-            className="w-full"
-            onClick={onGoogle}
             disabled={busy}
+            onClick={onGoogle}
+            className="flex w-full items-center justify-center gap-3 rounded-lg border border-white/10 bg-white/5 py-3 text-sm font-medium text-white transition-all hover:bg-white/10 disabled:opacity-60"
           >
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -220,9 +286,138 @@ function AuthPage() {
               />
             </svg>
             Continuar com Google
-          </Button>
-        </Card>
+          </button>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-slate-500">
+          © {new Date().getFullYear()} CRM CRISTIANO · Todos os direitos reservados
+        </p>
       </div>
     </div>
+  );
+}
+
+/* ---------- Subcomponents ---------- */
+
+function Field({
+  id,
+  name,
+  type = "text",
+  label,
+  placeholder,
+  autoComplete,
+  icon,
+  required,
+}: {
+  id: string;
+  name: string;
+  type?: string;
+  label: string;
+  placeholder?: string;
+  autoComplete?: string;
+  icon?: React.ReactNode;
+  required?: boolean;
+}) {
+  return (
+    <div>
+      <label
+        htmlFor={id}
+        className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-slate-400"
+      >
+        {label}
+      </label>
+      <div className="relative">
+        {icon && (
+          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-500">
+            {icon}
+          </span>
+        )}
+        <input
+          id={id}
+          name={name}
+          type={type}
+          required={required}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          className={`w-full rounded-lg border border-white/10 bg-white/5 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition-all focus:border-blue-500 focus:bg-white/[0.07] focus:ring-2 focus:ring-blue-500/40 ${
+            icon ? "pl-10 pr-4" : "px-4"
+          }`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PasswordField({
+  id,
+  label,
+  autoComplete,
+  minLength,
+  show,
+  onToggle,
+  rightSlot,
+}: {
+  id: string;
+  label: string;
+  autoComplete?: string;
+  minLength?: number;
+  show: boolean;
+  onToggle: () => void;
+  rightSlot?: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <label
+          htmlFor={id}
+          className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400"
+        >
+          {label}
+        </label>
+        {rightSlot}
+      </div>
+      <div className="relative">
+        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-500">
+          <Lock className="h-4 w-4" />
+        </span>
+        <input
+          id={id}
+          name="password"
+          type={show ? "text" : "password"}
+          required
+          minLength={minLength}
+          autoComplete={autoComplete}
+          placeholder="••••••••"
+          className="w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-10 pr-11 text-sm text-white placeholder:text-slate-500 outline-none transition-all focus:border-blue-500 focus:bg-white/[0.07] focus:ring-2 focus:ring-blue-500/40"
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          className="absolute inset-y-0 right-3 flex items-center text-slate-500 transition-colors hover:text-slate-200"
+          aria-label={show ? "Ocultar senha" : "Mostrar senha"}
+        >
+          {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SubmitButton({ busy, label }: { busy: boolean; label: string }) {
+  return (
+    <button
+      type="submit"
+      disabled={busy}
+      className="group flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/30 transition-all hover:bg-blue-500 hover:shadow-blue-500/40 active:scale-[0.98] disabled:opacity-70"
+    >
+      {busy ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <>
+          {label}
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </>
+      )}
+    </button>
   );
 }
