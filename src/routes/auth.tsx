@@ -292,6 +292,24 @@ function AuthPage() {
         <p className="mt-6 text-center text-xs text-slate-500">
           © {new Date().getFullYear()} CRM CRISTIANO · Todos os direitos reservados
         </p>
+
+        {/* Crédito de autoria */}
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 shadow-lg shadow-black/20 backdrop-blur">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 text-[11px] font-black text-white">
+              MR
+            </span>
+            <div className="flex flex-col leading-tight">
+              <span className="text-[10px] uppercase tracking-widest text-slate-500">
+                Feito por
+              </span>
+              <span className="text-xs font-semibold text-white">
+                Mídia Ramos
+              </span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
