@@ -32,7 +32,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Search, Loader2, Plus, X, Wifi } from "lucide-react";
+import { Pencil, Trash2, Search, Loader2, Plus, X, Wifi, FileDown } from "lucide-react";
+import { generateOrcamentoPdf } from "@/lib/orcamento-pdf";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/vendas")({
@@ -295,6 +296,21 @@ function VendasPage() {
                 </TableCell>
                 <TableCell className="text-right font-semibold">{brl(Number(o.total))}</TableCell>
                 <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title="Gerar PDF"
+                    onClick={async () => {
+                      try {
+                        await generateOrcamentoPdf(o.id);
+                        toast.success(`PDF do orçamento #${o.numero} gerado`);
+                      } catch (err) {
+                        toast.error((err as Error).message ?? "Falha ao gerar PDF");
+                      }
+                    }}
+                  >
+                    <FileDown className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
