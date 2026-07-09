@@ -244,21 +244,10 @@ function ControleFabrilPage() {
   });
 
   const create = useMutation({
-    mutationFn: async (payload: {
-      titulo: string;
-      cliente_nome: string | null;
-      data_entrega_prevista: string | null;
-      observacoes: string | null;
-    }) => {
+    mutationFn: async (payload: Record<string, unknown>) => {
       const { error } = await (supabase as unknown as { from: (t: string) => any })
         .from("obras")
-        .insert({
-          titulo: payload.titulo,
-          cliente_nome: payload.cliente_nome,
-          data_entrega_prevista: payload.data_entrega_prevista,
-          observacoes: payload.observacoes,
-          status: "planejamento",
-        });
+        .insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -278,12 +267,26 @@ function ControleFabrilPage() {
       toast.error("Informe o título da obra");
       return;
     }
-    create.mutate({
+    const payload: Record<string, unknown> = {
       titulo,
       cliente_nome: String(fd.get("cliente_nome") ?? "").trim() || null,
       data_entrega_prevista: String(fd.get("data_entrega_prevista") ?? "") || null,
       observacoes: String(fd.get("observacoes") ?? "").trim() || null,
+      status: "planejamento",
+    };
+    STAGES.forEach((s) => {
+      if (s.kind === "pre") {
+        payload[s.key as string] = String(fd.get(s.key as string) ?? "") || null;
+      } else {
+        payload[s.entradaKey as string] =
+          String(fd.get(s.entradaKey as string) ?? "") || null;
+        payload[s.saidaKey as string] =
+          String(fd.get(s.saidaKey as string) ?? "") || null;
+        payload[s.nameKey as string] =
+          String(fd.get(s.nameKey as string) ?? "").trim() || null;
+      }
     });
+    create.mutate(payload);
   };
 
   const quickStamp = (o: Obra, key: keyof Obra) => {
