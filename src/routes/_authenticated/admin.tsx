@@ -572,6 +572,15 @@ function AdminPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <CreateUserDialog
+        open={creatingUser}
+        onOpenChange={setCreatingUser}
+        onCreated={() => {
+          qc.invalidateQueries({ queryKey: ["admin", "profiles"] });
+          qc.invalidateQueries({ queryKey: ["admin", "user_roles"] });
+        }}
+      />
     </PageShell>
   );
 }
