@@ -145,6 +145,7 @@ function RootComponent() {
       <ThemeProvider>
         <AuthProvider>
           <Outlet />
+          <WhatsappFloat />
           <Toaster richColors position="top-right" />
         </AuthProvider>
       </ThemeProvider>
