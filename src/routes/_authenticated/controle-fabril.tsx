@@ -342,6 +342,10 @@ function ControleFabrilPage() {
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
+          <Button variant="outline" onClick={() => setMenuOpen(true)}>
+            <ListTree className="h-4 w-4 mr-2" />
+            Abrir controle
+          </Button>
           <Button onClick={() => setCreating(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Novo Controle
