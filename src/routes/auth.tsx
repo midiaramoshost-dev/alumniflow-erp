@@ -153,7 +153,7 @@ function AuthPage() {
               CRM <span className="text-blue-400">CRISTIANO</span>
             </h1>
             <p className="mt-1.5 text-sm text-slate-400">
-              Gestão para serralheria e vidraçaria
+              Gestão para esquadrias e vidraçaria
             </p>
           </div>
 
