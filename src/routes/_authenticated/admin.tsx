@@ -429,6 +429,9 @@ function AdminPage() {
           <TabsTrigger value="invites" className="gap-1">
             <Mail className="h-3.5 w-3.5" /> Convites
           </TabsTrigger>
+          <TabsTrigger value="permissions" className="gap-1">
+            <ShieldCheck className="h-3.5 w-3.5" /> Permissões
+          </TabsTrigger>
           <TabsTrigger value="data" className="gap-1">
             <Database className="h-3.5 w-3.5" /> Gestão de dados
           </TabsTrigger>
