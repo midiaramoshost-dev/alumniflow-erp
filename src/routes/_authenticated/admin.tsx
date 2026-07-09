@@ -456,14 +456,19 @@ function AdminPage() {
                   Atribua funções para controlar o que cada usuário pode fazer.
                 </p>
               </div>
-              <div className="relative w-64">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  className="pl-8"
-                  placeholder="Buscar por nome ou e-mail…"
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                />
+              <div className="flex items-center gap-2">
+                <div className="relative w-64">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    className="pl-8"
+                    placeholder="Buscar por nome ou e-mail…"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                  />
+                </div>
+                <Button size="sm" onClick={() => setCreatingUser(true)}>
+                  <UserPlus className="h-4 w-4 mr-1" /> Novo usuário
+                </Button>
               </div>
             </CardHeader>
             <CardContent>
