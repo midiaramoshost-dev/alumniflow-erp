@@ -234,8 +234,13 @@ function ControleFabrilPage() {
   const [creating, setCreating] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
-  const [formTick, setFormTick] = useState(0); // força re-render nos validadores inline
   const [formErrors, setFormErrors] = useState<string[]>([]);
+  const [createStageState, setCreateStageState] = useState<
+    Record<string, string | null>
+  >({});
+  const [editStageState, setEditStageState] = useState<
+    Record<string, string | null>
+  >({});
 
   // Realtime: atualiza a lista quando obras são criadas/alteradas.
   useEffect(() => {
