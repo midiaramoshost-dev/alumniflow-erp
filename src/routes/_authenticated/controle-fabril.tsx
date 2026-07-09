@@ -38,6 +38,7 @@ import {
   LogOut,
   Sparkles,
   Square,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -179,6 +180,7 @@ function ControleFabrilPage() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Obra | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["controle-fabril"],
@@ -241,6 +243,49 @@ function ControleFabrilPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const create = useMutation({
+    mutationFn: async (payload: {
+      titulo: string;
+      cliente_nome: string | null;
+      data_entrega_prevista: string | null;
+      observacoes: string | null;
+    }) => {
+      const { error } = await (supabase as unknown as { from: (t: string) => any })
+        .from("obras")
+        .insert({
+          titulo: payload.titulo,
+          cliente_nome: payload.cliente_nome,
+          data_entrega_prevista: payload.data_entrega_prevista,
+          observacoes: payload.observacoes,
+          status: "planejamento",
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["controle-fabril"] });
+      qc.invalidateQueries({ queryKey: ["obras"] });
+      toast.success("Nova obra criada no controle fabril");
+      setCreating(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const onCreate = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const titulo = String(fd.get("titulo") ?? "").trim();
+    if (!titulo) {
+      toast.error("Informe o título da obra");
+      return;
+    }
+    create.mutate({
+      titulo,
+      cliente_nome: String(fd.get("cliente_nome") ?? "").trim() || null,
+      data_entrega_prevista: String(fd.get("data_entrega_prevista") ?? "") || null,
+      observacoes: String(fd.get("observacoes") ?? "").trim() || null,
+    });
+  };
+
   const quickStamp = (o: Obra, key: keyof Obra) => {
     save.mutate({ id: o.id, [key]: new Date().toISOString() } as Partial<Obra> & {
       id: string;
@@ -273,14 +318,20 @@ function ControleFabrilPage() {
       title="Controle Fabril"
       description="Entrada e saída por setor: medição, compras, corte, usinagem, montagem, vidraçaria, acabamento e conferência"
       actions={
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar cliente ou obra…"
-            className="pl-8 w-64"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar cliente ou obra…"
+              className="pl-8 w-64"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+          <Button onClick={() => setCreating(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Controle
+          </Button>
         </div>
       }
     >
@@ -414,7 +465,43 @@ function ControleFabrilPage() {
         </Table>
       </div>
 
+      <Dialog open={creating} onOpenChange={setCreating}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Novo controle fabril</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={onCreate} className="space-y-4">
+            <div>
+              <Label htmlFor="titulo">Título da obra *</Label>
+              <Input id="titulo" name="titulo" placeholder="Ex.: Fachada Edifício X" required />
+            </div>
+            <div>
+              <Label htmlFor="cliente_nome">Cliente</Label>
+              <Input id="cliente_nome" name="cliente_nome" placeholder="Nome do cliente" />
+            </div>
+            <div>
+              <Label htmlFor="data_entrega_prevista">Entrega prevista</Label>
+              <Input id="data_entrega_prevista" name="data_entrega_prevista" type="date" />
+            </div>
+            <div>
+              <Label htmlFor="observacoes">Observações</Label>
+              <Input id="observacoes" name="observacoes" placeholder="Notas iniciais" />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setCreating(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={create.isPending}>
+                {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Criar
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
+
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
