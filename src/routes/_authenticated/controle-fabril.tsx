@@ -419,6 +419,24 @@ function ControleFabrilPage() {
     });
   };
 
+  /** Marca a etapa como concluída direto pela UI (bolinha/badge). */
+  const completePreStage = (o: Obra, s: PreStage) => {
+    if (o[s.key]) return;
+    quickStamp(o, s.key);
+    toast.success(`${s.label} marcada como concluída`);
+  };
+  const completeSectorStage = (o: Obra, s: SectorStage) => {
+    const ent = o[s.entradaKey] as string | null;
+    const sai = o[s.saidaKey] as string | null;
+    if (sai) return;
+    const now = new Date().toISOString();
+    const patch: Partial<Obra> & { id: string } = { id: o.id };
+    if (!ent) (patch as Record<string, unknown>)[s.entradaKey as string] = now;
+    (patch as Record<string, unknown>)[s.saidaKey as string] = now;
+    save.mutate(patch);
+    toast.success(`${s.label} concluída — avance para a próxima etapa`);
+  };
+
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editing) return;
