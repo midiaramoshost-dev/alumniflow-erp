@@ -245,7 +245,7 @@ export function PermissionsMatrix() {
                       </TableHeader>
                       <TableBody>
                         {grouped.map(([group, mods]) => (
-                          <>
+                          <Fragment key={`g-${group}`}>
                             <TableRow key={`g-${group}`} className="bg-muted/40 hover:bg-muted/40">
                               <TableCell
                                 colSpan={ACTIONS.length + 2}
