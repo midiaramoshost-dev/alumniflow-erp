@@ -279,6 +279,9 @@ function AdminPage() {
   const [editing, setEditing] = useState<Profile | null>(null);
 
   const isAdmin = hasRole("admin");
+  const [creatingUser, setCreatingUser] = useState(false);
+
+
 
 
   const { data: profiles, isLoading: loadingProfiles } = useQuery({
