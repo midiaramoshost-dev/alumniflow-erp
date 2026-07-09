@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Search, Loader2, Plus, X, Wifi, FileDown } from "lucide-react";
-import { generateOrcamentoPdf } from "@/lib/orcamento-pdf";
+import { buildOrcamentoPdf } from "@/lib/orcamento-pdf";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/vendas")({
@@ -126,6 +126,7 @@ function VendasPage() {
   const [statusFilter, setStatusFilter] = useState<Status | "todos">("todos");
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
 
   useEffect(() => {
     if (search.open) {
@@ -299,15 +300,8 @@ function VendasPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    title="Gerar PDF"
-                    onClick={async () => {
-                      try {
-                        await generateOrcamentoPdf(o.id);
-                        toast.success(`PDF do orçamento #${o.numero} gerado`);
-                      } catch (err) {
-                        toast.error((err as Error).message ?? "Falha ao gerar PDF");
-                      }
-                    }}
+                    title="Prévia do PDF"
+                    onClick={() => setPreviewId(o.id)}
                   >
                     <FileDown className="h-4 w-4" />
                   </Button>
@@ -343,6 +337,11 @@ function VendasPage() {
         onOpenChange={setOpen}
         orcamentoId={editingId}
         userId={user?.id ?? null}
+      />
+
+      <OrcamentoPdfPreview
+        orcamentoId={previewId}
+        onOpenChange={(o) => !o && setPreviewId(null)}
       />
     </PageShell>
   );
@@ -1278,5 +1277,87 @@ function ResumoLinha({
       <span className={muted ? "text-muted-foreground" : ""}>{label}</span>
       <span className={`font-medium ${accent ?? ""}`}>{value}</span>
     </div>
+  );
+}
+
+function OrcamentoPdfPreview({
+  orcamentoId,
+  onOpenChange,
+}: {
+  orcamentoId: string | null;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [filename, setFilename] = useState<string>("orcamento.pdf");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!orcamentoId) return;
+    let revoke: string | null = null;
+    let cancelled = false;
+    setLoading(true);
+    buildOrcamentoPdf(orcamentoId)
+      .then(({ doc, filename }) => {
+        if (cancelled) return;
+        const blob = doc.output("blob");
+        const objectUrl = URL.createObjectURL(blob);
+        revoke = objectUrl;
+        setUrl(objectUrl);
+        setFilename(filename);
+      })
+      .catch((e) => toast.error((e as Error).message ?? "Falha ao gerar PDF"))
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+      if (revoke) URL.revokeObjectURL(revoke);
+      setUrl(null);
+    };
+  }, [orcamentoId]);
+
+  const download = () => {
+    if (!url) return;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+  };
+
+  return (
+    <Dialog open={!!orcamentoId} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-5xl h-[90vh] p-0 flex flex-col gap-0">
+        <DialogHeader className="p-4 border-b flex-row items-center justify-between space-y-0">
+          <div>
+            <DialogTitle>Prévia do orçamento</DialogTitle>
+            <DialogDescription className="text-xs">
+              Revise o layout antes de baixar ou enviar ao cliente.
+            </DialogDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+              Fechar
+            </Button>
+            <Button size="sm" onClick={download} disabled={!url || loading}>
+              <FileDown className="h-4 w-4 mr-1.5" />
+              Baixar PDF
+            </Button>
+          </div>
+        </DialogHeader>
+        <div className="flex-1 bg-muted overflow-hidden">
+          {loading || !url ? (
+            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Gerando prévia…
+            </div>
+          ) : (
+            <iframe
+              key={url}
+              src={url}
+              title="Prévia do orçamento"
+              className="w-full h-full border-0"
+            />
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
