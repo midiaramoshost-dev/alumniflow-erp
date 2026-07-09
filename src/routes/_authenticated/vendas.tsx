@@ -126,6 +126,7 @@ function VendasPage() {
   const [statusFilter, setStatusFilter] = useState<Status | "todos">("todos");
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
 
   useEffect(() => {
     if (search.open) {
