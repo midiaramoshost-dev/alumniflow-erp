@@ -24,6 +24,7 @@ export type Database = {
           estoque_atual: number | null
           estoque_minimo: number | null
           id: string
+          imagem_url: string | null
           observacoes: string | null
           preco_unitario: number | null
           unidade: string
@@ -38,6 +39,7 @@ export type Database = {
           estoque_atual?: number | null
           estoque_minimo?: number | null
           id?: string
+          imagem_url?: string | null
           observacoes?: string | null
           preco_unitario?: number | null
           unidade?: string
@@ -52,6 +54,7 @@ export type Database = {
           estoque_atual?: number | null
           estoque_minimo?: number | null
           id?: string
+          imagem_url?: string | null
           observacoes?: string | null
           preco_unitario?: number | null
           unidade?: string
