@@ -131,7 +131,7 @@ export const adminUpdateUser = createServerFn({ method: "POST" })
     }
 
     // Sync profile
-    const profileUpdate: Record<string, unknown> = {};
+    const profileUpdate: { email?: string; full_name?: string | null } = {};
     if (data.email) profileUpdate.email = data.email;
     if (data.full_name !== undefined) profileUpdate.full_name = data.full_name;
     if (Object.keys(profileUpdate).length > 0) {
