@@ -26,8 +26,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { RequireRole } from "@/components/require-role";
+
 export const Route = createFileRoute("/_authenticated/financeiro")({
-  component: FinanceiroPage,
+  component: () => (
+    <RequireRole roles={["admin", "financeiro_obra"]}>
+      <FinanceiroPage />
+    </RequireRole>
+  ),
 });
 
 type Tipo = "receita" | "despesa";

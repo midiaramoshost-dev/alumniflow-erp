@@ -52,8 +52,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { RequireRole } from "@/components/require-role";
+
 export const Route = createFileRoute("/_authenticated/controle-fabril")({
-  component: ControleFabrilPage,
+  component: () => (
+    <RequireRole roles={["admin", "producao"]}>
+      <ControleFabrilPage />
+    </RequireRole>
+  ),
 });
 
 type Obra = {

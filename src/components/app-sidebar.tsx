@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   FileSpreadsheet,
 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 import {
   Sidebar,
@@ -32,7 +33,17 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const nav = [
+type AppRole = "admin" | "vendedor" | "producao" | "financeiro_obra";
+
+type NavItem = {
+  title: string;
+  url: string;
+  icon: typeof LayoutDashboard;
+  roles?: AppRole[]; // if omitted, visible to any authenticated user
+  soon?: boolean;
+};
+
+const nav: { label: string; items: NavItem[] }[] = [
   {
     label: "Principal",
     items: [
@@ -44,38 +55,46 @@ const nav = [
   {
     label: "Cadastros",
     items: [
-      { title: "Clientes", url: "/clientes", icon: Users },
-      { title: "Perfis de Alumínio", url: "/perfis", icon: Layers },
-      { title: "Vidros", url: "/vidros", icon: Square },
-      { title: "Acessórios", url: "/acessorios", icon: Package },
+      { title: "Clientes", url: "/clientes", icon: Users, roles: ["admin", "vendedor"] },
+      { title: "Perfis de Alumínio", url: "/perfis", icon: Layers, roles: ["admin", "producao"] },
+      { title: "Vidros", url: "/vidros", icon: Square, roles: ["admin", "producao"] },
+      { title: "Acessórios", url: "/acessorios", icon: Package, roles: ["admin", "producao"] },
     ],
   },
   {
     label: "Operação",
     items: [
-      { title: "Vendas", url: "/vendas", icon: ShoppingCart },
-      { title: "Comercial", url: "/comercial", icon: Briefcase },
-      { title: "Produção", url: "/producao", icon: Factory },
-      { title: "Controle Fabril", url: "/controle-fabril", icon: Cog },
-      { title: "Obras", url: "/obras", icon: Building },
-      { title: "Materiais", url: "/materiais", icon: Boxes },
-      { title: "Financeiro", url: "/financeiro", icon: Wallet },
+      { title: "Vendas", url: "/vendas", icon: ShoppingCart, roles: ["admin", "vendedor"] },
+      { title: "Comercial", url: "/comercial", icon: Briefcase, roles: ["admin", "vendedor"] },
+      { title: "Produção", url: "/producao", icon: Factory, roles: ["admin", "producao"] },
+      { title: "Controle Fabril", url: "/controle-fabril", icon: Cog, roles: ["admin", "producao"] },
+      { title: "Obras", url: "/obras", icon: Building, roles: ["admin", "producao", "financeiro_obra"] },
+      { title: "Materiais", url: "/materiais", icon: Boxes, roles: ["admin", "producao"] },
+      { title: "Financeiro", url: "/financeiro", icon: Wallet, roles: ["admin", "financeiro_obra"] },
     ],
   },
   {
     label: "Sistema",
     items: [
-      { title: "Admin Master", url: "/admin", icon: ShieldCheck },
-      { title: "Exportar dados", url: "/exportar", icon: FileSpreadsheet },
+      { title: "Admin Master", url: "/admin", icon: ShieldCheck, roles: ["admin"] },
+      { title: "Exportar dados", url: "/exportar", icon: FileSpreadsheet, roles: ["admin"] },
       { title: "Configurações", url: "/configuracoes", icon: Settings },
     ],
   },
 ];
 
+
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const { roles: userRoles } = useAuth();
+  const canSee = (item: NavItem) =>
+    !item.roles || item.roles.some((r) => userRoles.includes(r));
+  const visibleNav = nav
+    .map((g) => ({ ...g, items: g.items.filter(canSee) }))
+    .filter((g) => g.items.length > 0);
+
 
   return (
     <Sidebar collapsible="icon" className="bg-gradient-sidebar border-r-0">
@@ -96,7 +115,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="bg-transparent">
-        {nav.map((group) => (
+        {visibleNav.map((group) => (
           <SidebarGroup key={group.label}>
             {!collapsed && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
             <SidebarGroupContent>

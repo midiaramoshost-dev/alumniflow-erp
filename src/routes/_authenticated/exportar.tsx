@@ -9,8 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Download, FileSpreadsheet, Loader2, CheckCircle2 } from "lucide-react";
 
+import { RequireRole } from "@/components/require-role";
+
 export const Route = createFileRoute("/_authenticated/exportar")({
-  component: ExportarPage,
+  component: () => (
+    <RequireRole roles={["admin"]}>
+      <ExportarPage />
+    </RequireRole>
+  ),
 });
 
 /* =========================================================================
