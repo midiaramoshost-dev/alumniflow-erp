@@ -338,6 +338,11 @@ function VendasPage() {
         orcamentoId={editingId}
         userId={user?.id ?? null}
       />
+
+      <OrcamentoPdfPreview
+        orcamentoId={previewId}
+        onOpenChange={(o) => !o && setPreviewId(null)}
+      />
     </PageShell>
   );
 }
