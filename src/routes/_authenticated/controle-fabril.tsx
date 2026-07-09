@@ -260,6 +260,35 @@ function ControleFabrilPage() {
     };
   }, [qc]);
 
+  // Reset live-validation state when dialogs open/close.
+  useEffect(() => {
+    if (creating) {
+      setCreateStageState({});
+      setFormErrors([]);
+    }
+  }, [creating]);
+  useEffect(() => {
+    if (editing) {
+      const initial: Record<string, string | null> = {};
+      STAGES.forEach((s) => {
+        if (s.kind === "pre") {
+          initial[s.key as string] = toDateInput(editing[s.key] as string | null);
+        } else {
+          initial[s.entradaKey as string] = toDateInput(
+            editing[s.entradaKey] as string | null,
+          );
+          initial[s.saidaKey as string] = toDateInput(
+            editing[s.saidaKey] as string | null,
+          );
+          initial[s.nameKey as string] =
+            (editing[s.nameKey] as string | null) ?? "";
+        }
+      });
+      setEditStageState(initial);
+      setFormErrors([]);
+    }
+  }, [editing]);
+
   const { data, isLoading } = useQuery({
     queryKey: ["controle-fabril"],
     queryFn: async () => {
