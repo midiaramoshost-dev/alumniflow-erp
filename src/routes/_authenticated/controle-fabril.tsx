@@ -243,6 +243,49 @@ function ControleFabrilPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const create = useMutation({
+    mutationFn: async (payload: {
+      titulo: string;
+      cliente_nome: string | null;
+      data_entrega_prevista: string | null;
+      observacoes: string | null;
+    }) => {
+      const { error } = await (supabase as unknown as { from: (t: string) => any })
+        .from("obras")
+        .insert({
+          titulo: payload.titulo,
+          cliente_nome: payload.cliente_nome,
+          data_entrega_prevista: payload.data_entrega_prevista,
+          observacoes: payload.observacoes,
+          status: "planejamento",
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["controle-fabril"] });
+      qc.invalidateQueries({ queryKey: ["obras"] });
+      toast.success("Nova obra criada no controle fabril");
+      setCreating(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const onCreate = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const titulo = String(fd.get("titulo") ?? "").trim();
+    if (!titulo) {
+      toast.error("Informe o título da obra");
+      return;
+    }
+    create.mutate({
+      titulo,
+      cliente_nome: String(fd.get("cliente_nome") ?? "").trim() || null,
+      data_entrega_prevista: String(fd.get("data_entrega_prevista") ?? "") || null,
+      observacoes: String(fd.get("observacoes") ?? "").trim() || null,
+    });
+  };
+
   const quickStamp = (o: Obra, key: keyof Obra) => {
     save.mutate({ id: o.id, [key]: new Date().toISOString() } as Partial<Obra> & {
       id: string;
