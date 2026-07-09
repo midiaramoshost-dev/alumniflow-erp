@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageShell } from "@/components/page-shell";
@@ -14,6 +14,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -39,6 +46,8 @@ import {
   Sparkles,
   Square,
   Plus,
+  ListTree,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -181,6 +190,8 @@ function ControleFabrilPage() {
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Obra | null>(null);
   const [creating, setCreating] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuQuery, setMenuQuery] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["controle-fabril"],
@@ -331,6 +342,10 @@ function ControleFabrilPage() {
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
+          <Button variant="outline" onClick={() => setMenuOpen(true)}>
+            <ListTree className="h-4 w-4 mr-2" />
+            Abrir controle
+          </Button>
           <Button onClick={() => setCreating(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Novo Controle
@@ -458,9 +473,19 @@ function ControleFabrilPage() {
                   );
                 })}
                 <TableCell className="text-right">
-                  <Button size="sm" variant="outline" onClick={() => setEditing(o)}>
-                    Editar
-                  </Button>
+                  <div className="flex gap-1 justify-end">
+                    <Button size="sm" variant="ghost" asChild>
+                      <Link
+                        to="/controle-fabril/$obraId"
+                        params={{ obraId: o.id }}
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Link>
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditing(o)}>
+                      Editar
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -682,6 +707,89 @@ function ControleFabrilPage() {
           )}
         </DialogContent>
       </Dialog>
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent side="left" className="w-full sm:max-w-md flex flex-col">
+          <SheetHeader>
+            <SheetTitle>Controles cadastrados</SheetTitle>
+            <SheetDescription>
+              Selecione uma obra para abrir os detalhes de entrada/saída.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="relative mt-4">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por número, cliente ou obra…"
+              className="pl-8"
+              value={menuQuery}
+              onChange={(e) => setMenuQuery(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="flex-1 overflow-y-auto mt-4 -mx-6 px-6 space-y-1">
+            {(() => {
+              const s = menuQuery.trim().toLowerCase();
+              const list = (data ?? []).filter((o) =>
+                !s
+                  ? true
+                  : [o.titulo, o.cliente_nome, String(o.numero)].some((v) =>
+                      (v ?? "").toLowerCase().includes(s),
+                    ),
+              );
+              if (list.length === 0) {
+                return (
+                  <div className="text-center text-xs text-muted-foreground py-8">
+                    Nenhum controle encontrado.
+                  </div>
+                );
+              }
+              return list.map((o) => {
+                const done = !!o.data_conferencia_saida;
+                const wip = SECTOR_STAGES.some(
+                  (st) => o[st.entradaKey] && !o[st.saidaKey],
+                );
+                return (
+                  <Link
+                    key={o.id}
+                    to="/controle-fabril/$obraId"
+                    params={{ obraId: o.id }}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-[10px] text-muted-foreground">
+                        OB-{o.numero}
+                      </div>
+                      <div className="text-sm font-medium truncate">
+                        {o.cliente_nome ?? o.titulo}
+                      </div>
+                      {o.cliente_nome && (
+                        <div className="text-xs text-muted-foreground truncate">
+                          {o.titulo}
+                        </div>
+                      )}
+                    </div>
+                    <div className="shrink-0">
+                      {done ? (
+                        <Badge variant="default" className="text-[10px]">
+                          Concluído
+                        </Badge>
+                      ) : wip ? (
+                        <Badge variant="secondary" className="text-[10px]">
+                          Em curso
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px]">
+                          {o.status}
+                        </Badge>
+                      )}
+                    </div>
+                  </Link>
+                );
+              });
+            })()}
+          </div>
+        </SheetContent>
+      </Sheet>
     </PageShell>
   );
 }
