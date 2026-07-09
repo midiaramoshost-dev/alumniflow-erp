@@ -291,5 +291,11 @@ export async function buildOrcamentoPdf(orcamentoId: string): Promise<{ doc: jsP
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")}.pdf`;
+  return { doc, filename };
+}
+
+export async function generateOrcamentoPdf(orcamentoId: string) {
+  const { doc, filename } = await buildOrcamentoPdf(orcamentoId);
   doc.save(filename);
 }
+
