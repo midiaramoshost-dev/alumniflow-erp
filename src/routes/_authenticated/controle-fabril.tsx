@@ -234,6 +234,26 @@ function ControleFabrilPage() {
   const [creating, setCreating] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
+  const [formTick, setFormTick] = useState(0); // força re-render nos validadores inline
+  const [formErrors, setFormErrors] = useState<string[]>([]);
+
+  // Realtime: atualiza a lista quando obras são criadas/alteradas.
+  useEffect(() => {
+    const channel = supabase
+      .channel("controle-fabril-obras")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "obras" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["controle-fabril"] });
+          qc.invalidateQueries({ queryKey: ["obras"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["controle-fabril"],
