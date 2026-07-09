@@ -46,6 +46,8 @@ import {
   Sparkles,
   Square,
   Plus,
+  ListTree,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
