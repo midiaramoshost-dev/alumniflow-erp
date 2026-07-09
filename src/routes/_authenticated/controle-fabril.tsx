@@ -540,7 +540,15 @@ function ControleFabrilPage() {
                   return (
                     <TableCell key={String(s.key)} className="text-center">
                       <div className="flex items-center justify-center gap-1.5">
-                        <StatusDot state={v ? "done" : "empty"} />
+                        <StatusDot
+                          state={v ? "done" : "empty"}
+                          onClick={v ? undefined : () => completePreStage(o, s)}
+                          title={
+                            v
+                              ? `${s.label} — concluída em ${fmtDate(v)}`
+                              : `Clique para marcar ${s.label} como concluída hoje`
+                          }
+                        />
                         {v ? (
                           <Badge variant="default" className="text-[10px]">
                             {fmtDate(v)}
