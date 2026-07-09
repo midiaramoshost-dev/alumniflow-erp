@@ -59,6 +59,7 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PermissionsMatrix } from "@/components/permissions-matrix";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
