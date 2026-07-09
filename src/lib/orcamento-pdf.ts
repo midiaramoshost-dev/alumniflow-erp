@@ -23,7 +23,7 @@ const MUTED: [number, number, number] = [113, 113, 122];
 
 type Acessorio = { descricao?: string; codigo?: string; quantidade?: number; preco_unitario?: number };
 
-export async function generateOrcamentoPdf(orcamentoId: string) {
+export async function buildOrcamentoPdf(orcamentoId: string): Promise<{ doc: jsPDF; filename: string }> {
   const [{ data: orc, error: e1 }, { data: itens, error: e2 }] = await Promise.all([
     supabase.from("orcamentos").select("*").eq("id", orcamentoId).maybeSingle(),
     supabase.from("orcamento_itens").select("*").eq("orcamento_id", orcamentoId).order("ordem"),
