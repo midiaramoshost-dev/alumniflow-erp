@@ -524,7 +524,7 @@ function AdminPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <Button size="sm" variant="outline" onClick={() => setEditing(p)}>
-                            Editar funções
+                            <Pencil className="h-3.5 w-3.5 mr-1" /> Editar
                           </Button>
                         </TableCell>
                       </TableRow>
