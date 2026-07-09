@@ -608,7 +608,27 @@ function ControleFabrilPage() {
           <DialogHeader>
             <DialogTitle>Novo controle fabril</DialogTitle>
           </DialogHeader>
-          <form onSubmit={onCreate} className="space-y-6">
+          <form
+            onSubmit={onCreate}
+            onChange={(e) =>
+              setCreateStageState(collectStageValues(new FormData(e.currentTarget)))
+            }
+            className="space-y-6"
+          >
+            {formErrors.length > 0 && (
+              <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+                <div className="flex items-center gap-2 font-medium mb-1">
+                  <AlertCircle className="h-4 w-4" />
+                  Corrija antes de salvar
+                </div>
+                <ul className="list-disc pl-5 space-y-0.5 text-xs">
+                  {formErrors.map((err, i) => (
+                    <li key={i}>{err}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <section>
               <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
                 Dados da obra
@@ -655,53 +675,62 @@ function ControleFabrilPage() {
                 Setores produtivos
               </h3>
               <div className="grid gap-4">
-                {SECTOR_STAGES.map((s) => (
-                  <div
-                    key={s.label}
-                    className="rounded-md border p-3 grid gap-3 sm:grid-cols-[1fr_1fr_1.2fr]"
-                  >
-                    <div>
-                      <Label
-                        htmlFor={`new-${String(s.entradaKey)}`}
-                        className="flex items-center gap-1.5 text-xs"
-                      >
-                        <s.icon className="h-3.5 w-3.5" />
-                        {s.label} — Entrada
-                      </Label>
-                      <Input
-                        id={`new-${String(s.entradaKey)}`}
-                        name={String(s.entradaKey)}
-                        type="date"
-                      />
+                {SECTOR_STAGES.map((s) => {
+                  const state = stageState(createStageState, s);
+                  return (
+                    <div
+                      key={s.label}
+                      className={`rounded-md border p-3 grid gap-3 sm:grid-cols-[1fr_1fr_1.2fr_auto] ${
+                        state === "incomplete" ? "border-destructive/50 bg-destructive/5" : ""
+                      }`}
+                    >
+                      <div>
+                        <Label
+                          htmlFor={`new-${String(s.entradaKey)}`}
+                          className="flex items-center gap-1.5 text-xs"
+                        >
+                          <s.icon className="h-3.5 w-3.5" />
+                          {s.label} — Entrada
+                        </Label>
+                        <Input
+                          id={`new-${String(s.entradaKey)}`}
+                          name={String(s.entradaKey)}
+                          type="date"
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor={`new-${String(s.saidaKey)}`}
+                          className="flex items-center gap-1.5 text-xs"
+                        >
+                          <LogOut className="h-3.5 w-3.5" />
+                          {s.label} — Saída
+                        </Label>
+                        <Input
+                          id={`new-${String(s.saidaKey)}`}
+                          name={String(s.saidaKey)}
+                          type="date"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`new-${String(s.nameKey)}`} className="text-xs">
+                          {s.nameLabel}
+                        </Label>
+                        <Input
+                          id={`new-${String(s.nameKey)}`}
+                          name={String(s.nameKey)}
+                          placeholder="Nome do responsável"
+                        />
+                      </div>
+                      <div className="flex items-end justify-end pb-1">
+                        <StageBadge state={state} />
+                      </div>
                     </div>
-                    <div>
-                      <Label
-                        htmlFor={`new-${String(s.saidaKey)}`}
-                        className="flex items-center gap-1.5 text-xs"
-                      >
-                        <LogOut className="h-3.5 w-3.5" />
-                        {s.label} — Saída
-                      </Label>
-                      <Input
-                        id={`new-${String(s.saidaKey)}`}
-                        name={String(s.saidaKey)}
-                        type="date"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor={`new-${String(s.nameKey)}`} className="text-xs">
-                        {s.nameLabel}
-                      </Label>
-                      <Input
-                        id={`new-${String(s.nameKey)}`}
-                        name={String(s.nameKey)}
-                        placeholder="Nome do responsável"
-                      />
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
+
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setCreating(false)}>
