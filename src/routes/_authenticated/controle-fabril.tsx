@@ -186,6 +186,47 @@ function toDateInput(v: string | null | undefined): string {
   return v ? v.slice(0, 10) : "";
 }
 
+/**
+ * Valida coerência de datas entre pré-produção e setores.
+ * Retorna array de erros por rótulo/campo; vazio = ok.
+ */
+function validateStages(
+  values: Record<string, string | null | undefined>,
+): string[] {
+  const errors: string[] = [];
+  for (const s of SECTOR_STAGES) {
+    const ent = (values[s.entradaKey as string] ?? "") as string;
+    const sai = (values[s.saidaKey as string] ?? "") as string;
+    const nome = ((values[s.nameKey as string] ?? "") as string).trim();
+    if (sai && !ent) {
+      errors.push(`${s.label}: não é possível registrar saída sem entrada.`);
+    }
+    if (ent && sai && sai < ent) {
+      errors.push(`${s.label}: saída não pode ser anterior à entrada.`);
+    }
+    if ((ent || sai) && !nome) {
+      errors.push(`${s.label}: informe o ${s.nameLabel.toLowerCase()}.`);
+    }
+  }
+  return errors;
+}
+
+function stageState(
+  values: Record<string, string | null | undefined>,
+  s: SectorStage,
+): "empty" | "in_progress" | "incomplete" | "done" {
+  const ent = (values[s.entradaKey as string] ?? "") as string;
+  const sai = (values[s.saidaKey as string] ?? "") as string;
+  const nome = ((values[s.nameKey as string] ?? "") as string).trim();
+  if (!ent && !sai && !nome) return "empty";
+  if (sai && !ent) return "incomplete";
+  if (ent && sai && sai < ent) return "incomplete";
+  if ((ent || sai) && !nome) return "incomplete";
+  if (ent && !sai) return "in_progress";
+  if (ent && sai) return "done";
+  return "incomplete";
+}
+
 function ControleFabrilPage() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
