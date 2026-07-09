@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +48,7 @@ import {
   Plus,
   ListTree,
   ExternalLink,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -185,6 +186,47 @@ function toDateInput(v: string | null | undefined): string {
   return v ? v.slice(0, 10) : "";
 }
 
+/**
+ * Valida coerência de datas entre pré-produção e setores.
+ * Retorna array de erros por rótulo/campo; vazio = ok.
+ */
+function validateStages(
+  values: Record<string, string | null | undefined>,
+): string[] {
+  const errors: string[] = [];
+  for (const s of SECTOR_STAGES) {
+    const ent = (values[s.entradaKey as string] ?? "") as string;
+    const sai = (values[s.saidaKey as string] ?? "") as string;
+    const nome = ((values[s.nameKey as string] ?? "") as string).trim();
+    if (sai && !ent) {
+      errors.push(`${s.label}: não é possível registrar saída sem entrada.`);
+    }
+    if (ent && sai && sai < ent) {
+      errors.push(`${s.label}: saída não pode ser anterior à entrada.`);
+    }
+    if ((ent || sai) && !nome) {
+      errors.push(`${s.label}: informe o ${s.nameLabel.toLowerCase()}.`);
+    }
+  }
+  return errors;
+}
+
+function stageState(
+  values: Record<string, string | null | undefined>,
+  s: SectorStage,
+): "empty" | "in_progress" | "incomplete" | "done" {
+  const ent = (values[s.entradaKey as string] ?? "") as string;
+  const sai = (values[s.saidaKey as string] ?? "") as string;
+  const nome = ((values[s.nameKey as string] ?? "") as string).trim();
+  if (!ent && !sai && !nome) return "empty";
+  if (sai && !ent) return "incomplete";
+  if (ent && sai && sai < ent) return "incomplete";
+  if ((ent || sai) && !nome) return "incomplete";
+  if (ent && !sai) return "in_progress";
+  if (ent && sai) return "done";
+  return "incomplete";
+}
+
 function ControleFabrilPage() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
@@ -192,6 +234,60 @@ function ControleFabrilPage() {
   const [creating, setCreating] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
+  const [formErrors, setFormErrors] = useState<string[]>([]);
+  const [createStageState, setCreateStageState] = useState<
+    Record<string, string | null>
+  >({});
+  const [editStageState, setEditStageState] = useState<
+    Record<string, string | null>
+  >({});
+
+  // Realtime: atualiza a lista quando obras são criadas/alteradas.
+  useEffect(() => {
+    const channel = supabase
+      .channel("controle-fabril-obras")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "obras" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["controle-fabril"] });
+          qc.invalidateQueries({ queryKey: ["obras"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
+  // Reset live-validation state when dialogs open/close.
+  useEffect(() => {
+    if (creating) {
+      setCreateStageState({});
+      setFormErrors([]);
+    }
+  }, [creating]);
+  useEffect(() => {
+    if (editing) {
+      const initial: Record<string, string | null> = {};
+      STAGES.forEach((s) => {
+        if (s.kind === "pre") {
+          initial[s.key as string] = toDateInput(editing[s.key] as string | null);
+        } else {
+          initial[s.entradaKey as string] = toDateInput(
+            editing[s.entradaKey] as string | null,
+          );
+          initial[s.saidaKey as string] = toDateInput(
+            editing[s.saidaKey] as string | null,
+          );
+          initial[s.nameKey as string] =
+            (editing[s.nameKey] as string | null) ?? "";
+        }
+      });
+      setEditStageState(initial);
+      setFormErrors([]);
+    }
+  }, [editing]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["controle-fabril"],
@@ -270,33 +366,50 @@ function ControleFabrilPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const collectStageValues = (
+    fd: FormData,
+  ): Record<string, string | null> => {
+    const values: Record<string, string | null> = {};
+    STAGES.forEach((s) => {
+      if (s.kind === "pre") {
+        values[s.key as string] = String(fd.get(s.key as string) ?? "") || null;
+      } else {
+        values[s.entradaKey as string] =
+          String(fd.get(s.entradaKey as string) ?? "") || null;
+        values[s.saidaKey as string] =
+          String(fd.get(s.saidaKey as string) ?? "") || null;
+        values[s.nameKey as string] =
+          String(fd.get(s.nameKey as string) ?? "").trim() || null;
+      }
+    });
+    return values;
+  };
+
   const onCreate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const titulo = String(fd.get("titulo") ?? "").trim();
     if (!titulo) {
+      setFormErrors(["Informe o título da obra."]);
       toast.error("Informe o título da obra");
       return;
     }
+    const stageValues = collectStageValues(fd);
+    const errors = validateStages(stageValues);
+    if (errors.length) {
+      setFormErrors(errors);
+      toast.error(errors[0]);
+      return;
+    }
+    setFormErrors([]);
     const payload: Record<string, unknown> = {
       titulo,
       cliente_nome: String(fd.get("cliente_nome") ?? "").trim() || null,
       data_entrega_prevista: String(fd.get("data_entrega_prevista") ?? "") || null,
       observacoes: String(fd.get("observacoes") ?? "").trim() || null,
       status: "planejamento",
+      ...stageValues,
     };
-    STAGES.forEach((s) => {
-      if (s.kind === "pre") {
-        payload[s.key as string] = String(fd.get(s.key as string) ?? "") || null;
-      } else {
-        payload[s.entradaKey as string] =
-          String(fd.get(s.entradaKey as string) ?? "") || null;
-        payload[s.saidaKey as string] =
-          String(fd.get(s.saidaKey as string) ?? "") || null;
-        payload[s.nameKey as string] =
-          String(fd.get(s.nameKey as string) ?? "").trim() || null;
-      }
-    });
     create.mutate(payload);
   };
 
@@ -310,22 +423,19 @@ function ControleFabrilPage() {
     e.preventDefault();
     if (!editing) return;
     const fd = new FormData(e.currentTarget);
-    const payload: Partial<Obra> & { id: string } = { id: editing.id };
-    STAGES.forEach((s) => {
-      if (s.kind === "pre") {
-        (payload as Record<string, unknown>)[s.key as string] =
-          String(fd.get(s.key as string) ?? "") || null;
-      } else {
-        (payload as Record<string, unknown>)[s.entradaKey as string] =
-          String(fd.get(s.entradaKey as string) ?? "") || null;
-        (payload as Record<string, unknown>)[s.saidaKey as string] =
-          String(fd.get(s.saidaKey as string) ?? "") || null;
-        (payload as Record<string, unknown>)[s.nameKey as string] =
-          String(fd.get(s.nameKey as string) ?? "").trim() || null;
-      }
+    const stageValues = collectStageValues(fd);
+    const errors = validateStages(stageValues);
+    if (errors.length) {
+      setFormErrors(errors);
+      toast.error(errors[0]);
+      return;
+    }
+    setFormErrors([]);
+    save.mutate({ id: editing.id, ...stageValues } as Partial<Obra> & {
+      id: string;
     });
-    save.mutate(payload);
   };
+
 
   return (
     <PageShell
@@ -498,7 +608,27 @@ function ControleFabrilPage() {
           <DialogHeader>
             <DialogTitle>Novo controle fabril</DialogTitle>
           </DialogHeader>
-          <form onSubmit={onCreate} className="space-y-6">
+          <form
+            onSubmit={onCreate}
+            onChange={(e) =>
+              setCreateStageState(collectStageValues(new FormData(e.currentTarget)))
+            }
+            className="space-y-6"
+          >
+            {formErrors.length > 0 && (
+              <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+                <div className="flex items-center gap-2 font-medium mb-1">
+                  <AlertCircle className="h-4 w-4" />
+                  Corrija antes de salvar
+                </div>
+                <ul className="list-disc pl-5 space-y-0.5 text-xs">
+                  {formErrors.map((err, i) => (
+                    <li key={i}>{err}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <section>
               <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
                 Dados da obra
@@ -545,53 +675,62 @@ function ControleFabrilPage() {
                 Setores produtivos
               </h3>
               <div className="grid gap-4">
-                {SECTOR_STAGES.map((s) => (
-                  <div
-                    key={s.label}
-                    className="rounded-md border p-3 grid gap-3 sm:grid-cols-[1fr_1fr_1.2fr]"
-                  >
-                    <div>
-                      <Label
-                        htmlFor={`new-${String(s.entradaKey)}`}
-                        className="flex items-center gap-1.5 text-xs"
-                      >
-                        <s.icon className="h-3.5 w-3.5" />
-                        {s.label} — Entrada
-                      </Label>
-                      <Input
-                        id={`new-${String(s.entradaKey)}`}
-                        name={String(s.entradaKey)}
-                        type="date"
-                      />
+                {SECTOR_STAGES.map((s) => {
+                  const state = stageState(createStageState, s);
+                  return (
+                    <div
+                      key={s.label}
+                      className={`rounded-md border p-3 grid gap-3 sm:grid-cols-[1fr_1fr_1.2fr_auto] ${
+                        state === "incomplete" ? "border-destructive/50 bg-destructive/5" : ""
+                      }`}
+                    >
+                      <div>
+                        <Label
+                          htmlFor={`new-${String(s.entradaKey)}`}
+                          className="flex items-center gap-1.5 text-xs"
+                        >
+                          <s.icon className="h-3.5 w-3.5" />
+                          {s.label} — Entrada
+                        </Label>
+                        <Input
+                          id={`new-${String(s.entradaKey)}`}
+                          name={String(s.entradaKey)}
+                          type="date"
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor={`new-${String(s.saidaKey)}`}
+                          className="flex items-center gap-1.5 text-xs"
+                        >
+                          <LogOut className="h-3.5 w-3.5" />
+                          {s.label} — Saída
+                        </Label>
+                        <Input
+                          id={`new-${String(s.saidaKey)}`}
+                          name={String(s.saidaKey)}
+                          type="date"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`new-${String(s.nameKey)}`} className="text-xs">
+                          {s.nameLabel}
+                        </Label>
+                        <Input
+                          id={`new-${String(s.nameKey)}`}
+                          name={String(s.nameKey)}
+                          placeholder="Nome do responsável"
+                        />
+                      </div>
+                      <div className="flex items-end justify-end pb-1">
+                        <StageBadge state={state} />
+                      </div>
                     </div>
-                    <div>
-                      <Label
-                        htmlFor={`new-${String(s.saidaKey)}`}
-                        className="flex items-center gap-1.5 text-xs"
-                      >
-                        <LogOut className="h-3.5 w-3.5" />
-                        {s.label} — Saída
-                      </Label>
-                      <Input
-                        id={`new-${String(s.saidaKey)}`}
-                        name={String(s.saidaKey)}
-                        type="date"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor={`new-${String(s.nameKey)}`} className="text-xs">
-                        {s.nameLabel}
-                      </Label>
-                      <Input
-                        id={`new-${String(s.nameKey)}`}
-                        name={String(s.nameKey)}
-                        placeholder="Nome do responsável"
-                      />
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
+
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setCreating(false)}>
@@ -615,7 +754,26 @@ function ControleFabrilPage() {
             </DialogTitle>
           </DialogHeader>
           {editing && (
-            <form onSubmit={onSubmit} className="space-y-6">
+            <form
+              onSubmit={onSubmit}
+              onChange={(e) =>
+                setEditStageState(collectStageValues(new FormData(e.currentTarget)))
+              }
+              className="space-y-6"
+            >
+              {formErrors.length > 0 && (
+                <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+                  <div className="flex items-center gap-2 font-medium mb-1">
+                    <AlertCircle className="h-4 w-4" />
+                    Corrija antes de salvar
+                  </div>
+                  <ul className="list-disc pl-5 space-y-0.5 text-xs">
+                    {formErrors.map((err, i) => (
+                      <li key={i}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <section>
                 <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
                   Pré-produção
@@ -643,56 +801,65 @@ function ControleFabrilPage() {
                   Setores produtivos
                 </h3>
                 <div className="grid gap-4">
-                  {SECTOR_STAGES.map((s) => (
-                    <div
-                      key={s.label}
-                      className="rounded-md border p-3 grid gap-3 sm:grid-cols-[1fr_1fr_1.2fr]"
-                    >
-                      <div>
-                        <Label
-                          htmlFor={String(s.entradaKey)}
-                          className="flex items-center gap-1.5 text-xs"
-                        >
-                          <s.icon className="h-3.5 w-3.5" />
-                          {s.label} — Entrada
-                        </Label>
-                        <Input
-                          id={String(s.entradaKey)}
-                          name={String(s.entradaKey)}
-                          type="date"
-                          defaultValue={toDateInput(editing[s.entradaKey] as string | null)}
-                        />
+                  {SECTOR_STAGES.map((s) => {
+                    const state = stageState(editStageState, s);
+                    return (
+                      <div
+                        key={s.label}
+                        className={`rounded-md border p-3 grid gap-3 sm:grid-cols-[1fr_1fr_1.2fr_auto] ${
+                          state === "incomplete" ? "border-destructive/50 bg-destructive/5" : ""
+                        }`}
+                      >
+                        <div>
+                          <Label
+                            htmlFor={String(s.entradaKey)}
+                            className="flex items-center gap-1.5 text-xs"
+                          >
+                            <s.icon className="h-3.5 w-3.5" />
+                            {s.label} — Entrada
+                          </Label>
+                          <Input
+                            id={String(s.entradaKey)}
+                            name={String(s.entradaKey)}
+                            type="date"
+                            defaultValue={toDateInput(editing[s.entradaKey] as string | null)}
+                          />
+                        </div>
+                        <div>
+                          <Label
+                            htmlFor={String(s.saidaKey)}
+                            className="flex items-center gap-1.5 text-xs"
+                          >
+                            <LogOut className="h-3.5 w-3.5" />
+                            {s.label} — Saída
+                          </Label>
+                          <Input
+                            id={String(s.saidaKey)}
+                            name={String(s.saidaKey)}
+                            type="date"
+                            defaultValue={toDateInput(editing[s.saidaKey] as string | null)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={String(s.nameKey)} className="text-xs">
+                            {s.nameLabel}
+                          </Label>
+                          <Input
+                            id={String(s.nameKey)}
+                            name={String(s.nameKey)}
+                            defaultValue={(editing[s.nameKey] as string | null) ?? ""}
+                            placeholder="Nome do responsável"
+                          />
+                        </div>
+                        <div className="flex items-end justify-end pb-1">
+                          <StageBadge state={state} />
+                        </div>
                       </div>
-                      <div>
-                        <Label
-                          htmlFor={String(s.saidaKey)}
-                          className="flex items-center gap-1.5 text-xs"
-                        >
-                          <LogOut className="h-3.5 w-3.5" />
-                          {s.label} — Saída
-                        </Label>
-                        <Input
-                          id={String(s.saidaKey)}
-                          name={String(s.saidaKey)}
-                          type="date"
-                          defaultValue={toDateInput(editing[s.saidaKey] as string | null)}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor={String(s.nameKey)} className="text-xs">
-                          {s.nameLabel}
-                        </Label>
-                        <Input
-                          id={String(s.nameKey)}
-                          name={String(s.nameKey)}
-                          defaultValue={(editing[s.nameKey] as string | null) ?? ""}
-                          placeholder="Nome do responsável"
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
+
 
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setEditing(null)}>
@@ -815,5 +982,40 @@ function Kpi({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function StageBadge({
+  state,
+}: {
+  state: "empty" | "in_progress" | "incomplete" | "done";
+}) {
+  if (state === "done") {
+    return (
+      <Badge variant="default" className="text-[10px]">
+        <CheckCircle2 className="h-3 w-3 mr-1" />
+        Concluído
+      </Badge>
+    );
+  }
+  if (state === "in_progress") {
+    return (
+      <Badge variant="secondary" className="text-[10px]">
+        Em curso
+      </Badge>
+    );
+  }
+  if (state === "incomplete") {
+    return (
+      <Badge variant="destructive" className="text-[10px]">
+        <AlertCircle className="h-3 w-3 mr-1" />
+        Incompleto
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="outline" className="text-[10px]">
+      Pendente
+    </Badge>
   );
 }
