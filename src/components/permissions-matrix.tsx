@@ -305,7 +305,7 @@ export function PermissionsMatrix() {
                                 </TableRow>
                               );
                             })}
-                          </>
+                          </Fragment>
                         ))}
                       </TableBody>
                     </Table>
