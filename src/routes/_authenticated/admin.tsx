@@ -843,67 +843,6 @@ function formatCell(v: unknown, type?: Col["type"]) {
   return String(v);
 }
 
-/* ---------------- Role editor ---------------- */
-
-function RoleEditor({
-  initial,
-  onCancel,
-  onSave,
-  saving,
-  isSelf,
-}: {
-  initial: AppRole[];
-  onCancel: () => void;
-  onSave: (roles: AppRole[]) => void;
-  saving: boolean;
-  isSelf: boolean;
-}) {
-  const [selected, setSelected] = useState<Set<AppRole>>(new Set(initial));
-  const toggle = (r: AppRole) => {
-    const next = new Set(selected);
-    if (next.has(r)) next.delete(r);
-    else next.add(r);
-    setSelected(next);
-  };
-
-  const submit = () => {
-    const roles = Array.from(selected);
-    if (isSelf && !roles.includes("admin")) {
-      if (!confirm("Você está removendo sua própria função de admin. Continuar?")) return;
-    }
-    onSave(roles);
-  };
-
-  return (
-    <div className="space-y-3">
-      {ROLES.map((r) => {
-        const checked = selected.has(r.key);
-        return (
-          <label
-            key={r.key}
-            className="flex items-start gap-3 rounded-md border p-3 cursor-pointer hover:bg-accent/40"
-          >
-            <Checkbox checked={checked} onCheckedChange={() => toggle(r.key)} />
-            <div>
-              <div className="font-medium text-sm">{r.label}</div>
-              <div className="text-xs text-muted-foreground">{r.description}</div>
-            </div>
-          </label>
-        );
-      })}
-      <DialogFooter>
-        <Button variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button onClick={submit} disabled={saving}>
-          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Salvar
-        </Button>
-      </DialogFooter>
-    </div>
-  );
-}
-
 /* ---------------- Cards ---------------- */
 
 function ModuleCard({
