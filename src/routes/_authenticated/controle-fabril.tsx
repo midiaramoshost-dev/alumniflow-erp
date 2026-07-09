@@ -984,3 +984,38 @@ function Kpi({
     </Card>
   );
 }
+
+function StageBadge({
+  state,
+}: {
+  state: "empty" | "in_progress" | "incomplete" | "done";
+}) {
+  if (state === "done") {
+    return (
+      <Badge variant="default" className="text-[10px]">
+        <CheckCircle2 className="h-3 w-3 mr-1" />
+        Concluído
+      </Badge>
+    );
+  }
+  if (state === "in_progress") {
+    return (
+      <Badge variant="secondary" className="text-[10px]">
+        Em curso
+      </Badge>
+    );
+  }
+  if (state === "incomplete") {
+    return (
+      <Badge variant="destructive" className="text-[10px]">
+        <AlertCircle className="h-3 w-3 mr-1" />
+        Incompleto
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="outline" className="text-[10px]">
+      Pendente
+    </Badge>
+  );
+}
