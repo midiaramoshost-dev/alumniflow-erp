@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,12 +11,14 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Search, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Search, Loader2, ImageIcon, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/acessorios")({
   component: AcessoriosPage,
 });
+
+const BUCKET = "acessorio-imagens";
 
 type Item = {
   id: string;
@@ -28,6 +30,7 @@ type Item = {
   estoque_atual: number | null;
   estoque_minimo: number | null;
   ativo: boolean;
+  imagem_url: string | null;
 };
 
 function num(v: FormDataEntryValue | null): number | null {
@@ -44,6 +47,10 @@ function AcessoriosPage() {
   const [ativo, setAtivo] = useState(true);
   const [categoria, setCategoria] = useState<string>("");
   const [categoriaFiltro, setCategoriaFiltro] = useState<string>("todas");
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const CATEGORIAS = [
     "Puxadores",
@@ -62,6 +69,40 @@ function AcessoriosPage() {
     },
   });
 
+  // Batch-sign image URLs for the visible rows
+  const paths = useMemo(
+    () => Array.from(new Set((data ?? []).map((i) => i.imagem_url).filter((p): p is string => !!p))),
+    [data],
+  );
+  const { data: signedMap } = useQuery({
+    queryKey: ["acessorios-signed", paths],
+    enabled: paths.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.storage.from(BUCKET).createSignedUrls(paths, 3600);
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r) => { if (r.path && r.signedUrl) map[r.path] = r.signedUrl; });
+      return map;
+    },
+    staleTime: 60_000 * 30,
+  });
+
+  // Preview for the currently editing image
+  useEffect(() => {
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    if (editing?.imagem_url && !removeImage) {
+      supabase.storage.from(BUCKET).createSignedUrl(editing.imagem_url, 3600).then(({ data }) => {
+        setPreviewUrl(data?.signedUrl ?? null);
+      });
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [file, editing, removeImage]);
+
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     let base = data ?? [];
@@ -69,6 +110,24 @@ function AcessoriosPage() {
     if (!s) return base;
     return base.filter((v) => [v.codigo, v.descricao, v.categoria].some((x) => (x ?? "").toLowerCase().includes(s)));
   }, [data, q, categoriaFiltro]);
+
+  const openNew = () => {
+    setEditing(null);
+    setAtivo(true);
+    setCategoria("");
+    setFile(null);
+    setRemoveImage(false);
+    setOpen(true);
+  };
+
+  const openEdit = (v: Item) => {
+    setEditing(v);
+    setAtivo(v.ativo);
+    setCategoria(v.categoria ?? "");
+    setFile(null);
+    setRemoveImage(false);
+    setOpen(true);
+  };
 
   const save = useMutation({
     mutationFn: async (payload: Partial<Item> & { id?: string }) => {
@@ -92,8 +151,11 @@ function AcessoriosPage() {
   });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("acessorios").delete().eq("id", id);
+    mutationFn: async (item: Item) => {
+      if (item.imagem_url) {
+        await supabase.storage.from(BUCKET).remove([item.imagem_url]);
+      }
+      const { error } = await supabase.from("acessorios").delete().eq("id", item.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -104,12 +166,42 @@ function AcessoriosPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const codigo = String(fd.get("codigo") ?? "").trim();
     const descricao = String(fd.get("descricao") ?? "").trim();
     if (!codigo || !descricao) return toast.error("Código e descrição são obrigatórios");
+
+    let imagem_url: string | null = editing?.imagem_url ?? null;
+
+    try {
+      if (removeImage && editing?.imagem_url) {
+        setUploading(true);
+        await supabase.storage.from(BUCKET).remove([editing.imagem_url]);
+        imagem_url = null;
+      }
+      if (file) {
+        setUploading(true);
+        if (editing?.imagem_url) {
+          await supabase.storage.from(BUCKET).remove([editing.imagem_url]);
+        }
+        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
+          contentType: file.type,
+          upsert: false,
+        });
+        if (error) throw error;
+        imagem_url = path;
+      }
+    } catch (err) {
+      setUploading(false);
+      toast.error((err as Error).message);
+      return;
+    }
+    setUploading(false);
+
     save.mutate({
       id: editing?.id,
       codigo,
@@ -120,6 +212,7 @@ function AcessoriosPage() {
       estoque_atual: num(fd.get("estoque_atual")) ?? 0,
       estoque_minimo: num(fd.get("estoque_minimo")) ?? 0,
       ativo,
+      imagem_url,
     });
   };
 
@@ -128,7 +221,7 @@ function AcessoriosPage() {
       title="Acessórios"
       description="Puxadores, roldanas, borrachas, parafusos, ferragens"
       newLabel="Novo acessório"
-      onNew={() => { setEditing(null); setAtivo(true); setCategoria(""); setOpen(true); }}
+      onNew={openNew}
       actions={
         <div className="flex items-center gap-2">
           <Select value={categoriaFiltro} onValueChange={setCategoriaFiltro}>
@@ -148,6 +241,7 @@ function AcessoriosPage() {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-16">Foto</TableHead>
             <TableHead>Código</TableHead>
             <TableHead>Descrição</TableHead>
             <TableHead className="hidden md:table-cell">Categoria</TableHead>
@@ -159,15 +253,25 @@ function AcessoriosPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading && <TableRow><TableCell colSpan={8} className="text-center py-10"><Loader2 className="h-4 w-4 animate-spin inline mr-2" />Carregando…</TableCell></TableRow>}
-          {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground text-sm">Nenhum acessório cadastrado.</TableCell></TableRow>}
+          {isLoading && <TableRow><TableCell colSpan={9} className="text-center py-10"><Loader2 className="h-4 w-4 animate-spin inline mr-2" />Carregando…</TableCell></TableRow>}
+          {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={9} className="text-center py-10 text-muted-foreground text-sm">Nenhum acessório cadastrado.</TableCell></TableRow>}
           {filtered.map((v) => {
             const low =
               v.estoque_atual != null &&
               v.estoque_minimo != null &&
               Number(v.estoque_atual) < Number(v.estoque_minimo);
+            const thumb = v.imagem_url ? signedMap?.[v.imagem_url] : null;
             return (
               <TableRow key={v.id}>
+                <TableCell>
+                  <div className="h-10 w-10 rounded-md bg-muted overflow-hidden flex items-center justify-center border">
+                    {thumb ? (
+                      <img src={thumb} alt={v.descricao} className="h-full w-full object-cover" />
+                    ) : (
+                      <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className="font-mono text-xs">{v.codigo}</TableCell>
                 <TableCell className="font-medium">{v.descricao}</TableCell>
                 <TableCell className="hidden md:table-cell text-muted-foreground">{v.categoria ?? "—"}</TableCell>
@@ -180,8 +284,8 @@ function AcessoriosPage() {
                 </TableCell>
                 <TableCell><Badge variant={v.ativo ? "default" : "secondary"}>{v.ativo ? "Ativo" : "Inativo"}</Badge></TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => { setEditing(v); setAtivo(v.ativo); setCategoria(v.categoria ?? ""); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => confirm(`Excluir "${v.codigo}"?`) && remove.mutate(v.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => openEdit(v)}><Pencil className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => confirm(`Excluir "${v.codigo}"?`) && remove.mutate(v)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 </TableCell>
               </TableRow>
             );
@@ -193,6 +297,49 @@ function AcessoriosPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>{editing ? "Editar acessório" : "Novo acessório"}</DialogTitle></DialogHeader>
           <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Label>Imagem</Label>
+              <div className="mt-2 flex items-center gap-4">
+                <div className="h-24 w-24 rounded-md border bg-muted overflow-hidden flex items-center justify-center">
+                  {previewUrl ? (
+                    <img src={previewUrl} alt="Prévia" className="h-full w-full object-cover" />
+                  ) : (
+                    <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm cursor-pointer hover:bg-accent">
+                    <Upload className="h-4 w-4" />
+                    <span>{file ? file.name : "Escolher imagem…"}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] ?? null;
+                        if (f && f.size > 5 * 1024 * 1024) {
+                          toast.error("Imagem deve ter no máximo 5MB");
+                          return;
+                        }
+                        setFile(f);
+                        setRemoveImage(false);
+                      }}
+                    />
+                  </label>
+                  {(file || (editing?.imagem_url && !removeImage)) && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="justify-start text-destructive h-auto py-1"
+                      onClick={() => { setFile(null); setRemoveImage(!!editing?.imagem_url); }}
+                    >
+                      <X className="h-3.5 w-3.5 mr-1" /> Remover imagem
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
             <div><Label htmlFor="codigo">Código *</Label><Input id="codigo" name="codigo" required defaultValue={editing?.codigo ?? ""} /></div>
             <div><Label htmlFor="categoria">Categoria</Label>
               <Select value={categoria || "none"} onValueChange={(v) => setCategoria(v === "none" ? "" : v)}>
@@ -214,7 +361,10 @@ function AcessoriosPage() {
             </div>
             <DialogFooter className="sm:col-span-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={save.isPending}>{save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{editing ? "Salvar" : "Criar"}</Button>
+              <Button type="submit" disabled={save.isPending || uploading}>
+                {(save.isPending || uploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {editing ? "Salvar" : "Criar"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
