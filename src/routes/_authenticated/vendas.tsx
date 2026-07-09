@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Search, Loader2, Plus, X, Wifi, FileDown } from "lucide-react";
-import { buildOrcamentoPdf, generateOrcamentoPdf } from "@/lib/orcamento-pdf";
+import { buildOrcamentoPdf } from "@/lib/orcamento-pdf";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/vendas")({
