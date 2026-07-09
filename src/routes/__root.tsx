@@ -15,6 +15,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { WhatsappFloat } from "@/components/whatsapp-float";
 
 function NotFoundComponent() {
   return (
@@ -144,6 +145,7 @@ function RootComponent() {
       <ThemeProvider>
         <AuthProvider>
           <Outlet />
+          <WhatsappFloat />
           <Toaster richColors position="top-right" />
         </AuthProvider>
       </ThemeProvider>
