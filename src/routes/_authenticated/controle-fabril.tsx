@@ -518,13 +518,16 @@ function ControleFabrilPage() {
                   const v = o[s.key] as string | null;
                   return (
                     <TableCell key={String(s.key)} className="text-center">
-                      {v ? (
-                        <Badge variant="default" className="text-[10px]">
-                          {fmtDate(v)}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground/40 text-xs">—</span>
-                      )}
+                      <div className="flex items-center justify-center gap-1.5">
+                        <StatusDot state={v ? "done" : "empty"} />
+                        {v ? (
+                          <Badge variant="default" className="text-[10px]">
+                            {fmtDate(v)}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground/40 text-xs">—</span>
+                        )}
+                      </div>
                     </TableCell>
                   );
                 })}
@@ -533,9 +536,15 @@ function ControleFabrilPage() {
                   const sai = o[s.saidaKey] as string | null;
                   const name = o[s.nameKey] as string | null;
                   const inProgress = ent && !sai;
+                  const cellState: "empty" | "in_progress" | "done" = sai
+                    ? "done"
+                    : ent
+                      ? "in_progress"
+                      : "empty";
                   return (
                     <TableCell key={s.label} className="text-center align-top">
                       <div className="flex flex-col gap-1 items-center">
+                        <StatusDot state={cellState} />
                         <div className="flex flex-col items-center gap-0.5 text-[10px]">
                           <div className="flex items-center gap-1">
                             <LogIn className="h-2.5 w-2.5 text-blue-600" />
@@ -985,6 +994,42 @@ function Kpi({
   );
 }
 
+export function StatusDot({
+  state,
+  className = "",
+}: {
+  state: "empty" | "in_progress" | "incomplete" | "done";
+  className?: string;
+}) {
+  const base = "inline-block h-2 w-2 rounded-full shrink-0";
+  if (state === "done") {
+    return (
+      <span
+        aria-label="Concluído"
+        className={`${base} bg-green-500 shadow-[0_0_0_2px_rgba(34,197,94,0.2)] ${className}`}
+      />
+    );
+  }
+  if (state === "in_progress") {
+    return (
+      <span aria-label="Em curso" className={`relative ${base} ${className}`}>
+        <span className="absolute inset-0 rounded-full bg-amber-500 animate-ping opacity-75" />
+        <span className="relative block h-2 w-2 rounded-full bg-amber-500" />
+      </span>
+    );
+  }
+  // empty (pendente) e incomplete → bolinha vermelha piscando
+  return (
+    <span
+      aria-label={state === "incomplete" ? "Incompleto" : "Pendente"}
+      className={`relative ${base} ${className}`}
+    >
+      <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
+      <span className="relative block h-2 w-2 rounded-full bg-red-500" />
+    </span>
+  );
+}
+
 function StageBadge({
   state,
 }: {
@@ -992,29 +1037,33 @@ function StageBadge({
 }) {
   if (state === "done") {
     return (
-      <Badge variant="default" className="text-[10px]">
-        <CheckCircle2 className="h-3 w-3 mr-1" />
+      <Badge variant="default" className="text-[10px] gap-1">
+        <StatusDot state="done" />
+        <CheckCircle2 className="h-3 w-3" />
         Concluído
       </Badge>
     );
   }
   if (state === "in_progress") {
     return (
-      <Badge variant="secondary" className="text-[10px]">
+      <Badge variant="secondary" className="text-[10px] gap-1">
+        <StatusDot state="in_progress" />
         Em curso
       </Badge>
     );
   }
   if (state === "incomplete") {
     return (
-      <Badge variant="destructive" className="text-[10px]">
-        <AlertCircle className="h-3 w-3 mr-1" />
+      <Badge variant="destructive" className="text-[10px] gap-1">
+        <StatusDot state="incomplete" className="bg-white" />
+        <AlertCircle className="h-3 w-3" />
         Incompleto
       </Badge>
     );
   }
   return (
-    <Badge variant="outline" className="text-[10px]">
+    <Badge variant="outline" className="text-[10px] gap-1">
+      <StatusDot state="empty" />
       Pendente
     </Badge>
   );
