@@ -465,7 +465,43 @@ function ControleFabrilPage() {
         </Table>
       </div>
 
+      <Dialog open={creating} onOpenChange={setCreating}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Novo controle fabril</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={onCreate} className="space-y-4">
+            <div>
+              <Label htmlFor="titulo">Título da obra *</Label>
+              <Input id="titulo" name="titulo" placeholder="Ex.: Fachada Edifício X" required />
+            </div>
+            <div>
+              <Label htmlFor="cliente_nome">Cliente</Label>
+              <Input id="cliente_nome" name="cliente_nome" placeholder="Nome do cliente" />
+            </div>
+            <div>
+              <Label htmlFor="data_entrega_prevista">Entrega prevista</Label>
+              <Input id="data_entrega_prevista" name="data_entrega_prevista" type="date" />
+            </div>
+            <div>
+              <Label htmlFor="observacoes">Observações</Label>
+              <Input id="observacoes" name="observacoes" placeholder="Notas iniciais" />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setCreating(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={create.isPending}>
+                {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Criar
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
+
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
