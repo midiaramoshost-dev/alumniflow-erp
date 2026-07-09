@@ -31,6 +31,7 @@ import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAcessoriosRouteImport } from './routes/_authenticated/acessorios'
 import { Route as AuthenticatedPedidosPedidoIdRouteImport } from './routes/_authenticated/pedidos.$pedidoId'
+import { Route as AuthenticatedControleFabrilObraIdRouteImport } from './routes/_authenticated/controle-fabril.$obraId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -144,6 +145,12 @@ const AuthenticatedPedidosPedidoIdRoute =
     path: '/$pedidoId',
     getParentRoute: () => AuthenticatedPedidosRoute,
   } as any)
+const AuthenticatedControleFabrilObraIdRoute =
+  AuthenticatedControleFabrilObraIdRouteImport.update({
+    id: '/$obraId',
+    path: '/$obraId',
+    getParentRoute: () => AuthenticatedControleFabrilRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -153,7 +160,7 @@ export interface FileRoutesByFullPath {
   '/clientes': typeof AuthenticatedClientesRoute
   '/comercial': typeof AuthenticatedComercialRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/controle-fabril': typeof AuthenticatedControleFabrilRoute
+  '/controle-fabril': typeof AuthenticatedControleFabrilRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/exportar': typeof AuthenticatedExportarRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/vendas': typeof AuthenticatedVendasRoute
   '/vidros': typeof AuthenticatedVidrosRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/controle-fabril/$obraId': typeof AuthenticatedControleFabrilObraIdRoute
   '/pedidos/$pedidoId': typeof AuthenticatedPedidosPedidoIdRoute
 }
 export interface FileRoutesByTo {
@@ -176,7 +184,7 @@ export interface FileRoutesByTo {
   '/clientes': typeof AuthenticatedClientesRoute
   '/comercial': typeof AuthenticatedComercialRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/controle-fabril': typeof AuthenticatedControleFabrilRoute
+  '/controle-fabril': typeof AuthenticatedControleFabrilRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/exportar': typeof AuthenticatedExportarRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
@@ -189,6 +197,7 @@ export interface FileRoutesByTo {
   '/vendas': typeof AuthenticatedVendasRoute
   '/vidros': typeof AuthenticatedVidrosRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/controle-fabril/$obraId': typeof AuthenticatedControleFabrilObraIdRoute
   '/pedidos/$pedidoId': typeof AuthenticatedPedidosPedidoIdRoute
 }
 export interface FileRoutesById {
@@ -201,7 +210,7 @@ export interface FileRoutesById {
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/comercial': typeof AuthenticatedComercialRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/_authenticated/controle-fabril': typeof AuthenticatedControleFabrilRoute
+  '/_authenticated/controle-fabril': typeof AuthenticatedControleFabrilRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/exportar': typeof AuthenticatedExportarRoute
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
@@ -214,6 +223,7 @@ export interface FileRoutesById {
   '/_authenticated/vendas': typeof AuthenticatedVendasRoute
   '/_authenticated/vidros': typeof AuthenticatedVidrosRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/_authenticated/controle-fabril/$obraId': typeof AuthenticatedControleFabrilObraIdRoute
   '/_authenticated/pedidos/$pedidoId': typeof AuthenticatedPedidosPedidoIdRoute
 }
 export interface FileRouteTypes {
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/vendas'
     | '/vidros'
     | '/invite/$token'
+    | '/controle-fabril/$obraId'
     | '/pedidos/$pedidoId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/vendas'
     | '/vidros'
     | '/invite/$token'
+    | '/controle-fabril/$obraId'
     | '/pedidos/$pedidoId'
   id:
     | '__root__'
@@ -286,6 +298,7 @@ export interface FileRouteTypes {
     | '/_authenticated/vendas'
     | '/_authenticated/vidros'
     | '/invite/$token'
+    | '/_authenticated/controle-fabril/$obraId'
     | '/_authenticated/pedidos/$pedidoId'
   fileRoutesById: FileRoutesById
 }
@@ -452,8 +465,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPedidosPedidoIdRouteImport
       parentRoute: typeof AuthenticatedPedidosRoute
     }
+    '/_authenticated/controle-fabril/$obraId': {
+      id: '/_authenticated/controle-fabril/$obraId'
+      path: '/$obraId'
+      fullPath: '/controle-fabril/$obraId'
+      preLoaderRoute: typeof AuthenticatedControleFabrilObraIdRouteImport
+      parentRoute: typeof AuthenticatedControleFabrilRoute
+    }
   }
 }
+
+interface AuthenticatedControleFabrilRouteChildren {
+  AuthenticatedControleFabrilObraIdRoute: typeof AuthenticatedControleFabrilObraIdRoute
+}
+
+const AuthenticatedControleFabrilRouteChildren: AuthenticatedControleFabrilRouteChildren =
+  {
+    AuthenticatedControleFabrilObraIdRoute:
+      AuthenticatedControleFabrilObraIdRoute,
+  }
+
+const AuthenticatedControleFabrilRouteWithChildren =
+  AuthenticatedControleFabrilRoute._addFileChildren(
+    AuthenticatedControleFabrilRouteChildren,
+  )
 
 interface AuthenticatedPedidosRouteChildren {
   AuthenticatedPedidosPedidoIdRoute: typeof AuthenticatedPedidosPedidoIdRoute
@@ -472,7 +507,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedComercialRoute: typeof AuthenticatedComercialRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
-  AuthenticatedControleFabrilRoute: typeof AuthenticatedControleFabrilRoute
+  AuthenticatedControleFabrilRoute: typeof AuthenticatedControleFabrilRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedExportarRoute: typeof AuthenticatedExportarRoute
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
@@ -492,7 +527,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedComercialRoute: AuthenticatedComercialRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
-  AuthenticatedControleFabrilRoute: AuthenticatedControleFabrilRoute,
+  AuthenticatedControleFabrilRoute:
+    AuthenticatedControleFabrilRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedExportarRoute: AuthenticatedExportarRoute,
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
@@ -518,13 +554,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
