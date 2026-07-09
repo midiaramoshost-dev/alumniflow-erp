@@ -518,13 +518,16 @@ function ControleFabrilPage() {
                   const v = o[s.key] as string | null;
                   return (
                     <TableCell key={String(s.key)} className="text-center">
-                      {v ? (
-                        <Badge variant="default" className="text-[10px]">
-                          {fmtDate(v)}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground/40 text-xs">—</span>
-                      )}
+                      <div className="flex items-center justify-center gap-1.5">
+                        <StatusDot state={v ? "done" : "empty"} />
+                        {v ? (
+                          <Badge variant="default" className="text-[10px]">
+                            {fmtDate(v)}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground/40 text-xs">—</span>
+                        )}
+                      </div>
                     </TableCell>
                   );
                 })}
@@ -533,9 +536,15 @@ function ControleFabrilPage() {
                   const sai = o[s.saidaKey] as string | null;
                   const name = o[s.nameKey] as string | null;
                   const inProgress = ent && !sai;
+                  const cellState: "empty" | "in_progress" | "done" = sai
+                    ? "done"
+                    : ent
+                      ? "in_progress"
+                      : "empty";
                   return (
                     <TableCell key={s.label} className="text-center align-top">
                       <div className="flex flex-col gap-1 items-center">
+                        <StatusDot state={cellState} />
                         <div className="flex flex-col items-center gap-0.5 text-[10px]">
                           <div className="flex items-center gap-1">
                             <LogIn className="h-2.5 w-2.5 text-blue-600" />
