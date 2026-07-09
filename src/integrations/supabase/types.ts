@@ -418,6 +418,7 @@ export type Database = {
       }
       obras: {
         Row: {
+          acabador_nome: string | null
           bairro: string | null
           cep: string | null
           cidade: string | null
@@ -428,18 +429,30 @@ export type Database = {
           cortador_nome: string | null
           created_at: string
           created_by: string | null
+          data_acabamento_entrada: string | null
+          data_acabamento_saida: string | null
           data_compra_acessorios: string | null
           data_compra_perfis: string | null
           data_compra_vidros: string | null
           data_conferencia: string | null
+          data_conferencia_entrada: string | null
+          data_conferencia_saida: string | null
           data_corte: string | null
+          data_corte_entrada: string | null
+          data_corte_saida: string | null
           data_entrega_prevista: string | null
           data_entrega_real: string | null
           data_envio_tecnico: string | null
           data_inicio_prevista: string | null
           data_medicao: string | null
           data_montagem: string | null
+          data_montagem_entrada: string | null
+          data_montagem_saida: string | null
           data_usinagem: string | null
+          data_usinagem_entrada: string | null
+          data_usinagem_saida: string | null
+          data_vidracaria_entrada: string | null
+          data_vidracaria_saida: string | null
           descricao: string | null
           estado: string | null
           id: string
@@ -460,8 +473,10 @@ export type Database = {
           updated_at: string
           usinador_nome: string | null
           valor: number | null
+          vidraceiro_nome: string | null
         }
         Insert: {
+          acabador_nome?: string | null
           bairro?: string | null
           cep?: string | null
           cidade?: string | null
@@ -472,18 +487,30 @@ export type Database = {
           cortador_nome?: string | null
           created_at?: string
           created_by?: string | null
+          data_acabamento_entrada?: string | null
+          data_acabamento_saida?: string | null
           data_compra_acessorios?: string | null
           data_compra_perfis?: string | null
           data_compra_vidros?: string | null
           data_conferencia?: string | null
+          data_conferencia_entrada?: string | null
+          data_conferencia_saida?: string | null
           data_corte?: string | null
+          data_corte_entrada?: string | null
+          data_corte_saida?: string | null
           data_entrega_prevista?: string | null
           data_entrega_real?: string | null
           data_envio_tecnico?: string | null
           data_inicio_prevista?: string | null
           data_medicao?: string | null
           data_montagem?: string | null
+          data_montagem_entrada?: string | null
+          data_montagem_saida?: string | null
           data_usinagem?: string | null
+          data_usinagem_entrada?: string | null
+          data_usinagem_saida?: string | null
+          data_vidracaria_entrada?: string | null
+          data_vidracaria_saida?: string | null
           descricao?: string | null
           estado?: string | null
           id?: string
@@ -504,8 +531,10 @@ export type Database = {
           updated_at?: string
           usinador_nome?: string | null
           valor?: number | null
+          vidraceiro_nome?: string | null
         }
         Update: {
+          acabador_nome?: string | null
           bairro?: string | null
           cep?: string | null
           cidade?: string | null
@@ -516,18 +545,30 @@ export type Database = {
           cortador_nome?: string | null
           created_at?: string
           created_by?: string | null
+          data_acabamento_entrada?: string | null
+          data_acabamento_saida?: string | null
           data_compra_acessorios?: string | null
           data_compra_perfis?: string | null
           data_compra_vidros?: string | null
           data_conferencia?: string | null
+          data_conferencia_entrada?: string | null
+          data_conferencia_saida?: string | null
           data_corte?: string | null
+          data_corte_entrada?: string | null
+          data_corte_saida?: string | null
           data_entrega_prevista?: string | null
           data_entrega_real?: string | null
           data_envio_tecnico?: string | null
           data_inicio_prevista?: string | null
           data_medicao?: string | null
           data_montagem?: string | null
+          data_montagem_entrada?: string | null
+          data_montagem_saida?: string | null
           data_usinagem?: string | null
+          data_usinagem_entrada?: string | null
+          data_usinagem_saida?: string | null
+          data_vidracaria_entrada?: string | null
+          data_vidracaria_saida?: string | null
           descricao?: string | null
           estado?: string | null
           id?: string
@@ -548,6 +589,7 @@ export type Database = {
           updated_at?: string
           usinador_nome?: string | null
           valor?: number | null
+          vidraceiro_nome?: string | null
         }
         Relationships: [
           {
