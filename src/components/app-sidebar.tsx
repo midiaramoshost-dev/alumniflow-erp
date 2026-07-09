@@ -88,6 +88,13 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const { roles: userRoles } = useAuth();
+  const canSee = (item: NavItem) =>
+    !item.roles || item.roles.some((r) => userRoles.includes(r));
+  const visibleNav = nav
+    .map((g) => ({ ...g, items: g.items.filter(canSee) }))
+    .filter((g) => g.items.length > 0);
+
 
   return (
     <Sidebar collapsible="icon" className="bg-gradient-sidebar border-r-0">
