@@ -59,6 +59,7 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PermissionsMatrix } from "@/components/permissions-matrix";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
@@ -428,6 +429,9 @@ function AdminPage() {
           <TabsTrigger value="invites" className="gap-1">
             <Mail className="h-3.5 w-3.5" /> Convites
           </TabsTrigger>
+          <TabsTrigger value="permissions" className="gap-1">
+            <ShieldCheck className="h-3.5 w-3.5" /> Permissões
+          </TabsTrigger>
           <TabsTrigger value="data" className="gap-1">
             <Database className="h-3.5 w-3.5" /> Gestão de dados
           </TabsTrigger>
@@ -524,6 +528,11 @@ function AdminPage() {
         {/* Invites */}
         <TabsContent value="invites" className="mt-4">
           <InvitesManager />
+        </TabsContent>
+
+        {/* Permissions matrix */}
+        <TabsContent value="permissions" className="mt-4">
+          <PermissionsMatrix />
         </TabsContent>
 
         {/* Data management */}
