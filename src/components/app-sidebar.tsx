@@ -115,7 +115,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="bg-transparent">
-        {nav.map((group) => (
+        {visibleNav.map((group) => (
           <SidebarGroup key={group.label}>
             {!collapsed && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
             <SidebarGroupContent>
