@@ -299,6 +299,21 @@ function VendasPage() {
                   <Button
                     variant="ghost"
                     size="icon"
+                    title="Gerar PDF"
+                    onClick={async () => {
+                      try {
+                        await generateOrcamentoPdf(o.id);
+                        toast.success(`PDF do orçamento #${o.numero} gerado`);
+                      } catch (err) {
+                        toast.error((err as Error).message ?? "Falha ao gerar PDF");
+                      }
+                    }}
+                  >
+                    <FileDown className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => {
                       setEditingId(o.id);
                       setOpen(true);
