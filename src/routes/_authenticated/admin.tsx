@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { adminCreateUser } from "@/lib/admin-users.functions";
+import { adminCreateUser, adminUpdateUser } from "@/lib/admin-users.functions";
 import { UserPlus, Eye, EyeOff } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
