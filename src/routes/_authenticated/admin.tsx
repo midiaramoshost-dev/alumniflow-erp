@@ -1287,3 +1287,160 @@ function CreateUserDialog({
     </Dialog>
   );
 }
+
+/* ---------------- Edit User Dialog ---------------- */
+
+function EditUserDialog({
+  profile,
+  currentRoles,
+  isSelf,
+  onOpenChange,
+  onSaved,
+}: {
+  profile: Profile | null;
+  currentRoles: AppRole[];
+  isSelf: boolean;
+  onOpenChange: (v: boolean) => void;
+  onSaved: () => void;
+}) {
+  const updateUser = useServerFn(adminUpdateUser);
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [roles, setRolesState] = useState<AppRole[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  const open = !!profile;
+
+  // Initialize when opening
+  useMemo(() => {
+    if (profile) {
+      setEmail(profile.email ?? "");
+      setFullName(profile.full_name ?? "");
+      setPassword("");
+      setShowPwd(false);
+      setRolesState(currentRoles);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id]);
+
+  const toggleRole = (r: AppRole, checked: boolean) => {
+    setRolesState((prev) =>
+      checked ? Array.from(new Set([...prev, r])) : prev.filter((x) => x !== r),
+    );
+  };
+
+  const submit = async () => {
+    if (!profile) return;
+    if (!email.trim()) return toast.error("Informe o e-mail");
+    if (password && password.length < 8)
+      return toast.error("Senha deve ter pelo menos 8 caracteres");
+    if (roles.length === 0) return toast.error("Selecione ao menos uma função");
+    if (isSelf && !roles.includes("admin")) {
+      if (!confirm("Você está removendo sua própria função de admin. Continuar?")) return;
+    }
+    setSubmitting(true);
+    try {
+      await updateUser({
+        data: {
+          user_id: profile.id,
+          email,
+          full_name: fullName,
+          password: password || null,
+          roles,
+        },
+      });
+      toast.success("Usuário atualizado");
+      onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao atualizar usuário");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Pencil className="h-5 w-5" /> Editar usuário
+          </DialogTitle>
+          <DialogDescription>
+            Atualize e-mail, nome, senha e funções. A conta não é recriada.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label>Nome completo</Label>
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>E-mail</Label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="off"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Nova senha (opcional)</Label>
+            <div className="relative">
+              <Input
+                type={showPwd ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Deixe em branco para manter a atual"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+              >
+                {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Funções</Label>
+            <div className="space-y-2 rounded-md border p-3">
+              {ROLES.map((r) => {
+                const checked = roles.includes(r.key);
+                return (
+                  <label key={r.key} className="flex items-start gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={(v) => toggleRole(r.key, v === true)}
+                    />
+                    <div>
+                      <div className="text-sm font-medium">{r.label}</div>
+                      <div className="text-xs text-muted-foreground">{r.description}</div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Permissões finas por módulo/ação são definidas na aba <strong>Permissões</strong>.
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            Cancelar
+          </Button>
+          <Button onClick={submit} disabled={submitting}>
+            {submitting && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+            Salvar alterações
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
