@@ -40,9 +40,10 @@ function AuthPage() {
   const postAuthRedirect = () => {
     const token = pendingInvite();
     if (token) {
+      sessionStorage.removeItem("pending_invite");
       navigate({ to: "/invite/$token", params: { token } });
     } else {
-      postAuthRedirect();
+      navigate({ to: "/dashboard" });
     }
   };
 
