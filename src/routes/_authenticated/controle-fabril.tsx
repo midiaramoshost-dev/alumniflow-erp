@@ -48,6 +48,7 @@ import {
   Plus,
   ListTree,
   ExternalLink,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
