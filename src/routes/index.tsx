@@ -1,15 +1,5 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import {
-  Building2,
-  ShieldCheck,
-  Factory,
-  BarChart3,
-  Layers,
-  Users,
-  ArrowRight,
-} from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -20,6 +10,7 @@ function Landing() {
 
   if (loading) return null;
   if (user) return <Navigate to="/dashboard" replace />;
+  return <Navigate to="/auth" replace />;
 
   return (
     <div className="min-h-screen bg-background">
