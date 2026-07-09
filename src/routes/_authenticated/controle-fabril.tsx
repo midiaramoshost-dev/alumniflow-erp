@@ -473,9 +473,19 @@ function ControleFabrilPage() {
                   );
                 })}
                 <TableCell className="text-right">
-                  <Button size="sm" variant="outline" onClick={() => setEditing(o)}>
-                    Editar
-                  </Button>
+                  <div className="flex gap-1 justify-end">
+                    <Button size="sm" variant="ghost" asChild>
+                      <Link
+                        to="/controle-fabril/$obraId"
+                        params={{ obraId: o.id }}
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Link>
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditing(o)}>
+                      Editar
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
