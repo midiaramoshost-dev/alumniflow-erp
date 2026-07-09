@@ -530,6 +530,11 @@ function AdminPage() {
           <InvitesManager />
         </TabsContent>
 
+        {/* Permissions matrix */}
+        <TabsContent value="permissions" className="mt-4">
+          <PermissionsMatrix />
+        </TabsContent>
+
         {/* Data management */}
         <TabsContent value="data" className="mt-4">
           <DataManager />
