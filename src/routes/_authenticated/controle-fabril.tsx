@@ -318,14 +318,20 @@ function ControleFabrilPage() {
       title="Controle Fabril"
       description="Entrada e saída por setor: medição, compras, corte, usinagem, montagem, vidraçaria, acabamento e conferência"
       actions={
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar cliente ou obra…"
-            className="pl-8 w-64"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar cliente ou obra…"
+              className="pl-8 w-64"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+          <Button onClick={() => setCreating(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Controle
+          </Button>
         </div>
       }
     >
