@@ -2,7 +2,7 @@ import { MessageCircle } from "lucide-react";
 
 export function WhatsappFloat({
   phone = "5515997625135",
-  message = "Olá! Preciso de suporte no CRM CRISTIANO.",
+  message = "Olá! Sou usuário do CRM CRISTIANO e preciso de suporte técnico. Poderia me ajudar, por favor?",
 }: {
   phone?: string;
   message?: string;
