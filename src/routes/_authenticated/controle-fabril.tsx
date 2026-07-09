@@ -573,7 +573,21 @@ function ControleFabrilPage() {
                   return (
                     <TableCell key={s.label} className="text-center align-top">
                       <div className="flex flex-col gap-1 items-center">
-                        <StatusDot state={cellState} />
+                        <StatusDot
+                          state={cellState}
+                          onClick={
+                            cellState === "done"
+                              ? undefined
+                              : () => completeSectorStage(o, s)
+                          }
+                          title={
+                            cellState === "done"
+                              ? `${s.label} — concluída em ${fmtDate(sai)}`
+                              : cellState === "in_progress"
+                                ? `Clique para registrar a saída de ${s.label} agora`
+                                : `Clique para concluir ${s.label} (entrada e saída = agora)`
+                          }
+                        />
                         <div className="flex flex-col items-center gap-0.5 text-[10px]">
                           <div className="flex items-center gap-1">
                             <LogIn className="h-2.5 w-2.5 text-blue-600" />
