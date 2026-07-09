@@ -244,21 +244,10 @@ function ControleFabrilPage() {
   });
 
   const create = useMutation({
-    mutationFn: async (payload: {
-      titulo: string;
-      cliente_nome: string | null;
-      data_entrega_prevista: string | null;
-      observacoes: string | null;
-    }) => {
+    mutationFn: async (payload: Record<string, unknown>) => {
       const { error } = await (supabase as unknown as { from: (t: string) => any })
         .from("obras")
-        .insert({
-          titulo: payload.titulo,
-          cliente_nome: payload.cliente_nome,
-          data_entrega_prevista: payload.data_entrega_prevista,
-          observacoes: payload.observacoes,
-          status: "planejamento",
-        });
+        .insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -278,12 +267,26 @@ function ControleFabrilPage() {
       toast.error("Informe o título da obra");
       return;
     }
-    create.mutate({
+    const payload: Record<string, unknown> = {
       titulo,
       cliente_nome: String(fd.get("cliente_nome") ?? "").trim() || null,
       data_entrega_prevista: String(fd.get("data_entrega_prevista") ?? "") || null,
       observacoes: String(fd.get("observacoes") ?? "").trim() || null,
+      status: "planejamento",
+    };
+    STAGES.forEach((s) => {
+      if (s.kind === "pre") {
+        payload[s.key as string] = String(fd.get(s.key as string) ?? "") || null;
+      } else {
+        payload[s.entradaKey as string] =
+          String(fd.get(s.entradaKey as string) ?? "") || null;
+        payload[s.saidaKey as string] =
+          String(fd.get(s.saidaKey as string) ?? "") || null;
+        payload[s.nameKey as string] =
+          String(fd.get(s.nameKey as string) ?? "").trim() || null;
+      }
     });
+    create.mutate(payload);
   };
 
   const quickStamp = (o: Obra, key: keyof Obra) => {
@@ -466,27 +469,105 @@ function ControleFabrilPage() {
       </div>
 
       <Dialog open={creating} onOpenChange={setCreating}>
-        <DialogContent>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Novo controle fabril</DialogTitle>
           </DialogHeader>
-          <form onSubmit={onCreate} className="space-y-4">
-            <div>
-              <Label htmlFor="titulo">Título da obra *</Label>
-              <Input id="titulo" name="titulo" placeholder="Ex.: Fachada Edifício X" required />
-            </div>
-            <div>
-              <Label htmlFor="cliente_nome">Cliente</Label>
-              <Input id="cliente_nome" name="cliente_nome" placeholder="Nome do cliente" />
-            </div>
-            <div>
-              <Label htmlFor="data_entrega_prevista">Entrega prevista</Label>
-              <Input id="data_entrega_prevista" name="data_entrega_prevista" type="date" />
-            </div>
-            <div>
-              <Label htmlFor="observacoes">Observações</Label>
-              <Input id="observacoes" name="observacoes" placeholder="Notas iniciais" />
-            </div>
+          <form onSubmit={onCreate} className="space-y-6">
+            <section>
+              <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
+                Dados da obra
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <Label htmlFor="titulo">Título da obra *</Label>
+                  <Input id="titulo" name="titulo" placeholder="Ex.: Fachada Edifício X" required />
+                </div>
+                <div>
+                  <Label htmlFor="cliente_nome">Cliente</Label>
+                  <Input id="cliente_nome" name="cliente_nome" placeholder="Nome do cliente" />
+                </div>
+                <div>
+                  <Label htmlFor="data_entrega_prevista">Entrega prevista</Label>
+                  <Input id="data_entrega_prevista" name="data_entrega_prevista" type="date" />
+                </div>
+                <div className="sm:col-span-2">
+                  <Label htmlFor="observacoes">Observações</Label>
+                  <Input id="observacoes" name="observacoes" placeholder="Notas iniciais" />
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
+                Pré-produção
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {PRE_STAGES.map((s) => (
+                  <div key={String(s.key)}>
+                    <Label htmlFor={`new-${String(s.key)}`} className="flex items-center gap-1.5 text-xs">
+                      <s.icon className="h-3.5 w-3.5" />
+                      {s.label}
+                    </Label>
+                    <Input id={`new-${String(s.key)}`} name={String(s.key)} type="date" />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
+                Setores produtivos
+              </h3>
+              <div className="grid gap-4">
+                {SECTOR_STAGES.map((s) => (
+                  <div
+                    key={s.label}
+                    className="rounded-md border p-3 grid gap-3 sm:grid-cols-[1fr_1fr_1.2fr]"
+                  >
+                    <div>
+                      <Label
+                        htmlFor={`new-${String(s.entradaKey)}`}
+                        className="flex items-center gap-1.5 text-xs"
+                      >
+                        <s.icon className="h-3.5 w-3.5" />
+                        {s.label} — Entrada
+                      </Label>
+                      <Input
+                        id={`new-${String(s.entradaKey)}`}
+                        name={String(s.entradaKey)}
+                        type="date"
+                      />
+                    </div>
+                    <div>
+                      <Label
+                        htmlFor={`new-${String(s.saidaKey)}`}
+                        className="flex items-center gap-1.5 text-xs"
+                      >
+                        <LogOut className="h-3.5 w-3.5" />
+                        {s.label} — Saída
+                      </Label>
+                      <Input
+                        id={`new-${String(s.saidaKey)}`}
+                        name={String(s.saidaKey)}
+                        type="date"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`new-${String(s.nameKey)}`} className="text-xs">
+                        {s.nameLabel}
+                      </Label>
+                      <Input
+                        id={`new-${String(s.nameKey)}`}
+                        name={String(s.nameKey)}
+                        placeholder="Nome do responsável"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setCreating(false)}>
                 Cancelar
