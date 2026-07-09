@@ -17,8 +17,14 @@ import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Search, Loader2, Users, Percent, Target, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
+import { RequireRole } from "@/components/require-role";
+
 export const Route = createFileRoute("/_authenticated/comercial")({
-  component: ComercialPage,
+  component: () => (
+    <RequireRole roles={["admin", "vendedor"]}>
+      <ComercialPage />
+    </RequireRole>
+  ),
 });
 
 type Vendedor = {
