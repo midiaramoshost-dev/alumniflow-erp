@@ -332,33 +332,50 @@ function ControleFabrilPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const collectStageValues = (
+    fd: FormData,
+  ): Record<string, string | null> => {
+    const values: Record<string, string | null> = {};
+    STAGES.forEach((s) => {
+      if (s.kind === "pre") {
+        values[s.key as string] = String(fd.get(s.key as string) ?? "") || null;
+      } else {
+        values[s.entradaKey as string] =
+          String(fd.get(s.entradaKey as string) ?? "") || null;
+        values[s.saidaKey as string] =
+          String(fd.get(s.saidaKey as string) ?? "") || null;
+        values[s.nameKey as string] =
+          String(fd.get(s.nameKey as string) ?? "").trim() || null;
+      }
+    });
+    return values;
+  };
+
   const onCreate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const titulo = String(fd.get("titulo") ?? "").trim();
     if (!titulo) {
+      setFormErrors(["Informe o título da obra."]);
       toast.error("Informe o título da obra");
       return;
     }
+    const stageValues = collectStageValues(fd);
+    const errors = validateStages(stageValues);
+    if (errors.length) {
+      setFormErrors(errors);
+      toast.error(errors[0]);
+      return;
+    }
+    setFormErrors([]);
     const payload: Record<string, unknown> = {
       titulo,
       cliente_nome: String(fd.get("cliente_nome") ?? "").trim() || null,
       data_entrega_prevista: String(fd.get("data_entrega_prevista") ?? "") || null,
       observacoes: String(fd.get("observacoes") ?? "").trim() || null,
       status: "planejamento",
+      ...stageValues,
     };
-    STAGES.forEach((s) => {
-      if (s.kind === "pre") {
-        payload[s.key as string] = String(fd.get(s.key as string) ?? "") || null;
-      } else {
-        payload[s.entradaKey as string] =
-          String(fd.get(s.entradaKey as string) ?? "") || null;
-        payload[s.saidaKey as string] =
-          String(fd.get(s.saidaKey as string) ?? "") || null;
-        payload[s.nameKey as string] =
-          String(fd.get(s.nameKey as string) ?? "").trim() || null;
-      }
-    });
     create.mutate(payload);
   };
 
@@ -372,22 +389,19 @@ function ControleFabrilPage() {
     e.preventDefault();
     if (!editing) return;
     const fd = new FormData(e.currentTarget);
-    const payload: Partial<Obra> & { id: string } = { id: editing.id };
-    STAGES.forEach((s) => {
-      if (s.kind === "pre") {
-        (payload as Record<string, unknown>)[s.key as string] =
-          String(fd.get(s.key as string) ?? "") || null;
-      } else {
-        (payload as Record<string, unknown>)[s.entradaKey as string] =
-          String(fd.get(s.entradaKey as string) ?? "") || null;
-        (payload as Record<string, unknown>)[s.saidaKey as string] =
-          String(fd.get(s.saidaKey as string) ?? "") || null;
-        (payload as Record<string, unknown>)[s.nameKey as string] =
-          String(fd.get(s.nameKey as string) ?? "").trim() || null;
-      }
+    const stageValues = collectStageValues(fd);
+    const errors = validateStages(stageValues);
+    if (errors.length) {
+      setFormErrors(errors);
+      toast.error(errors[0]);
+      return;
+    }
+    setFormErrors([]);
+    save.mutate({ id: editing.id, ...stageValues } as Partial<Obra> & {
+      id: string;
     });
-    save.mutate(payload);
   };
+
 
   return (
     <PageShell
