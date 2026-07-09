@@ -180,6 +180,7 @@ function ControleFabrilPage() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Obra | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["controle-fabril"],
