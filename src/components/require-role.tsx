@@ -1,11 +1,22 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { PageShell } from "@/components/page-shell";
-import { ShieldAlert, Loader2 } from "lucide-react";
+import { ShieldAlert, Loader2, ArrowLeft, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "@tanstack/react-router";
+import { Badge } from "@/components/ui/badge";
+import { Link, useRouter } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 type AppRole = "admin" | "vendedor" | "producao" | "financeiro_obra";
+
+const ROLE_LABELS: Record<AppRole, string> = {
+  admin: "Administrador",
+  vendedor: "Vendedor",
+  producao: "Produção",
+  financeiro_obra: "Financeiro/Obra",
+};
+
+const roleLabel = (r: string) => ROLE_LABELS[r as AppRole] ?? r;
 
 export function RequireRole({
   roles,
@@ -15,6 +26,20 @@ export function RequireRole({
   children: ReactNode;
 }) {
   const { loading, user, roles: userRoles } = useAuth();
+  const router = useRouter();
+  const notified = useRef(false);
+
+  const allowed = !loading && !!user && userRoles.some((r) => roles.includes(r as AppRole));
+
+  useEffect(() => {
+    if (loading || !user) return;
+    if (!allowed && !notified.current) {
+      notified.current = true;
+      toast.error("Acesso negado", {
+        description: `Esta área requer perfil: ${roles.map(roleLabel).join(", ")}.`,
+      });
+    }
+  }, [loading, user, allowed, roles]);
 
   if (loading) {
     return (
@@ -26,21 +51,70 @@ export function RequireRole({
 
   if (!user) return null;
 
-  const allowed = userRoles.some((r) => roles.includes(r));
   if (!allowed) {
     return (
       <PageShell title="Acesso restrito" description="Você não tem permissão para esta página">
-        <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-10 text-center">
-          <ShieldAlert className="h-10 w-10 text-destructive" />
-          <div>
-            <p className="font-medium">Permissão insuficiente</p>
+        <div className="mx-auto flex max-w-lg flex-col items-center justify-center gap-5 rounded-lg border border-dashed p-10 text-center">
+          <div className="rounded-full bg-destructive/10 p-3">
+            <ShieldAlert className="h-10 w-10 text-destructive" />
+          </div>
+          <div className="space-y-2">
+            <p className="text-lg font-semibold">Permissão insuficiente</p>
             <p className="text-sm text-muted-foreground">
-              Esta área é restrita a: {roles.join(", ")}.
+              Você não tem o perfil necessário para acessar esta área.
             </p>
           </div>
-          <Button asChild variant="outline">
-            <Link to="/dashboard">Voltar ao Dashboard</Link>
-          </Button>
+
+          <div className="w-full space-y-3 rounded-md bg-muted/40 p-4 text-left text-sm">
+            <div>
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Perfis necessários
+              </p>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {roles.map((r) => (
+                  <Badge key={r} variant="default">
+                    {roleLabel(r)}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Seus perfis atuais
+              </p>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {userRoles.length === 0 ? (
+                  <span className="text-xs text-muted-foreground">
+                    Nenhum perfil atribuído
+                  </span>
+                ) : (
+                  userRoles.map((r) => (
+                    <Badge key={r} variant="secondary">
+                      {roleLabel(r)}
+                    </Badge>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            Solicite ao administrador do sistema a permissão adequada.
+          </p>
+
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button variant="outline" onClick={() => router.history.back()}>
+              <ArrowLeft className="mr-1 h-4 w-4" /> Voltar
+            </Button>
+            <Button asChild>
+              <Link to="/dashboard">Ir ao Dashboard</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <a href="mailto:admin@crmcristiano.com?subject=Solicitação%20de%20acesso">
+                <Mail className="mr-1 h-4 w-4" /> Solicitar acesso
+              </a>
+            </Button>
+          </div>
         </div>
       </PageShell>
     );
