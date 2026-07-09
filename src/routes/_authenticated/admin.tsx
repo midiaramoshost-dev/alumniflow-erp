@@ -553,25 +553,17 @@ function AdminPage() {
 
       </Tabs>
 
-      <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Funções de {editing?.full_name ?? editing?.email}</DialogTitle>
-            <DialogDescription>
-              Marque as funções que este usuário deve ter. Múltiplas funções são permitidas.
-            </DialogDescription>
-          </DialogHeader>
-          {editing && (
-            <RoleEditor
-              initial={rolesByUser.get(editing.id) ?? []}
-              onCancel={() => setEditing(null)}
-              onSave={(roles) => setRoles.mutate({ userId: editing.id, roles })}
-              saving={setRoles.isPending}
-              isSelf={editing.id === user?.id}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <EditUserDialog
+        profile={editing}
+        currentRoles={editing ? (rolesByUser.get(editing.id) ?? []) : []}
+        isSelf={editing?.id === user?.id}
+        onOpenChange={(v) => !v && setEditing(null)}
+        onSaved={() => {
+          qc.invalidateQueries({ queryKey: ["admin", "profiles"] });
+          qc.invalidateQueries({ queryKey: ["admin", "user_roles"] });
+          setEditing(null);
+        }}
+      />
 
       <CreateUserDialog
         open={creatingUser}
