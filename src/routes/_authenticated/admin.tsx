@@ -326,27 +326,6 @@ function AdminPage() {
     );
   }, [profiles, q]);
 
-  const setRoles = useMutation({
-    mutationFn: async (payload: { userId: string; roles: AppRole[] }) => {
-      const { userId, roles } = payload;
-      const { error: delErr } = await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", userId);
-      if (delErr) throw delErr;
-      if (roles.length > 0) {
-        const rows = roles.map((r) => ({ user_id: userId, role: r }));
-        const { error } = await supabase.from("user_roles").insert(rows);
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin", "user_roles"] });
-      toast.success("Permissões atualizadas");
-      setEditing(null);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   const { data: counts } = useQuery({
     queryKey: ["admin", "counts"],
