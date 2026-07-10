@@ -47,7 +47,7 @@ const nav: { label: string; items: NavItem[] }[] = [
     label: "Principal",
     items: [
       { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-      { title: "Direct", url: "/direct", icon: Zap, roles: ["admin", "vendedor"] },
+      { title: "Direct", url: "/direct", icon: Zap },
       { title: "Pedidos", url: "/pedidos", icon: Workflow },
       { title: "Pipeline", url: "/pipeline", icon: Workflow },
     ],
@@ -55,29 +55,29 @@ const nav: { label: string; items: NavItem[] }[] = [
   {
     label: "Cadastros",
     items: [
-      { title: "Clientes", url: "/clientes", icon: Users, roles: ["admin", "vendedor"] },
-      { title: "Perfis de Alumínio", url: "/perfis", icon: Layers, roles: ["admin", "producao"] },
-      { title: "Vidros", url: "/vidros", icon: Square, roles: ["admin", "producao"] },
-      { title: "Acessórios", url: "/acessorios", icon: Package, roles: ["admin", "producao"] },
+      { title: "Clientes", url: "/clientes", icon: Users },
+      { title: "Perfis de Alumínio", url: "/perfis", icon: Layers },
+      { title: "Vidros", url: "/vidros", icon: Square },
+      { title: "Acessórios", url: "/acessorios", icon: Package },
     ],
   },
   {
     label: "Operação",
     items: [
-      { title: "Vendas", url: "/vendas", icon: ShoppingCart, roles: ["admin", "vendedor"] },
-      { title: "Comercial", url: "/comercial", icon: Briefcase, roles: ["admin", "vendedor"] },
-      { title: "Produção", url: "/producao", icon: Factory, roles: ["admin", "producao"] },
-      { title: "Controle Fabril", url: "/controle-fabril", icon: Cog, roles: ["admin", "producao"] },
-      { title: "Obras", url: "/obras", icon: Building, roles: ["admin", "producao", "financeiro_obra"] },
-      { title: "Materiais", url: "/materiais", icon: Boxes, roles: ["admin", "producao"] },
-      { title: "Financeiro", url: "/financeiro", icon: Wallet, roles: ["admin", "financeiro_obra"] },
+      { title: "Vendas", url: "/vendas", icon: ShoppingCart },
+      { title: "Comercial", url: "/comercial", icon: Briefcase },
+      { title: "Produção", url: "/producao", icon: Factory },
+      { title: "Controle Fabril", url: "/controle-fabril", icon: Cog },
+      { title: "Obras", url: "/obras", icon: Building },
+      { title: "Materiais", url: "/materiais", icon: Boxes },
+      { title: "Financeiro", url: "/financeiro", icon: Wallet },
     ],
   },
   {
     label: "Sistema",
     items: [
-      { title: "Admin Master", url: "/admin", icon: ShieldCheck, roles: ["admin"] },
-      { title: "Exportar dados", url: "/exportar", icon: FileSpreadsheet, roles: ["admin"] },
+      { title: "Admin Master", url: "/admin", icon: ShieldCheck },
+      { title: "Exportar dados", url: "/exportar", icon: FileSpreadsheet },
       { title: "Configurações", url: "/configuracoes", icon: Settings },
     ],
   },
@@ -89,10 +89,8 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const { roles: userRoles } = useAuth();
-  const canSee = (item: NavItem) =>
-    !item.roles || item.roles.some((r) => userRoles.includes(r));
   const visibleNav = nav
-    .map((g) => ({ ...g, items: g.items.filter(canSee) }))
+    .map((g) => ({ ...g, items: g.items.filter((it) => canAccessRoute(it.url, userRoles)) }))
     .filter((g) => g.items.length > 0);
 
 
