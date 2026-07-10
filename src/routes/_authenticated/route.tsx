@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
+import { RouteAccessGate } from "@/components/route-access-gate";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -62,7 +63,9 @@ function AuthLayout() {
             </div>
           </header>
           <main className="flex-1 p-4 md:p-6 lg:p-8">
-            <Outlet />
+            <RouteAccessGate>
+              <Outlet />
+            </RouteAccessGate>
           </main>
         </div>
       </div>
