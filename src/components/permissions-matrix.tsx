@@ -32,14 +32,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-type AppRole = "admin" | "vendedor" | "producao" | "financeiro_obra";
+import { ROLES as ROLE_CATALOG, type AppRole } from "@/lib/roles";
 
-const ROLES: { key: AppRole; label: string; tone: string }[] = [
-  { key: "admin", label: "Administrador", tone: "bg-primary/10 text-primary" },
-  { key: "vendedor", label: "Vendedor", tone: "bg-blue-500/10 text-blue-600" },
-  { key: "producao", label: "Produção", tone: "bg-amber-500/10 text-amber-600" },
-  { key: "financeiro_obra", label: "Financeiro/Obra", tone: "bg-emerald-500/10 text-emerald-600" },
-];
+const ROLES: { key: AppRole; label: string; tone: string }[] = ROLE_CATALOG.map((r) => ({
+  key: r.key,
+  label: r.label,
+  tone: r.tone,
+}));
 
 const MODULES: { key: string; label: string; group: string }[] = [
   { key: "comercial", label: "Comercial", group: "Vendas" },

@@ -68,14 +68,13 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-type AppRole = "admin" | "vendedor" | "producao" | "financeiro_obra";
+import { ROLES as ROLE_CATALOG, type AppRole } from "@/lib/roles";
 
-const ROLES: { key: AppRole; label: string; description: string }[] = [
-  { key: "admin", label: "Administrador", description: "Acesso total ao sistema" },
-  { key: "vendedor", label: "Vendedor", description: "Clientes, orçamentos e comercial" },
-  { key: "producao", label: "Produção", description: "Ordens, controle fabril e obras" },
-  { key: "financeiro_obra", label: "Financeiro/Obra", description: "Financeiro e acompanhamento de obras" },
-];
+const ROLES: { key: AppRole; label: string; description: string }[] = ROLE_CATALOG.map((r) => ({
+  key: r.key,
+  label: r.label,
+  description: r.description,
+}));
 
 type Profile = { id: string; full_name: string | null; email: string | null };
 type UserRoleRow = { user_id: string; role: AppRole };
