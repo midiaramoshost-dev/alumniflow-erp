@@ -49,6 +49,7 @@ const nav: { label: string; items: NavItem[] }[] = [
     label: "Principal",
     items: [
       { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Direct", url: "/direct", icon: Zap, roles: ["admin", "vendedor"] },
       { title: "Pedidos", url: "/pedidos", icon: Workflow },
       { title: "Pipeline", url: "/pipeline", icon: Workflow },
     ],
