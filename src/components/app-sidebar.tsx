@@ -20,6 +20,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { canAccessRoute } from "@/lib/route-access";
 
 import {
   Sidebar,
@@ -34,13 +35,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-import type { AppRole } from "@/lib/roles";
-
 type NavItem = {
   title: string;
   url: string;
   icon: typeof LayoutDashboard;
-  roles?: AppRole[]; // if omitted, visible to any authenticated user
   soon?: boolean;
 };
 
