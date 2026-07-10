@@ -174,6 +174,40 @@ export function AppSidebar() {
                           </Link>
                         )}
                       </SidebarMenuButton>
+
+                      {item.url === "/direct" && !collapsed && pathname === "/direct" && (
+                        <SidebarMenuSub>
+                          {directSubs.map((sub) => {
+                            const allowed = roleAllows(sub.roles);
+                            const isActive = currentEtapa === sub.etapa;
+                            const SubIcon = sub.icon;
+                            return (
+                              <SidebarMenuSubItem key={sub.etapa}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  isActive={isActive}
+                                  className={!allowed ? "opacity-60" : ""}
+                                  title={
+                                    allowed
+                                      ? sub.label
+                                      : "Etapa restrita ao seu perfil"
+                                  }
+                                >
+                                  <Link to="/direct" search={{ etapa: sub.etapa }}>
+                                    <SubIcon className="h-3.5 w-3.5" />
+                                    <span>{sub.label}</span>
+                                    {!allowed && (
+                                      <span className="ml-auto text-[9px] uppercase text-muted-foreground">
+                                        restrito
+                                      </span>
+                                    )}
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
+                        </SidebarMenuSub>
+                      )}
                     </SidebarMenuItem>
                   );
                 })}
