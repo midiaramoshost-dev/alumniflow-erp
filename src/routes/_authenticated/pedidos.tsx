@@ -85,11 +85,28 @@ type Pedido = {
   etapa: Etapa;
   prioridade: string;
   valor_estimado: number | null;
+  valor_total: number | null;
+  saldo: number | null;
+  sinal_entrada: number | null;
+  status_pagamento: string | null;
+  prazo_entrega: string | null;
+  forma_entrega: string | null;
   responsavel_atual_id: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
 };
+
+const brl = (n: number | null | undefined) =>
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n ?? 0));
+
+function diasParaPrazo(iso: string | null): number | null {
+  if (!iso) return null;
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const d = new Date(iso + "T00:00:00");
+  return Math.round((d.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as unknown as { from: (t: string) => any; rpc: (fn: string, args?: any) => any; storage: any };
