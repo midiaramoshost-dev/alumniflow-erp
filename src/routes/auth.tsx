@@ -76,11 +76,11 @@ function AuthPage() {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+    const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Bem-vindo!");
-    postAuthRedirect();
+    await postAuthRedirect(data.user?.id);
   };
 
   const onSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
