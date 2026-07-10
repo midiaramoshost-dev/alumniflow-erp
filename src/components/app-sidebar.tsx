@@ -18,9 +18,14 @@ import {
   ShieldCheck,
   FileSpreadsheet,
   Zap,
+  User as UserIcon,
+  Ruler,
+  ClipboardList,
+  CheckCircle2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { canAccessRoute } from "@/lib/route-access";
+import type { AppRole } from "@/lib/roles";
 
 import {
   Sidebar,
@@ -32,6 +37,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
 
@@ -87,11 +95,29 @@ const nav: { label: string; items: NavItem[] }[] = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const routerState = useRouterState({ select: (r) => r.location });
+  const pathname = routerState.pathname;
+  const currentEtapa =
+    (routerState.search as { etapa?: string } | undefined)?.etapa ?? "cliente";
   const { roles: userRoles } = useAuth();
   const visibleNav = nav
     .map((g) => ({ ...g, items: g.items.filter((it) => canAccessRoute(it.url, userRoles)) }))
     .filter((g) => g.items.length > 0);
+
+  const directSubs: {
+    etapa: "cliente" | "medicao" | "servico" | "materiais" | "revisao";
+    label: string;
+    icon: typeof UserIcon;
+    roles: AppRole[];
+  }[] = [
+    { etapa: "cliente", label: "Cliente", icon: UserIcon, roles: ["admin", "vendedor"] },
+    { etapa: "medicao", label: "Medição", icon: Ruler, roles: ["admin", "vendedor", "medidor"] },
+    { etapa: "servico", label: "Serviço", icon: ClipboardList, roles: ["admin", "vendedor", "tecnico"] },
+    { etapa: "materiais", label: "Materiais", icon: Package, roles: ["admin", "vendedor", "tecnico", "producao"] },
+    { etapa: "revisao", label: "Revisão", icon: CheckCircle2, roles: ["admin", "vendedor"] },
+  ];
+  const roleAllows = (allowed: AppRole[]) =>
+    userRoles.includes("admin") || allowed.some((r) => userRoles.includes(r));
 
 
   return (
@@ -148,6 +174,40 @@ export function AppSidebar() {
                           </Link>
                         )}
                       </SidebarMenuButton>
+
+                      {item.url === "/direct" && !collapsed && pathname === "/direct" && (
+                        <SidebarMenuSub>
+                          {directSubs.map((sub) => {
+                            const allowed = roleAllows(sub.roles);
+                            const isActive = currentEtapa === sub.etapa;
+                            const SubIcon = sub.icon;
+                            return (
+                              <SidebarMenuSubItem key={sub.etapa}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  isActive={isActive}
+                                  className={!allowed ? "opacity-60" : ""}
+                                  title={
+                                    allowed
+                                      ? sub.label
+                                      : "Etapa restrita ao seu perfil"
+                                  }
+                                >
+                                  <Link to="/direct" search={{ etapa: sub.etapa }}>
+                                    <SubIcon className="h-3.5 w-3.5" />
+                                    <span>{sub.label}</span>
+                                    {!allowed && (
+                                      <span className="ml-auto text-[9px] uppercase text-muted-foreground">
+                                        restrito
+                                      </span>
+                                    )}
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
+                        </SidebarMenuSub>
+                      )}
                     </SidebarMenuItem>
                   );
                 })}

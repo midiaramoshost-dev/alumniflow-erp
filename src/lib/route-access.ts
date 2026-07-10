@@ -15,7 +15,7 @@ export const ROUTE_ACCESS: RouteAccess[] = [
   { path: "/pedidos" }, // todos
   { path: "/pipeline" }, // todos
 
-  { path: "/direct", roles: ["admin", "vendedor"] },
+  { path: "/direct", roles: ["admin", "vendedor", "medidor", "tecnico", "producao"] },
   { path: "/clientes", roles: ["admin", "vendedor"] },
   { path: "/vendas", roles: ["admin", "vendedor"] },
   { path: "/comercial", roles: ["admin", "vendedor"] },
