@@ -17,6 +17,7 @@ import {
   Cog,
   ShieldCheck,
   FileSpreadsheet,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
