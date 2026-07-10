@@ -95,11 +95,29 @@ const nav: { label: string; items: NavItem[] }[] = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const routerState = useRouterState({ select: (r) => r.location });
+  const pathname = routerState.pathname;
+  const currentEtapa =
+    (routerState.search as { etapa?: string } | undefined)?.etapa ?? "cliente";
   const { roles: userRoles } = useAuth();
   const visibleNav = nav
     .map((g) => ({ ...g, items: g.items.filter((it) => canAccessRoute(it.url, userRoles)) }))
     .filter((g) => g.items.length > 0);
+
+  const directSubs: {
+    etapa: "cliente" | "medicao" | "servico" | "materiais" | "revisao";
+    label: string;
+    icon: typeof UserIcon;
+    roles: AppRole[];
+  }[] = [
+    { etapa: "cliente", label: "Cliente", icon: UserIcon, roles: ["admin", "vendedor"] },
+    { etapa: "medicao", label: "Medição", icon: Ruler, roles: ["admin", "vendedor", "medidor"] },
+    { etapa: "servico", label: "Serviço", icon: ClipboardList, roles: ["admin", "vendedor", "tecnico"] },
+    { etapa: "materiais", label: "Materiais", icon: Package, roles: ["admin", "vendedor", "tecnico", "producao"] },
+    { etapa: "revisao", label: "Revisão", icon: CheckCircle2, roles: ["admin", "vendedor"] },
+  ];
+  const roleAllows = (allowed: AppRole[]) =>
+    userRoles.includes("admin") || allowed.some((r) => userRoles.includes(r));
 
 
   return (
