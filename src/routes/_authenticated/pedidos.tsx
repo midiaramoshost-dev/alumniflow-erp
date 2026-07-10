@@ -178,41 +178,77 @@ function PedidosPage() {
                         Sem pedidos
                       </p>
                     )}
-                    {items.map((p) => (
-                      <Link
-                        key={p.id}
-                        to="/pedidos/$pedidoId"
-                        params={{ pedidoId: p.id }}
-                        className="block"
-                      >
-                        <Card className="cursor-pointer hover:shadow-md transition">
-                          <CardContent className="p-3 space-y-1">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] text-muted-foreground">
-                                #{p.numero}
-                              </span>
-                              <Badge variant="outline" className="text-[9px]">
-                                {p.prioridade}
-                              </Badge>
-                            </div>
-                            <p className="text-sm font-medium line-clamp-2">{p.titulo}</p>
-                            {p.cliente_nome && (
-                              <p className="text-xs text-muted-foreground line-clamp-1">
-                                {p.cliente_nome}
-                              </p>
-                            )}
-                            {p.valor_estimado != null && (
-                              <p className="text-xs font-semibold">
-                                {new Intl.NumberFormat("pt-BR", {
-                                  style: "currency",
-                                  currency: "BRL",
-                                }).format(Number(p.valor_estimado))}
-                              </p>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    ))}
+                    {items.map((p) => {
+                      const dias = diasParaPrazo(p.prazo_entrega);
+                      const atrasado =
+                        dias != null && dias < 0 && !["concluido", "cancelado"].includes(p.etapa);
+                      const alerta =
+                        dias != null && dias >= 0 && dias <= 3 && !["concluido", "cancelado"].includes(p.etapa);
+                      return (
+                        <Link
+                          key={p.id}
+                          to="/pedidos/$pedidoId"
+                          params={{ pedidoId: p.id }}
+                          className="block"
+                        >
+                          <Card
+                            className={`cursor-pointer hover:shadow-md transition ${
+                              atrasado ? "border-destructive/60" : alerta ? "border-amber-500/60" : ""
+                            }`}
+                          >
+                            <CardContent className="p-3 space-y-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] text-muted-foreground">#{p.numero}</span>
+                                <Badge
+                                  variant={p.prioridade === "urgente" ? "destructive" : "outline"}
+                                  className="text-[9px] capitalize"
+                                >
+                                  {p.prioridade}
+                                </Badge>
+                              </div>
+                              <p className="text-sm font-medium line-clamp-2">{p.titulo}</p>
+                              {p.cliente_nome && (
+                                <p className="text-xs text-muted-foreground line-clamp-1">
+                                  {p.cliente_nome}
+                                </p>
+                              )}
+                              <div className="flex items-center justify-between gap-2 flex-wrap">
+                                {(p.valor_total ?? p.valor_estimado) != null && (
+                                  <p className="text-xs font-semibold">
+                                    {brl(p.valor_total ?? p.valor_estimado)}
+                                  </p>
+                                )}
+                                {p.status_pagamento && p.status_pagamento !== "pendente" && (
+                                  <Badge
+                                    variant={p.status_pagamento === "pago" ? "default" : "secondary"}
+                                    className="text-[9px] capitalize"
+                                  >
+                                    {p.status_pagamento}
+                                  </Badge>
+                                )}
+                              </div>
+                              {p.prazo_entrega && (
+                                <p
+                                  className={`text-[10px] flex items-center gap-1 ${
+                                    atrasado
+                                      ? "text-destructive font-medium"
+                                      : alerta
+                                        ? "text-amber-600"
+                                        : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {atrasado
+                                    ? `Atrasado ${Math.abs(dias!)}d`
+                                    : dias === 0
+                                      ? "Entrega hoje"
+                                      : `Prazo em ${dias}d`}
+                                </p>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               );
