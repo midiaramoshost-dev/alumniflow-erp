@@ -18,9 +18,14 @@ import {
   ShieldCheck,
   FileSpreadsheet,
   Zap,
+  User as UserIcon,
+  Ruler,
+  ClipboardList,
+  CheckCircle2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { canAccessRoute } from "@/lib/route-access";
+import type { AppRole } from "@/lib/roles";
 
 import {
   Sidebar,
@@ -32,6 +37,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
 
