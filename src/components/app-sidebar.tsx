@@ -34,7 +34,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-type AppRole = "admin" | "vendedor" | "producao" | "financeiro_obra";
+import type { AppRole } from "@/lib/roles";
 
 type NavItem = {
   title: string;
