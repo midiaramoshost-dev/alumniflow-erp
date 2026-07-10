@@ -168,6 +168,7 @@ export type Database = {
           observacoes: string | null
           orcamento_id: string | null
           orcamento_numero: number | null
+          pedido_id: string | null
           status: Database["public"]["Enums"]["financeiro_status"]
           tipo: Database["public"]["Enums"]["financeiro_tipo"]
           updated_at: string
@@ -189,6 +190,7 @@ export type Database = {
           observacoes?: string | null
           orcamento_id?: string | null
           orcamento_numero?: number | null
+          pedido_id?: string | null
           status?: Database["public"]["Enums"]["financeiro_status"]
           tipo: Database["public"]["Enums"]["financeiro_tipo"]
           updated_at?: string
@@ -210,6 +212,7 @@ export type Database = {
           observacoes?: string | null
           orcamento_id?: string | null
           orcamento_numero?: number | null
+          pedido_id?: string | null
           status?: Database["public"]["Enums"]["financeiro_status"]
           tipo?: Database["public"]["Enums"]["financeiro_tipo"]
           updated_at?: string
@@ -235,6 +238,13 @@ export type Database = {
             columns: ["orcamento_id"]
             isOneToOne: false
             referencedRelation: "orcamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financeiro_lancamentos_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
             referencedColumns: ["id"]
           },
         ]
@@ -1001,6 +1011,56 @@ export type Database = {
           },
         ]
       }
+      pedido_checklist: {
+        Row: {
+          concluido: boolean
+          concluido_em: string | null
+          concluido_por: string | null
+          created_at: string
+          etapa: Database["public"]["Enums"]["pedido_etapa"]
+          id: string
+          item: string
+          observacao: string | null
+          ordem: number
+          pedido_id: string
+          updated_at: string
+        }
+        Insert: {
+          concluido?: boolean
+          concluido_em?: string | null
+          concluido_por?: string | null
+          created_at?: string
+          etapa: Database["public"]["Enums"]["pedido_etapa"]
+          id?: string
+          item: string
+          observacao?: string | null
+          ordem?: number
+          pedido_id: string
+          updated_at?: string
+        }
+        Update: {
+          concluido?: boolean
+          concluido_em?: string | null
+          concluido_por?: string | null
+          created_at?: string
+          etapa?: Database["public"]["Enums"]["pedido_etapa"]
+          id?: string
+          item?: string
+          observacao?: string | null
+          ordem?: number
+          pedido_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedido_checklist_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pedido_historico: {
         Row: {
           acao: Database["public"]["Enums"]["pedido_acao"]
@@ -1048,60 +1108,200 @@ export type Database = {
           },
         ]
       }
+      pedido_itens: {
+        Row: {
+          acabamento: string | null
+          acessorio_id: string | null
+          altura_mm: number | null
+          cor: string | null
+          created_at: string
+          descricao: string
+          id: string
+          largura_mm: number | null
+          observacoes: string | null
+          ordem: number
+          pedido_id: string
+          perfil_id: string | null
+          preco_unitario: number
+          quantidade: number
+          subtotal: number
+          tipo: string
+          updated_at: string
+          vidro_id: string | null
+        }
+        Insert: {
+          acabamento?: string | null
+          acessorio_id?: string | null
+          altura_mm?: number | null
+          cor?: string | null
+          created_at?: string
+          descricao: string
+          id?: string
+          largura_mm?: number | null
+          observacoes?: string | null
+          ordem?: number
+          pedido_id: string
+          perfil_id?: string | null
+          preco_unitario?: number
+          quantidade?: number
+          subtotal?: number
+          tipo?: string
+          updated_at?: string
+          vidro_id?: string | null
+        }
+        Update: {
+          acabamento?: string | null
+          acessorio_id?: string | null
+          altura_mm?: number | null
+          cor?: string | null
+          created_at?: string
+          descricao?: string
+          id?: string
+          largura_mm?: number | null
+          observacoes?: string | null
+          ordem?: number
+          pedido_id?: string
+          perfil_id?: string | null
+          preco_unitario?: number
+          quantidade?: number
+          subtotal?: number
+          tipo?: string
+          updated_at?: string
+          vidro_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedido_itens_acessorio_id_fkey"
+            columns: ["acessorio_id"]
+            isOneToOne: false
+            referencedRelation: "acessorios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedido_itens_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedido_itens_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfis_aluminio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedido_itens_vidro_id_fkey"
+            columns: ["vidro_id"]
+            isOneToOne: false
+            referencedRelation: "vidros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pedidos: {
         Row: {
           cliente_id: string | null
           cliente_nome: string | null
+          condicoes_pagamento: string | null
           created_at: string
           created_by: string | null
+          desconto: number
           descricao: string | null
+          endereco_entrega: Json | null
           etapa: Database["public"]["Enums"]["pedido_etapa"]
+          forma_entrega: string | null
+          forma_pagamento: string | null
           id: string
+          impostos: number
           numero: number
           obra_id: string | null
+          observacoes_internas: string | null
           orcamento_id: string | null
           ordem_producao_id: string | null
+          parcelas: number
+          prazo_entrega: string | null
+          prazos_por_etapa: Json
           prioridade: string
           responsavel_atual_id: string | null
+          saldo: number
+          sinal_entrada: number
+          status_pagamento: string
+          subtotal: number
           titulo: string
+          transportadora: string | null
           updated_at: string
           valor_estimado: number | null
+          valor_total: number
         }
         Insert: {
           cliente_id?: string | null
           cliente_nome?: string | null
+          condicoes_pagamento?: string | null
           created_at?: string
           created_by?: string | null
+          desconto?: number
           descricao?: string | null
+          endereco_entrega?: Json | null
           etapa?: Database["public"]["Enums"]["pedido_etapa"]
+          forma_entrega?: string | null
+          forma_pagamento?: string | null
           id?: string
+          impostos?: number
           numero?: number
           obra_id?: string | null
+          observacoes_internas?: string | null
           orcamento_id?: string | null
           ordem_producao_id?: string | null
+          parcelas?: number
+          prazo_entrega?: string | null
+          prazos_por_etapa?: Json
           prioridade?: string
           responsavel_atual_id?: string | null
+          saldo?: number
+          sinal_entrada?: number
+          status_pagamento?: string
+          subtotal?: number
           titulo: string
+          transportadora?: string | null
           updated_at?: string
           valor_estimado?: number | null
+          valor_total?: number
         }
         Update: {
           cliente_id?: string | null
           cliente_nome?: string | null
+          condicoes_pagamento?: string | null
           created_at?: string
           created_by?: string | null
+          desconto?: number
           descricao?: string | null
+          endereco_entrega?: Json | null
           etapa?: Database["public"]["Enums"]["pedido_etapa"]
+          forma_entrega?: string | null
+          forma_pagamento?: string | null
           id?: string
+          impostos?: number
           numero?: number
           obra_id?: string | null
+          observacoes_internas?: string | null
           orcamento_id?: string | null
           ordem_producao_id?: string | null
+          parcelas?: number
+          prazo_entrega?: string | null
+          prazos_por_etapa?: Json
           prioridade?: string
           responsavel_atual_id?: string | null
+          saldo?: number
+          sinal_entrada?: number
+          status_pagamento?: string
+          subtotal?: number
           titulo?: string
+          transportadora?: string | null
           updated_at?: string
           valor_estimado?: number | null
+          valor_total?: number
         }
         Relationships: [
           {
@@ -1399,20 +1599,36 @@ export type Database = {
         Returns: {
           cliente_id: string | null
           cliente_nome: string | null
+          condicoes_pagamento: string | null
           created_at: string
           created_by: string | null
+          desconto: number
           descricao: string | null
+          endereco_entrega: Json | null
           etapa: Database["public"]["Enums"]["pedido_etapa"]
+          forma_entrega: string | null
+          forma_pagamento: string | null
           id: string
+          impostos: number
           numero: number
           obra_id: string | null
+          observacoes_internas: string | null
           orcamento_id: string | null
           ordem_producao_id: string | null
+          parcelas: number
+          prazo_entrega: string | null
+          prazos_por_etapa: Json
           prioridade: string
           responsavel_atual_id: string | null
+          saldo: number
+          sinal_entrada: number
+          status_pagamento: string
+          subtotal: number
           titulo: string
+          transportadora: string | null
           updated_at: string
           valor_estimado: number | null
+          valor_total: number
         }
         SetofOptions: {
           from: "*"
@@ -1426,20 +1642,36 @@ export type Database = {
         Returns: {
           cliente_id: string | null
           cliente_nome: string | null
+          condicoes_pagamento: string | null
           created_at: string
           created_by: string | null
+          desconto: number
           descricao: string | null
+          endereco_entrega: Json | null
           etapa: Database["public"]["Enums"]["pedido_etapa"]
+          forma_entrega: string | null
+          forma_pagamento: string | null
           id: string
+          impostos: number
           numero: number
           obra_id: string | null
+          observacoes_internas: string | null
           orcamento_id: string | null
           ordem_producao_id: string | null
+          parcelas: number
+          prazo_entrega: string | null
+          prazos_por_etapa: Json
           prioridade: string
           responsavel_atual_id: string | null
+          saldo: number
+          sinal_entrada: number
+          status_pagamento: string
+          subtotal: number
           titulo: string
+          transportadora: string | null
           updated_at: string
           valor_estimado: number | null
+          valor_total: number
         }
         SetofOptions: {
           from: "*"
@@ -1453,20 +1685,36 @@ export type Database = {
         Returns: {
           cliente_id: string | null
           cliente_nome: string | null
+          condicoes_pagamento: string | null
           created_at: string
           created_by: string | null
+          desconto: number
           descricao: string | null
+          endereco_entrega: Json | null
           etapa: Database["public"]["Enums"]["pedido_etapa"]
+          forma_entrega: string | null
+          forma_pagamento: string | null
           id: string
+          impostos: number
           numero: number
           obra_id: string | null
+          observacoes_internas: string | null
           orcamento_id: string | null
           ordem_producao_id: string | null
+          parcelas: number
+          prazo_entrega: string | null
+          prazos_por_etapa: Json
           prioridade: string
           responsavel_atual_id: string | null
+          saldo: number
+          sinal_entrada: number
+          status_pagamento: string
+          subtotal: number
           titulo: string
+          transportadora: string | null
           updated_at: string
           valor_estimado: number | null
+          valor_total: number
         }
         SetofOptions: {
           from: "*"
@@ -1484,20 +1732,36 @@ export type Database = {
         Returns: {
           cliente_id: string | null
           cliente_nome: string | null
+          condicoes_pagamento: string | null
           created_at: string
           created_by: string | null
+          desconto: number
           descricao: string | null
+          endereco_entrega: Json | null
           etapa: Database["public"]["Enums"]["pedido_etapa"]
+          forma_entrega: string | null
+          forma_pagamento: string | null
           id: string
+          impostos: number
           numero: number
           obra_id: string | null
+          observacoes_internas: string | null
           orcamento_id: string | null
           ordem_producao_id: string | null
+          parcelas: number
+          prazo_entrega: string | null
+          prazos_por_etapa: Json
           prioridade: string
           responsavel_atual_id: string | null
+          saldo: number
+          sinal_entrada: number
+          status_pagamento: string
+          subtotal: number
           titulo: string
+          transportadora: string | null
           updated_at: string
           valor_estimado: number | null
+          valor_total: number
         }
         SetofOptions: {
           from: "*"
