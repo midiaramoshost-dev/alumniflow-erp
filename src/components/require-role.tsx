@@ -6,17 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
-
-type AppRole = "admin" | "vendedor" | "producao" | "financeiro_obra";
-
-const ROLE_LABELS: Record<AppRole, string> = {
-  admin: "Administrador",
-  vendedor: "Vendedor",
-  producao: "Produção",
-  financeiro_obra: "Financeiro/Obra",
-};
-
-const roleLabel = (r: string) => ROLE_LABELS[r as AppRole] ?? r;
+import { type AppRole, roleLabel } from "@/lib/roles";
 
 export function RequireRole({
   roles,
