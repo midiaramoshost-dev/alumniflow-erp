@@ -6,6 +6,8 @@ import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2, Mail, Lock, User, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { firstAllowedRoute } from "@/lib/route-access";
+import type { AppRole } from "@/lib/roles";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -23,7 +25,7 @@ const signUpSchema = signInSchema.extend({
 type Mode = "signin" | "signup";
 
 function AuthPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, roles } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [mode, setMode] = useState<Mode>("signin");
@@ -36,21 +38,30 @@ function AuthPage() {
       return null;
     }
   };
-  const postAuthRedirect = () => {
+  const postAuthRedirect = async (userId?: string) => {
     const token = pendingInvite();
     if (token) {
       sessionStorage.removeItem("pending_invite");
       navigate({ to: "/invite/$token", params: { token } });
-    } else {
-      navigate({ to: "/dashboard" });
+      return;
     }
+    // Busca roles direto (o contexto pode não ter atualizado ainda) e roteia.
+    let userRoles: AppRole[] = roles;
+    if (userId) {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+      userRoles = (data ?? []).map((r) => r.role as AppRole);
+    }
+    navigate({ to: firstAllowedRoute(userRoles) });
   };
 
   if (loading) return null;
   if (user) {
     const token = pendingInvite();
     if (token) return <Navigate to="/invite/$token" params={{ token }} replace />;
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={firstAllowedRoute(roles)} replace />;
   }
 
   const onSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -65,11 +76,11 @@ function AuthPage() {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+    const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Bem-vindo!");
-    postAuthRedirect();
+    await postAuthRedirect(data.user?.id);
   };
 
   const onSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
