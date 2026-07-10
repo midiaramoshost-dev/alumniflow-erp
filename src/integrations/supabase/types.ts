@@ -1524,7 +1524,20 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "vendedor" | "producao" | "financeiro_obra"
+      app_role:
+        | "admin"
+        | "vendedor"
+        | "producao"
+        | "financeiro_obra"
+        | "medidor"
+        | "tecnico"
+        | "cortador"
+        | "usinador"
+        | "montador"
+        | "vidraceiro"
+        | "acabamento"
+        | "instalador"
+        | "conferente"
       financeiro_status: "pendente" | "pago" | "atrasado" | "cancelado"
       financeiro_tipo: "receita" | "despesa"
       obra_cronograma_status:
@@ -1687,7 +1700,21 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "vendedor", "producao", "financeiro_obra"],
+      app_role: [
+        "admin",
+        "vendedor",
+        "producao",
+        "financeiro_obra",
+        "medidor",
+        "tecnico",
+        "cortador",
+        "usinador",
+        "montador",
+        "vidraceiro",
+        "acabamento",
+        "instalador",
+        "conferente",
+      ],
       financeiro_status: ["pendente", "pago", "atrasado", "cancelado"],
       financeiro_tipo: ["receita", "despesa"],
       obra_cronograma_status: [
