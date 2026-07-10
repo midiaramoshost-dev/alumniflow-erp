@@ -272,6 +272,15 @@ function NovoPedidoDialog({ onClose }: { onClose: () => void }) {
   const [clienteNome, setClienteNome] = useState("");
   const [valor, setValor] = useState("");
   const [prioridade, setPrioridade] = useState("media");
+  const [prazoEntrega, setPrazoEntrega] = useState("");
+  const [formaEntrega, setFormaEntrega] = useState("");
+  const [transportadora, setTransportadora] = useState("");
+  const [enderecoEntrega, setEnderecoEntrega] = useState("");
+  const [formaPagamento, setFormaPagamento] = useState("");
+  const [condicoesPagamento, setCondicoesPagamento] = useState("");
+  const [parcelas, setParcelas] = useState("1");
+  const [sinalEntrada, setSinalEntrada] = useState("");
+  const [observacoesInternas, setObservacoesInternas] = useState("");
 
   const { data: clientes = [] } = useQuery({
     queryKey: ["pedidos", "clientes-lookup"],
@@ -284,13 +293,27 @@ function NovoPedidoDialog({ onClose }: { onClose: () => void }) {
   const create = useMutation({
     mutationFn: async () => {
       if (!titulo.trim()) throw new Error("Informe um título");
+      const total = valor ? Number(valor) : 0;
       const payload = {
         titulo: titulo.trim(),
         descricao: descricao.trim() || null,
         cliente_id: clienteId || null,
         cliente_nome: clienteNome.trim() || null,
-        valor_estimado: valor ? Number(valor) : null,
+        valor_estimado: total || null,
+        subtotal: total,
+        valor_total: total,
+        sinal_entrada: sinalEntrada ? Number(sinalEntrada) : 0,
         prioridade,
+        prazo_entrega: prazoEntrega || null,
+        forma_entrega: formaEntrega.trim() || null,
+        transportadora: transportadora.trim() || null,
+        endereco_entrega: enderecoEntrega.trim()
+          ? { endereco: enderecoEntrega.trim() }
+          : null,
+        forma_pagamento: formaPagamento.trim() || null,
+        condicoes_pagamento: condicoesPagamento.trim() || null,
+        parcelas: parcelas ? Math.max(1, Number(parcelas)) : 1,
+        observacoes_internas: observacoesInternas.trim() || null,
         created_by: user?.id,
       };
       const { error } = await db.from("pedidos").insert(payload);
@@ -300,57 +323,42 @@ function NovoPedidoDialog({ onClose }: { onClose: () => void }) {
       qc.invalidateQueries({ queryKey: ["pedidos"] });
       toast.success("Pedido criado");
       onClose();
-      setTitulo("");
-      setDescricao("");
-      setClienteId("");
-      setClienteNome("");
-      setValor("");
-      setPrioridade("media");
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   return (
-    <DialogContent className="max-w-lg">
+    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>Novo pedido</DialogTitle>
       </DialogHeader>
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div>
-          <Label>Título</Label>
+          <Label>Título *</Label>
           <Input value={titulo} onChange={(e) => setTitulo(e.target.value)} />
-        </div>
-        <div>
-          <Label>Cliente</Label>
-          <Select
-            value={clienteId}
-            onValueChange={(v) => {
-              setClienteId(v);
-              const c = clientes.find((x) => x.id === v);
-              if (c) setClienteNome(c.nome);
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione (opcional)" />
-            </SelectTrigger>
-            <SelectContent>
-              {clientes.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.nome}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label>Valor estimado (R$)</Label>
-            <Input
-              type="number"
-              step="0.01"
-              value={valor}
-              onChange={(e) => setValor(e.target.value)}
-            />
+            <Label>Cliente</Label>
+            <Select
+              value={clienteId}
+              onValueChange={(v) => {
+                setClienteId(v);
+                const c = clientes.find((x) => x.id === v);
+                if (c) setClienteNome(c.nome);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione (opcional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {clientes.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label>Prioridade</Label>
@@ -367,12 +375,125 @@ function NovoPedidoDialog({ onClose }: { onClose: () => void }) {
             </Select>
           </div>
         </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label>Valor inicial (R$)</Label>
+            <Input
+              type="number"
+              step="0.01"
+              value={valor}
+              onChange={(e) => setValor(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label>Sinal / entrada (R$)</Label>
+            <Input
+              type="number"
+              step="0.01"
+              value={sinalEntrada}
+              onChange={(e) => setSinalEntrada(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label>Prazo de entrega</Label>
+            <Input
+              type="date"
+              value={prazoEntrega}
+              onChange={(e) => setPrazoEntrega(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label>Forma de entrega</Label>
+            <Select value={formaEntrega} onValueChange={setFormaEntrega}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="retirada">Retirada na fábrica</SelectItem>
+                <SelectItem value="entrega_propria">Entrega própria</SelectItem>
+                <SelectItem value="transportadora">Transportadora</SelectItem>
+                <SelectItem value="instalacao">Entrega + instalação</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {formaEntrega === "transportadora" && (
+          <div>
+            <Label>Transportadora</Label>
+            <Input
+              value={transportadora}
+              onChange={(e) => setTransportadora(e.target.value)}
+            />
+          </div>
+        )}
+
+        <div>
+          <Label>Endereço de entrega</Label>
+          <Textarea
+            value={enderecoEntrega}
+            onChange={(e) => setEnderecoEntrega(e.target.value)}
+            rows={2}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label>Forma de pagamento</Label>
+            <Select value={formaPagamento} onValueChange={setFormaPagamento}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="a_vista">À vista</SelectItem>
+                <SelectItem value="pix">PIX</SelectItem>
+                <SelectItem value="boleto">Boleto</SelectItem>
+                <SelectItem value="cartao">Cartão</SelectItem>
+                <SelectItem value="transferencia">Transferência</SelectItem>
+                <SelectItem value="parcelado">Parcelado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Parcelas</Label>
+            <Input
+              type="number"
+              min="1"
+              value={parcelas}
+              onChange={(e) => setParcelas(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label>Condições de pagamento</Label>
+          <Input
+            placeholder="Ex.: 50% entrada + 50% na entrega"
+            value={condicoesPagamento}
+            onChange={(e) => setCondicoesPagamento(e.target.value)}
+          />
+        </div>
+
         <div>
           <Label>Descrição</Label>
           <Textarea
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
             rows={3}
+          />
+        </div>
+
+        <div>
+          <Label>Observações internas</Label>
+          <Textarea
+            placeholder="Só visível à equipe"
+            value={observacoesInternas}
+            onChange={(e) => setObservacoesInternas(e.target.value)}
+            rows={2}
           />
         </div>
       </div>
