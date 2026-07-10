@@ -715,12 +715,14 @@ export type Database = {
           cliente_nome: string | null
           created_at: string
           created_by: string | null
+          data_medicao: string | null
           data_orcamento: string
           desconto: number
           forma_pagamento: string | null
           id: string
           imposto_percentual: number
           margem_percentual: number
+          medidor_nome: string | null
           numero: number
           obra_ambiente: string | null
           obra_bairro: string | null
@@ -734,6 +736,7 @@ export type Database = {
           observacoes: string | null
           percentual_comissao: number
           prazo_entrega_dias: number | null
+          servico_descricao: string | null
           status: string
           subtotal: number
           total: number
@@ -748,12 +751,14 @@ export type Database = {
           cliente_nome?: string | null
           created_at?: string
           created_by?: string | null
+          data_medicao?: string | null
           data_orcamento?: string
           desconto?: number
           forma_pagamento?: string | null
           id?: string
           imposto_percentual?: number
           margem_percentual?: number
+          medidor_nome?: string | null
           numero?: number
           obra_ambiente?: string | null
           obra_bairro?: string | null
@@ -767,6 +772,7 @@ export type Database = {
           observacoes?: string | null
           percentual_comissao?: number
           prazo_entrega_dias?: number | null
+          servico_descricao?: string | null
           status?: string
           subtotal?: number
           total?: number
@@ -781,12 +787,14 @@ export type Database = {
           cliente_nome?: string | null
           created_at?: string
           created_by?: string | null
+          data_medicao?: string | null
           data_orcamento?: string
           desconto?: number
           forma_pagamento?: string | null
           id?: string
           imposto_percentual?: number
           margem_percentual?: number
+          medidor_nome?: string | null
           numero?: number
           obra_ambiente?: string | null
           obra_bairro?: string | null
@@ -800,6 +808,7 @@ export type Database = {
           observacoes?: string | null
           percentual_comissao?: number
           prazo_entrega_dias?: number | null
+          servico_descricao?: string | null
           status?: string
           subtotal?: number
           total?: number

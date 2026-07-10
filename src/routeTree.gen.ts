@@ -23,6 +23,7 @@ import { Route as AuthenticatedObrasRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMateriaisRouteImport } from './routes/_authenticated/materiais'
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedExportarRouteImport } from './routes/_authenticated/exportar'
+import { Route as AuthenticatedDirectRouteImport } from './routes/_authenticated/direct'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedControleFabrilRouteImport } from './routes/_authenticated/controle-fabril'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
@@ -102,6 +103,11 @@ const AuthenticatedExportarRoute = AuthenticatedExportarRouteImport.update({
   path: '/exportar',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDirectRoute = AuthenticatedDirectRouteImport.update({
+  id: '/direct',
+  path: '/direct',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/controle-fabril': typeof AuthenticatedControleFabrilRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/direct': typeof AuthenticatedDirectRoute
   '/exportar': typeof AuthenticatedExportarRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/materiais': typeof AuthenticatedMateriaisRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/controle-fabril': typeof AuthenticatedControleFabrilRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/direct': typeof AuthenticatedDirectRoute
   '/exportar': typeof AuthenticatedExportarRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/materiais': typeof AuthenticatedMateriaisRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/controle-fabril': typeof AuthenticatedControleFabrilRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/direct': typeof AuthenticatedDirectRoute
   '/_authenticated/exportar': typeof AuthenticatedExportarRoute
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/materiais': typeof AuthenticatedMateriaisRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/controle-fabril'
     | '/dashboard'
+    | '/direct'
     | '/exportar'
     | '/financeiro'
     | '/materiais'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/controle-fabril'
     | '/dashboard'
+    | '/direct'
     | '/exportar'
     | '/financeiro'
     | '/materiais'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/_authenticated/configuracoes'
     | '/_authenticated/controle-fabril'
     | '/_authenticated/dashboard'
+    | '/_authenticated/direct'
     | '/_authenticated/exportar'
     | '/_authenticated/financeiro'
     | '/_authenticated/materiais'
@@ -409,6 +421,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedExportarRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/direct': {
+      id: '/_authenticated/direct'
+      path: '/direct'
+      fullPath: '/direct'
+      preLoaderRoute: typeof AuthenticatedDirectRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -509,6 +528,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedControleFabrilRoute: typeof AuthenticatedControleFabrilRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDirectRoute: typeof AuthenticatedDirectRoute
   AuthenticatedExportarRoute: typeof AuthenticatedExportarRoute
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
   AuthenticatedMateriaisRoute: typeof AuthenticatedMateriaisRoute
@@ -530,6 +550,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedControleFabrilRoute:
     AuthenticatedControleFabrilRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDirectRoute: AuthenticatedDirectRoute,
   AuthenticatedExportarRoute: AuthenticatedExportarRoute,
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
   AuthenticatedMateriaisRoute: AuthenticatedMateriaisRoute,
