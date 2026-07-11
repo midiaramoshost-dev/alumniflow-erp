@@ -257,7 +257,35 @@
   text-wrap: balance;
 }
 
-
-#lovable-badge {
-  display: none !important;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    text-size-adjust: 100%;
+  }
+  body {
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+  }
+  /* Respect iOS safe areas */
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  /* Touch targets on coarse pointers */
+  @media (pointer: coarse) {
+    button, [role="button"], a.button, .touch-target {
+      min-height: 40px;
+    }
+  }
+  /* Prevent iOS zoom on focus */
+  @media (max-width: 640px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+  /* Thinner scrollbars on touch */
+  @media (pointer: coarse) {
+    *::-webkit-scrollbar { width: 4px; height: 4px; }
+  }
 }
