@@ -334,6 +334,7 @@
     background: color-mix(in oklab, var(--foreground) 30%, transparent);
     background-clip: padding-box;
     border: 2px solid transparent;
+  }
   /* Invalid form controls — destructive border/ring */
   [aria-invalid="true"]:where(input, textarea, [role="combobox"], [data-slot="select-trigger"], button[role="combobox"]) {
     border-color: var(--color-destructive);
