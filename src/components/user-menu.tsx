@@ -38,7 +38,7 @@ export function UserMenu() {
               {user?.user_metadata?.full_name || user?.email}
             </span>
             <span className="text-[10px] text-muted-foreground">
-              {roles.map((r) => roleLabels[r] ?? r).join(", ") || "Sem papel"}
+              {roles.map((r) => roleLabel(r)).join(", ") || "Sem papel"}
             </span>
           </div>
         </Button>
