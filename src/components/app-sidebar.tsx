@@ -22,6 +22,10 @@ import {
   Ruler,
   ClipboardList,
   CheckCircle2,
+  Scissors,
+  Hammer,
+  ClipboardCheck,
+  Truck,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { canAccessRoute } from "@/lib/route-access";
@@ -105,7 +109,17 @@ export function AppSidebar() {
     .filter((g) => g.items.length > 0);
 
   const directSubs: {
-    etapa: "cliente" | "medicao" | "servico" | "materiais" | "revisao";
+    etapa:
+      | "cliente"
+      | "medicao"
+      | "servico"
+      | "materiais"
+      | "revisao"
+      | "corte"
+      | "usinagem"
+      | "montagem"
+      | "conferencia"
+      | "carregamento";
     label: string;
     icon: typeof UserIcon;
     roles: AppRole[];
@@ -114,8 +128,14 @@ export function AppSidebar() {
     { etapa: "medicao", label: "Medição", icon: Ruler, roles: ["admin", "vendedor", "medidor"] },
     { etapa: "servico", label: "Serviço", icon: ClipboardList, roles: ["admin", "vendedor", "tecnico"] },
     { etapa: "materiais", label: "Materiais", icon: Package, roles: ["admin", "vendedor", "tecnico", "producao"] },
-    { etapa: "revisao", label: "Revisão", icon: CheckCircle2, roles: ["admin", "vendedor"] },
+    { etapa: "revisao", label: "Orçamento", icon: CheckCircle2, roles: ["admin", "vendedor"] },
+    { etapa: "corte", label: "Corte", icon: Scissors, roles: ["admin", "producao", "cortador"] },
+    { etapa: "usinagem", label: "Usinagem", icon: Cog, roles: ["admin", "producao", "usinador"] },
+    { etapa: "montagem", label: "Montagem", icon: Hammer, roles: ["admin", "producao", "montador"] },
+    { etapa: "conferencia", label: "Conferência", icon: ClipboardCheck, roles: ["admin", "producao", "conferente"] },
+    { etapa: "carregamento", label: "Carregamento", icon: Truck, roles: ["admin", "producao", "instalador"] },
   ];
+
   const roleAllows = (allowed: AppRole[]) =>
     userRoles.includes("admin") || allowed.some((r) => userRoles.includes(r));
 

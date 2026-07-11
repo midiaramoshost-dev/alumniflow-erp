@@ -41,10 +41,27 @@ import {
   ChevronLeft,
   Lock,
   ShieldCheck,
+  Scissors,
+  Cog,
+  Hammer,
+  ClipboardCheck,
+  Truck,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
-const ETAPAS = ["cliente", "medicao", "servico", "materiais", "revisao"] as const;
+const ETAPAS = [
+  "cliente",
+  "medicao",
+  "servico",
+  "materiais",
+  "revisao",
+  "corte",
+  "usinagem",
+  "montagem",
+  "conferencia",
+  "carregamento",
+] as const;
 type Etapa = (typeof ETAPAS)[number];
 
 const searchSchema = z.object({
@@ -63,6 +80,11 @@ const STEP_ROLES: Record<Etapa, AppRole[]> = {
   servico: ["admin", "vendedor", "tecnico"],
   materiais: ["admin", "vendedor", "tecnico", "producao"],
   revisao: ["admin", "vendedor"],
+  corte: ["admin", "producao", "cortador"],
+  usinagem: ["admin", "producao", "usinador"],
+  montagem: ["admin", "producao", "montador"],
+  conferencia: ["admin", "producao", "conferente"],
+  carregamento: ["admin", "producao", "instalador"],
 };
 
 const STEP_META: Record<Etapa, { label: string; icon: typeof User; desc: string }> = {
@@ -70,8 +92,14 @@ const STEP_META: Record<Etapa, { label: string; icon: typeof User; desc: string 
   medicao: { label: "Medição", icon: Ruler, desc: "Vendedor, medidor e data" },
   servico: { label: "Serviço", icon: ClipboardList, desc: "Descrição, obra e prazos" },
   materiais: { label: "Materiais", icon: Package, desc: "Itens, preços e totais" },
-  revisao: { label: "Revisão", icon: CheckCircle2, desc: "Confirmação e salvamento" },
+  revisao: { label: "Orçamento", icon: CheckCircle2, desc: "Revisão e salvamento" },
+  corte: { label: "Corte", icon: Scissors, desc: "Setor de corte de perfis" },
+  usinagem: { label: "Usinagem", icon: Cog, desc: "Setor de usinagem" },
+  montagem: { label: "Montagem", icon: Hammer, desc: "Setor de montagem" },
+  conferencia: { label: "Conferência", icon: ClipboardCheck, desc: "Conferência final" },
+  carregamento: { label: "Carregamento", icon: Truck, desc: "Expedição e entrega" },
 };
+
 
 type ItemForm = {
   tipo: string;
@@ -953,6 +981,15 @@ function DirectPage() {
                   </div>
                 </div>
               )}
+
+              {(etapa === "corte" ||
+                etapa === "usinagem" ||
+                etapa === "montagem" ||
+                etapa === "conferencia" ||
+                etapa === "carregamento") && (
+                <ProductionStageCard etapa={etapa} />
+              )}
+
             </>
           )}
         </CardContent>
@@ -1064,3 +1101,85 @@ function SummaryBlock({
     </div>
   );
 }
+
+function ProductionStageCard({ etapa }: { etapa: Etapa }) {
+  const meta = STEP_META[etapa];
+  const Icon = meta.icon;
+  const info: Record<string, { title: string; bullets: string[] }> = {
+    corte: {
+      title: "Setor de Corte",
+      bullets: [
+        "Registre entrada dos perfis no setor.",
+        "Informe o cortador responsável e a data de corte.",
+        "Ao concluir, marque saída e envie para a Usinagem.",
+      ],
+    },
+    usinagem: {
+      title: "Setor de Usinagem",
+      bullets: [
+        "Registre entrada das peças na usinagem.",
+        "Informe o usinador responsável e a data.",
+        "Após furações e recortes, libere para Montagem.",
+      ],
+    },
+    montagem: {
+      title: "Setor de Montagem",
+      bullets: [
+        "Monte as esquadrias conforme o projeto aprovado.",
+        "Registre o montador responsável e a data.",
+        "Envie para Conferência ao concluir.",
+      ],
+    },
+    conferencia: {
+      title: "Conferência Final",
+      bullets: [
+        "Confira medidas, acabamento e acessórios.",
+        "Registre o conferente responsável.",
+        "Libere para Carregamento após aprovação.",
+      ],
+    },
+    carregamento: {
+      title: "Carregamento & Expedição",
+      bullets: [
+        "Confirme os itens embarcados e a nota fiscal.",
+        "Registre motorista, veículo e horário de saída.",
+        "Envie ao cliente confirmação de entrega prevista.",
+      ],
+    },
+  };
+  const data = info[etapa];
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border bg-muted/30 p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="rounded-md bg-primary/10 p-2">
+            <Icon className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <p className="font-semibold">{data.title}</p>
+            <p className="text-sm text-muted-foreground">{meta.desc}</p>
+          </div>
+        </div>
+        <ul className="space-y-1.5 text-sm text-muted-foreground list-disc pl-5">
+          {data.bullets.map((b, i) => (
+            <li key={i}>{b}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="rounded-md border border-dashed p-4 text-sm">
+        <p className="font-medium mb-1">Rastreamento em tempo real</p>
+        <p className="text-muted-foreground mb-3">
+          O registro de entrada/saída deste setor é feito no Controle Fabril,
+          por obra, com datas e responsáveis.
+        </p>
+        <Button asChild size="sm" variant="outline">
+          <Link to="/controle-fabril">
+            Abrir Controle Fabril
+            <ExternalLink className="h-3.5 w-3.5 ml-1" />
+          </Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
