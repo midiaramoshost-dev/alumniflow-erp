@@ -289,3 +289,7 @@
     *::-webkit-scrollbar { width: 4px; height: 4px; }
   }
 }
+
+#lovable-badge {
+  display: none !important;
+}
