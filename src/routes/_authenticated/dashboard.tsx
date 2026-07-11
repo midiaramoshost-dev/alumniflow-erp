@@ -40,16 +40,23 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <Card className="shadow-card overflow-hidden">
+    <Card className="group relative overflow-hidden border-border/70 shadow-card hover:shadow-elevated transition-all duration-300 hover:-translate-y-0.5">
+      <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-brand opacity-70" />
       <CardContent className="p-5">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="mt-2 text-3xl font-bold tracking-tight truncate">{value}</p>
-            {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {title}
+            </p>
+            <p className="mt-2.5 font-display text-3xl font-bold tracking-tight text-foreground truncate">
+              {value}
+            </p>
+            {hint && (
+              <p className="mt-1.5 text-xs text-muted-foreground/90">{hint}</p>
+            )}
           </div>
           <div
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset ring-border/60 transition-transform group-hover:scale-105 ${
               accent ?? "bg-primary/10 text-primary"
             }`}
           >
