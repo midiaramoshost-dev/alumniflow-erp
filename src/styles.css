@@ -334,6 +334,14 @@
     background: color-mix(in oklab, var(--foreground) 30%, transparent);
     background-clip: padding-box;
     border: 2px solid transparent;
+  /* Invalid form controls — destructive border/ring */
+  [aria-invalid="true"]:where(input, textarea, [role="combobox"], [data-slot="select-trigger"], button[role="combobox"]) {
+    border-color: var(--color-destructive);
+  }
+  [aria-invalid="true"]:where(input, textarea, [role="combobox"]):focus-visible,
+  [aria-invalid="true"]:where(input, textarea, [role="combobox"]):focus {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-destructive) 25%, transparent);
+    outline: none;
   }
 }
 
