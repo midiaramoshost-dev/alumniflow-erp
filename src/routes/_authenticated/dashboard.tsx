@@ -141,19 +141,36 @@ function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-            Olá{name ? `, ${name.split(" ")[0]}` : ""} 👋
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Visão geral do seu ERP de esquadrias em tempo real.
-          </p>
+      {/* Hero band */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-brand text-primary-foreground shadow-elegant">
+        <div className="absolute inset-0 bg-grid opacity-[0.08]" aria-hidden />
+        <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary-glow/30 blur-3xl" aria-hidden />
+        <div className="relative flex flex-wrap items-end justify-between gap-6 px-6 py-7 md:px-8 md:py-9">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-primary-foreground/70 font-semibold">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+              Painel de comando · Tempo real
+            </div>
+            <h1 className="mt-2 font-display text-3xl md:text-4xl font-bold tracking-tight text-balance">
+              Bem-vindo{name ? `, ${name.split(" ")[0]}` : ""}
+            </h1>
+            <p className="mt-1.5 text-sm text-primary-foreground/80 max-w-xl">
+              Visão consolidada do seu ERP de esquadrias. Vendas, produção, obras e financeiro em um só lugar.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge className="gap-1.5 border-0 bg-white/15 text-primary-foreground backdrop-blur hover:bg-white/20">
+              <Wifi className="h-3 w-3" />
+              Ao vivo
+            </Badge>
+            <Link
+              to="/pedidos"
+              className="inline-flex items-center gap-1.5 rounded-md bg-white/10 hover:bg-white/20 border border-white/15 px-3 py-1.5 text-xs font-semibold backdrop-blur transition-colors"
+            >
+              Ir para pedidos <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </div>
-        <Badge variant="secondary" className="gap-1.5 bg-chart-2/15 text-chart-2 border-0">
-          <Wifi className="h-3 w-3" />
-          Atualizando ao vivo
-        </Badge>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -175,7 +192,7 @@ function Dashboard() {
           value={brl(fechadosValor)}
           icon={Building}
           hint="Aprovados + convertidos"
-          accent="bg-chart-2/10 text-chart-2"
+          accent="bg-success/10 text-success"
         />
         <StatCard
           title="Clientes"
@@ -217,15 +234,20 @@ function Dashboard() {
         />
       </div>
 
-      <Card className="shadow-card">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <ShoppingCart className="h-4 w-4 text-primary" />
-            Últimos orçamentos
-          </CardTitle>
+      <Card className="shadow-card border-border/70 overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 bg-gradient-subtle py-4">
+          <div>
+            <CardTitle className="font-display flex items-center gap-2 text-base">
+              <ShoppingCart className="h-4 w-4 text-primary" />
+              Últimos orçamentos
+            </CardTitle>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Movimentações recentes do comercial
+            </p>
+          </div>
           <Link
             to="/vendas"
-            className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+            className="text-xs font-semibold text-primary hover:text-primary-glow inline-flex items-center gap-1 transition-colors"
           >
             Ver todos <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
@@ -234,20 +256,36 @@ function Dashboard() {
           {orcamentos.isLoading ? (
             <div className="p-6 text-sm text-muted-foreground">Carregando…</div>
           ) : orcs.length === 0 ? (
-            <div className="p-6 text-sm text-muted-foreground text-center">
-              Nenhum orçamento ainda. <Link to="/vendas" className="text-primary hover:underline">Crie o primeiro</Link>.
+            <div className="p-10 text-sm text-muted-foreground text-center">
+              Nenhum orçamento ainda.{" "}
+              <Link to="/vendas" className="text-primary font-semibold hover:underline">
+                Crie o primeiro
+              </Link>
+              .
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y divide-border/60">
               {orcs.slice(0, 6).map((o) => (
-                <div key={o.id} className="flex items-center justify-between px-6 py-3 hover:bg-muted/30 transition-colors">
+                <div
+                  key={o.id}
+                  className="flex items-center justify-between px-6 py-3.5 hover:bg-muted/40 transition-colors"
+                >
                   <div className="min-w-0 flex items-center gap-3">
-                    <span className="font-mono text-sm font-semibold text-muted-foreground">#{o.numero}</span>
+                    <span className="font-mono text-[11px] font-semibold text-muted-foreground bg-muted rounded px-1.5 py-0.5">
+                      #{o.numero}
+                    </span>
                     <span className="truncate font-medium">{o.cliente_nome ?? "Sem cliente"}</span>
                   </div>
                   <div className="flex items-center gap-4 shrink-0">
-                    <Badge variant="secondary" className="capitalize">{o.status}</Badge>
-                    <span className="font-semibold w-28 text-right">{brl(Number(o.total))}</span>
+                    <Badge
+                      variant="secondary"
+                      className="capitalize text-[10px] tracking-wide font-semibold"
+                    >
+                      {o.status}
+                    </Badge>
+                    <span className="font-display font-semibold w-28 text-right tabular-nums">
+                      {brl(Number(o.total))}
+                    </span>
                   </div>
                 </div>
               ))}
