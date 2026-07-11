@@ -140,25 +140,25 @@ function Dashboard() {
   const orcamentosAtivos = orcs.filter((o) => o.status !== "rejeitado").length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Hero band */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-brand text-primary-foreground shadow-elegant">
+      <div className="relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-brand text-primary-foreground shadow-elegant">
         <div className="absolute inset-0 bg-grid opacity-[0.08]" aria-hidden />
         <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary-glow/30 blur-3xl" aria-hidden />
-        <div className="relative flex flex-wrap items-end justify-between gap-6 px-6 py-7 md:px-8 md:py-9">
+        <div className="relative flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-6 px-4 py-5 sm:px-6 sm:py-7 md:px-8 md:py-9">
           <div className="min-w-0">
-            <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-primary-foreground/70 font-semibold">
+            <div className="flex items-center gap-2 text-[10px] sm:text-[11px] uppercase tracking-[0.16em] text-primary-foreground/70 font-semibold">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-              Painel de comando · Tempo real
+              <span className="truncate">Painel · Tempo real</span>
             </div>
-            <h1 className="mt-2 font-display text-3xl md:text-4xl font-bold tracking-tight text-balance">
+            <h1 className="mt-2 font-display text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-balance">
               Bem-vindo{name ? `, ${name.split(" ")[0]}` : ""}
             </h1>
-            <p className="mt-1.5 text-sm text-primary-foreground/80 max-w-xl">
-              Visão consolidada do seu ERP de esquadrias. Vendas, produção, obras e financeiro em um só lugar.
+            <p className="mt-1.5 text-xs sm:text-sm text-primary-foreground/80 max-w-xl">
+              Visão consolidada do seu ERP de esquadrias.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge className="gap-1.5 border-0 bg-white/15 text-primary-foreground backdrop-blur hover:bg-white/20">
               <Wifi className="h-3 w-3" />
               Ao vivo
@@ -173,7 +173,8 @@ function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+
         <StatCard
           title="Orçamentos ativos"
           value={orcamentosAtivos}
