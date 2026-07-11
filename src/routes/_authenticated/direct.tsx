@@ -41,10 +41,27 @@ import {
   ChevronLeft,
   Lock,
   ShieldCheck,
+  Scissors,
+  Cog,
+  Hammer,
+  ClipboardCheck,
+  Truck,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
-const ETAPAS = ["cliente", "medicao", "servico", "materiais", "revisao"] as const;
+const ETAPAS = [
+  "cliente",
+  "medicao",
+  "servico",
+  "materiais",
+  "revisao",
+  "corte",
+  "usinagem",
+  "montagem",
+  "conferencia",
+  "carregamento",
+] as const;
 type Etapa = (typeof ETAPAS)[number];
 
 const searchSchema = z.object({
@@ -63,6 +80,11 @@ const STEP_ROLES: Record<Etapa, AppRole[]> = {
   servico: ["admin", "vendedor", "tecnico"],
   materiais: ["admin", "vendedor", "tecnico", "producao"],
   revisao: ["admin", "vendedor"],
+  corte: ["admin", "producao", "cortador"],
+  usinagem: ["admin", "producao", "usinador"],
+  montagem: ["admin", "producao", "montador"],
+  conferencia: ["admin", "producao", "conferente"],
+  carregamento: ["admin", "producao", "instalador"],
 };
 
 const STEP_META: Record<Etapa, { label: string; icon: typeof User; desc: string }> = {
@@ -70,8 +92,14 @@ const STEP_META: Record<Etapa, { label: string; icon: typeof User; desc: string 
   medicao: { label: "Medição", icon: Ruler, desc: "Vendedor, medidor e data" },
   servico: { label: "Serviço", icon: ClipboardList, desc: "Descrição, obra e prazos" },
   materiais: { label: "Materiais", icon: Package, desc: "Itens, preços e totais" },
-  revisao: { label: "Revisão", icon: CheckCircle2, desc: "Confirmação e salvamento" },
+  revisao: { label: "Orçamento", icon: CheckCircle2, desc: "Revisão e salvamento" },
+  corte: { label: "Corte", icon: Scissors, desc: "Setor de corte de perfis" },
+  usinagem: { label: "Usinagem", icon: Cog, desc: "Setor de usinagem" },
+  montagem: { label: "Montagem", icon: Hammer, desc: "Setor de montagem" },
+  conferencia: { label: "Conferência", icon: ClipboardCheck, desc: "Conferência final" },
+  carregamento: { label: "Carregamento", icon: Truck, desc: "Expedição e entrega" },
 };
+
 
 type ItemForm = {
   tipo: string;
