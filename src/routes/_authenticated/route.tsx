@@ -26,10 +26,23 @@ export const Route = createFileRoute("/_authenticated")({
 
 const titles: Record<string, string> = {
   dashboard: "Dashboard",
+  direct: "Direct",
+  pedidos: "Pedidos",
+  pipeline: "Pipeline",
   clientes: "Clientes",
   perfis: "Perfis de Alumínio",
   vidros: "Vidros",
   acessorios: "Acessórios",
+  vendas: "Vendas",
+  comercial: "Comercial",
+  producao: "Produção",
+  "controle-fabril": "Controle Fabril",
+  obras: "Obras",
+  materiais: "Materiais",
+  financeiro: "Financeiro",
+  admin: "Admin Master",
+  exportar: "Exportar dados",
+  configuracoes: "Configurações",
 };
 
 function AuthLayout() {
@@ -39,25 +52,33 @@ function AuthLayout() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-muted/30">
+      <div className="flex min-h-screen w-full bg-muted/40">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/95 backdrop-blur px-4">
-            <SidebarTrigger className="-ml-1" />
+          <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/70 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
+            <SidebarTrigger className="-ml-1 hover:bg-accent rounded-md" />
+            <div className="hidden md:block h-6 w-px bg-border" aria-hidden />
             <Breadcrumb className="hidden sm:block">
-              <BreadcrumbList>
+              <BreadcrumbList className="text-[13px]">
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/dashboard">CRM CRISTIANO</Link>
+                    <Link to="/dashboard" className="font-display font-semibold tracking-tight text-foreground/80 hover:text-foreground transition-colors">
+                      CRM CRISTIANO
+                    </Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{title}</BreadcrumbPage>
+                  <BreadcrumbPage className="font-medium text-foreground">{title}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <div className="ml-auto flex items-center gap-1">
+            <div className="ml-auto flex items-center gap-2">
+              <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-muted-foreground border border-border/70 rounded-md px-2 py-1 bg-muted/40">
+                <span className="uppercase tracking-wider font-medium">ambiente</span>
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                <span className="font-semibold text-foreground/80">Produção</span>
+              </div>
               <ThemeToggle />
               <UserMenu />
             </div>
