@@ -11,13 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-
-const roleLabels: Record<string, string> = {
-  admin: "Administrador",
-  vendedor: "Vendedor",
-  producao: "Produção / PCP",
-  financeiro_obra: "Financeiro & Obra",
-};
+import { roleLabel } from "@/lib/roles";
 
 export function UserMenu() {
   const { user, roles, signOut } = useAuth();
@@ -44,7 +38,7 @@ export function UserMenu() {
               {user?.user_metadata?.full_name || user?.email}
             </span>
             <span className="text-[10px] text-muted-foreground">
-              {roles.map((r) => roleLabels[r] ?? r).join(", ") || "Sem papel"}
+              {roles.map((r) => roleLabel(r)).join(", ") || "Sem papel"}
             </span>
           </div>
         </Button>

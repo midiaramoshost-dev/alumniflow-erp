@@ -31,6 +31,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/lib/theme-provider";
+import { roleLabel } from "@/lib/roles";
 import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,13 +63,6 @@ export const Route = createFileRoute("/_authenticated/configuracoes")({
   component: SettingsPage,
 });
 
-const roleLabels: Record<string, string> = {
-  admin: "Administrador",
-  vendedor: "Vendedor",
-  producao: "Produção / PCP",
-  financeiro_obra: "Financeiro & Obra",
-};
-
 function SettingsPage() {
   const { user, roles } = useAuth();
 
@@ -79,7 +73,7 @@ function SettingsPage() {
       actions={
         <Badge variant="secondary" className="gap-1">
           <ShieldCheck className="h-3.5 w-3.5" />
-          {roles.map((r) => roleLabels[r] ?? r).join(", ") || "Sem função"}
+          {roles.map((r) => roleLabel(r)).join(", ") || "Sem função"}
         </Badge>
       }
     >
