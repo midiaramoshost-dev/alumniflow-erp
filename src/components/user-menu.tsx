@@ -11,13 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-
-const roleLabels: Record<string, string> = {
-  admin: "Administrador",
-  vendedor: "Vendedor",
-  producao: "Produção / PCP",
-  financeiro_obra: "Financeiro & Obra",
-};
+import { roleLabel } from "@/lib/roles";
 
 export function UserMenu() {
   const { user, roles, signOut } = useAuth();
