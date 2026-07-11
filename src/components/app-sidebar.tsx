@@ -22,6 +22,10 @@ import {
   Ruler,
   ClipboardList,
   CheckCircle2,
+  Scissors,
+  Hammer,
+  ClipboardCheck,
+  Truck,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { canAccessRoute } from "@/lib/route-access";
