@@ -269,22 +269,22 @@ function Dashboard() {
               {orcs.slice(0, 6).map((o) => (
                 <div
                   key={o.id}
-                  className="flex items-center justify-between px-6 py-3.5 hover:bg-muted/40 transition-colors"
+                  className="flex flex-wrap items-center gap-x-3 gap-y-1 justify-between px-4 sm:px-6 py-3 sm:py-3.5 hover:bg-muted/40 transition-colors"
                 >
-                  <div className="min-w-0 flex items-center gap-3">
-                    <span className="font-mono text-[11px] font-semibold text-muted-foreground bg-muted rounded px-1.5 py-0.5">
+                  <div className="min-w-0 flex items-center gap-2 sm:gap-3 flex-1">
+                    <span className="font-mono text-[11px] font-semibold text-muted-foreground bg-muted rounded px-1.5 py-0.5 shrink-0">
                       #{o.numero}
                     </span>
-                    <span className="truncate font-medium">{o.cliente_nome ?? "Sem cliente"}</span>
+                    <span className="truncate font-medium text-sm">{o.cliente_nome ?? "Sem cliente"}</span>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0">
+                  <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                     <Badge
                       variant="secondary"
                       className="capitalize text-[10px] tracking-wide font-semibold"
                     >
                       {o.status}
                     </Badge>
-                    <span className="font-display font-semibold w-28 text-right tabular-nums">
+                    <span className="font-display font-semibold text-sm sm:text-base w-24 sm:w-28 text-right tabular-nums">
                       {brl(Number(o.total))}
                     </span>
                   </div>
