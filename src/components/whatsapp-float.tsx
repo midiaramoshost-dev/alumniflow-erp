@@ -16,6 +16,7 @@ export function WhatsappFloat({
       aria-label="Falar com suporte no WhatsApp"
       className="fixed z-50 group flex items-center gap-2 right-4 sm:right-5"
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+    >
       <span className="hidden sm:inline-flex items-center rounded-full bg-background/90 backdrop-blur px-3 py-1.5 text-xs font-medium text-foreground shadow-md border border-border opacity-0 group-hover:opacity-100 transition-opacity">
         Suporte via WhatsApp
       </span>
