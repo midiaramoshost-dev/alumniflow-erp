@@ -981,6 +981,15 @@ function DirectPage() {
                   </div>
                 </div>
               )}
+
+              {(etapa === "corte" ||
+                etapa === "usinagem" ||
+                etapa === "montagem" ||
+                etapa === "conferencia" ||
+                etapa === "carregamento") && (
+                <ProductionStageCard etapa={etapa} />
+              )}
+
             </>
           )}
         </CardContent>
