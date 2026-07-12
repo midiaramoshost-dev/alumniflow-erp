@@ -1,1 +1,0 @@
-ALTER TABLE public.vidros ADD COLUMN IF NOT EXISTS fornecedor TEXT;

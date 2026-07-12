@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-Bhh1vgom.js";import{B as t,p as n}from"./index-BGPiBLdb.js";var r=e();function i(){let{user:e,loading:i}=n();return i?null:e?(0,r.jsx)(t,{to:`/dashboard`,replace:!0}):(0,r.jsx)(t,{to:`/auth`,replace:!0})}export{i as component};

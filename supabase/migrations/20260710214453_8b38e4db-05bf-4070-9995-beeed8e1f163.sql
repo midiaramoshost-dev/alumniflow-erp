@@ -1,9 +1,0 @@
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'medidor';
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'tecnico';
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'cortador';
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'usinador';
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'montador';
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'vidraceiro';
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'acabamento';
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'instalador';
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'conferente';

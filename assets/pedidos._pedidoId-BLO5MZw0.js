@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-Bhh1vgom.js";import{t}from"./button-BdzutAZp.js";var n=e(),r=({error:e,reset:r})=>(0,n.jsxs)(`div`,{className:`p-6 space-y-3`,children:[(0,n.jsxs)(`p`,{className:`text-sm text-destructive`,children:[`Erro: `,e.message]}),(0,n.jsx)(t,{size:`sm`,variant:`outline`,onClick:r,children:`Tentar de novo`})]});export{r as errorComponent};

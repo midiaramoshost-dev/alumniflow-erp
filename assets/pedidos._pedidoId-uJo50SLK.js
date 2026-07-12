@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-Bhh1vgom.js";var t=e(),n=()=>(0,t.jsx)(`div`,{className:`p-6 text-sm text-muted-foreground`,children:`Pedido não encontrado.`});export{n as notFoundComponent};
